@@ -1,0 +1,181 @@
+<html lang="pl">
+<head>
+    <meta charset="utf-8">
+    <title>Strona główna – System Zapisów</title>
+    <meta name="description"
+          content="System obsługi cyklu dydaktycznego Instytut Informatyki Uniwersytetu Wrocławskiego">
+    <meta name="author" content="KSI i Studenci Instytutu Informatyki Uniwersytetu Wrocławskiego">
+    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
+    <!--[if lt IE 9]><script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script><![endif]-->
+    <!-- Le fav and touch icons -->
+    <link rel="shortcut icon" href="/static/favicon.ico">
+    <link rel="apple-touch-icon" href="/static/images/apple-touch-icon.png">
+    <link rel="apple-touch-icon" sizes="72x72" href="/static/images/apple-touch-icon-72x72.png">
+    <link rel="apple-touch-icon" sizes="114x114" href="/static/images/apple-touch-icon-114x114.png"><!-- Le styles -->
+    <script type="text/javascript" src="/static/vendor.js"></script>
+    <script type="text/javascript" src="/static/main-ec386cfd0ab406bdb949.min.js"></script>
+    <link href="/static/css/main.css" rel="stylesheet" type="text/css" media="screen,projection">
+    <link href="/static/css/fereol.css" rel="stylesheet" type="text/css" media="screen,projection">
+    <link href="/static/css/common/mainPage.css" rel="stylesheet" type="text/css" media="screen,projection">
+    <script type="text/javascript">
+        var user_is_authenticated = false,
+            user_is_student = false;
+    </script>
+    <link rel="stylesheet" type="text/css" href="/static/css/cookieconsent.min.css">
+    <script src="/static/js/cookieconsent.min.js"></script>
+    <script>
+        window.addEventListener("load", function () {
+            window.cookieconsent.initialise({
+                "palette": {
+                    "popup": {
+                        "background": "#222222"
+                    },
+                    "button": {
+                        "background": "#00709e"
+                    }
+                },
+                "showLink": false,
+                "theme": "classic",
+                "position": "bottom",
+                "content": {
+                    "message": "System zapisów wykorzystuje pliki cookies. Korzystanie z witryny oznacza zgodę na ich zapis lub odczyt według ustawień przeglądarki.",
+                    "dismiss": "OK"
+                }
+            })
+        });
+    </script>
+    <script src="/static/js/common/utils.js"></script>
+    <script src="/static/js/common/base.js"></script>
+    <style></style>
+</head>
+<body>
+<div role="dialog" aria-live="polite" aria-label="cookieconsent" aria-describedby="cookieconsent:desc"
+     class="cc-window cc-banner cc-type-info cc-theme-classic cc-bottom cc-color-override-1282628649 cc-invisible"
+     style="display: none;"><!--googleoff: all--><span id="cookieconsent:desc" class="cc-message">System zapisów wykorzystuje pliki cookies. Korzystanie z witryny oznacza zgodę na ich zapis lub odczyt według ustawień przeglądarki.</span>
+    <div class="cc-compliance"><a aria-label="dismiss cookie message" role="button" tabindex="0"
+                                  class="cc-btn cc-dismiss">OK</a></div><!--googleon: all--></div>
+<form action="/" method="post" style="display: none"><p><input name="data-invalidated" value="no" type="hidden"></p>
+</form>
+<script type="text/javascript">
+    jQuery.dataInvalidate_check();
+    $(document).ready(function () {
+        $('.dropdown-menu input,label').click(function (e) {
+            e.stopPropagation(); //This will prevent the event from bubbling up and close the dropdown when you type/click on text boxes.
+        });
+    });
+</script>
+<div class="container-fluid">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation"><span
+                class="navbar-toggler-icon"></span></button>
+        <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item"><a href="/courses/" class="nav-link">System Zapisów</a></li>
+                <li class="nav-item"><a href="/grade/" class="nav-link">Ocena Zajęć</a></li>
+                <li class="nav-item"><a href="/offer" class="nav-link">Oferta</a></li>
+                <li><a href="/classrooms" class="nav-link">Sale</a></li>
+            </ul>
+            <ul class="navbar-nav ml-auto">
+                <li class="nav-item dropdown"><a class="nav-link dropdown-toggle" href="#" id="navbarDropdown"
+                                                 role="button" data-toggle="dropdown" aria-haspopup="true"
+                                                 aria-expanded="false"><b>Zaloguj się</b><span class="caret"></span></a>
+                    <div class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <div class="row" id="login-dp">
+                            <div class="col-md-12"><a href="/accounts/login" class="btn" id="btn-usos"><img
+                                    src="/static/images/usos-login-logo.png" alt="Uniwersytet Wrocławski">Zaloguj się
+                                przez USOS</a>
+                                <button class="btn primary" id="btn-no-usos">
+                                    lub użyj konta Systemu Zapisów
+                                </button>
+                                <div id="login-without-usos">
+                                    <form action="/users/login/" method="POST"><input name="csrfmiddlewaretoken"
+                                                                                      value="IJAMXCvWO4qDb8rvbnOsgVVXlTlDyHGT"
+                                                                                      type="hidden"><input name="next"
+                                                                                                           value="/records/schedule/"
+                                                                                                           type="hidden">
+                                        <div class="form-group"><input tabindex="1" id="id_login" name="username"
+                                                                       placeholder="Użytkownik" type="text"></div>
+                                        <div class="form-group"><input tabindex="2" id="id_password" name="password"
+                                                                       placeholder="Hasło" type="password"></div>
+                                        <div class="form-group">
+                                            <button type="submit" tabindex="4" class="btn btn-primary btn-block">Zaloguj
+                                                »
+                                            </button>
+                                        </div>
+                                        <div class="form-group"><label><input tabindex="3" value="true" id="xlInput3"
+                                                                              name="remember_me" type="checkbox">
+                                            Pamiętaj mnie
+                                        </label></div>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+</div>
+<div class="top">
+    <div class="header">
+        <div class="container">
+            <div class="logo"><a href="/"><img src="/static/images/logotyp.jpg" alt="Uniwersytet Wrocławski"></a></div>
+        </div>
+    </div><!-- down-menu  -->
+    <div class="topbar systemtopbar">
+        <div class="fill">
+            <div class="container">
+                <ul id="main-menu-list"></ul>
+            </div>
+        </div>
+    </div><!-- end down-menu  --></div>
+<div class="container">
+    <div class="container space">
+        <div class="bread"></div>
+        <div id="main-content-container" class="row show-grid sidebar-right marginFix"><h1>Aktualności</h1>
+            <div class="hero-unit"><h3>Zmiana terminu wypisów</h3><h5>Czwartek, 05.10.2017 - 18:26 - Mateusz
+                Lewandowski</h5>
+                <p></p>
+                <p>Termin wypisów został przesunięty o jeden dzień, tj. na środę, do godziny 23:59.</p>
+                <p>Prosimy by pamiętać o wypisywaniu się z kolejek przed tym terminem (mogą wciągnąć i nie wypuścić!).
+                    Prośby o ręczne wypisanie po tym terminie nie będą realizowane.</p>
+                <p></p>
+                <p><a class="btn primary right" href="/news/">Więcej »</a></p></div><!-- Example row of columns -->
+            <div class="row space">
+                <div class="span-one-third"><h2>System Zapisów</h2>
+                    <p>System zapisów na zajęcia w Instytucie Informatyki
+                        Uniwersytetu Wrocławskiego.</p>
+                    <p><a class="btn" href="/courses/">Przejdź »</a></p></div>
+                <div class="span-one-third"><h2>Oferta Dydaktyczna</h2>
+                    <p>System kształtowania oferty dydaktycznej w Instytucie
+                        Informatyki.</p>
+                    <p><a class="btn" href="/offer">Przejdź »</a></p></div>
+                <div class="span-one-third"><h2>Ocena zajęć</h2>
+                    <p>System oceny zajęć w Instytucie
+                        Informatyki Uniwersytetu Wrocławskiego.</p>
+                    <p><a class="btn" href="/grade/">Przejdź »</a></p></div>
+            </div>
+        </div>
+    </div>
+    <footer><p>
+
+        © 2017 <a href="http://www.ii.uni.wroc.pl/">Instytut Informatyki UWr</a>
+        | Błędy i uwagi: <a href="https://tracker-zapisy.ii.uni.wroc.pl/">[link]</a> Wygenerowano: 22:55:43</p></footer>
+</div><!-- /container -->
+<script type="text/javascript">
+    let _gaq = _gaq || [];
+    _gaq.push(['_setAccount', 'UA-32366226-1']);
+    _gaq.push(['_trackPageview']);
+
+    (function () {
+        let ga = document.createElement('script');
+        ga.type = 'text/javascript';
+        ga.async = true;
+        ga.src = ('https:' === document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        let s = document.getElementsByTagName('script')[0];
+        s.parentNode.insertBefore(ga, s);
+    })();
+</script>
+</body>
+</html>

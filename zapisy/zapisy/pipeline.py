@@ -1,8 +1,6 @@
 PIPELINE_CSS = {
     'main': {
         'source_filenames': (
-            'css/bootstrap.css',
-            'css/jquery-ui.min.css',
             'css/main.css',
             'css/fereol.css',
             'css/cookieconsent.min.css'
@@ -183,12 +181,10 @@ PIPELINE_CSS = {
 PIPELINE_JS = {
     'main': {
         'source_filenames': (
-            'js/jquery/jquery-3.2.1.min.js',
-            'js/jquery/jquery-ui.min.js',
             'js/jquery/jquery.cookies.2.2.0.min.js',
             'js/jquery/baseExtensions.js',
-            'js/bootstrap/bootstrap.bundle.min.js',
-            'js/bootstrap/bootstrap.min.js',
+            # 'js/bootstrap/bootstrap.bundle.min.js',
+            # 'js/bootstrap/bootstrap.min.js',
             'js/main.js',
             'js/common/bootstrap-dropdown.js',
             'js/cookieconsent.min.js',
