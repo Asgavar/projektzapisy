@@ -9,7 +9,7 @@ const ExtractTextPlugin = require("extract-text-webpack-plugin");
 const CleanWebpackPlugin = require("clean-webpack-plugin");
 const CopyWebpackPlugin = require("copy-webpack-plugin");
 
-const BUNDLE_OUTPUT_DIR = "asset_bundles";
+const BUNDLE_OUTPUT_DIR = "compiled_assets";
 const ASSET_DIR = "assets";
 const ASSET_DEF_FILENAME = "asset-defs.ts";
 const ASSET_DEF_SEARCH_DIR = "apps";
@@ -173,6 +173,16 @@ module.exports = function(config: any) {
 							options: { minimize: config.minifyCss }
 						}, {
 							loader: "less-loader"
+						}]
+					})
+				},
+				{
+					test: /\.css$/,
+					use: ExtractTextPlugin.extract({
+						fallback: "style-loader",
+						use: [{
+							loader: "css-loader",
+							options: { minimize: config.minifyCss }
 						}]
 					})
 				}
