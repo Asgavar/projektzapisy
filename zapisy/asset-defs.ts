@@ -10,10 +10,8 @@ module.exports = {
 	],
 	bundles: {
         "main": [
-        	"common/index.ts"
-            // "js/bootstrap.bundle.min.js",
-            // "js/bootstrap.min.js",
-            // "css/bootstrap.min.css"
+        	"common/index.ts",
+			"common/index.css"
         ],
     }
 };
