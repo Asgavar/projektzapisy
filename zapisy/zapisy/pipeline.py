@@ -1,8 +1,8 @@
-
 PIPELINE_CSS = {
     'main': {
         'source_filenames': (
-            'css/bootstrap-1.2.0.css',
+            'css/bootstrap.css',
+            'css/jquery-ui.min.css',
             'css/main.css',
             'css/fereol.css',
             'css/cookieconsent.min.css'
@@ -14,7 +14,6 @@ PIPELINE_CSS = {
     },
     'ticketssave': {
         'source_filenames': (
-            'css/bootstrap-1.2.0.css',
             'css/main.css',
             'css/fereol.css',
             'css/grade/tickets_save.css'
@@ -26,7 +25,6 @@ PIPELINE_CSS = {
     },
     'connectionchoice': {
         'source_filenames': (
-            'css/bootstrap-1.2.0.css',
             'css/main.css',
             'css/fereol.css',
             'css/grade/connections_choice.css',
@@ -39,7 +37,6 @@ PIPELINE_CSS = {
     },
     'gradebase': {
         'source_filenames': (
-            'css/bootstrap-1.2.0.css',
             'css/main.css',
             'css/fereol.css',
             'css/common/mainPage.css',
@@ -55,7 +52,6 @@ PIPELINE_CSS = {
     },
     'gradepollshow': {
         'source_filenames': (
-            'css/bootstrap-1.2.0.css',
             'css/main.css',
             'css/fereol.css',
             'css/grade/declaration.css'
@@ -67,7 +63,6 @@ PIPELINE_CSS = {
     },
     'help': {
         'source_filenames': (
-            'css/bootstrap-1.2.0.css',
             'css/main.css',
             'css/fereol.css',
             'css/help.css',
@@ -79,7 +74,6 @@ PIPELINE_CSS = {
     },
     'news': {
         'source_filenames': (
-            'css/bootstrap-1.2.0.css',
             'css/main.css',
             'css/fereol.css',
             'css/news.css',
@@ -91,7 +85,6 @@ PIPELINE_CSS = {
     },
     'login': {
         'source_filenames': (
-            'css/bootstrap-1.2.0.css',
             'css/main.css',
             'css/fereol.css',
             'css/common/login.css'
@@ -103,7 +96,6 @@ PIPELINE_CSS = {
     },
     'schedule': {
         'source_filenames': (
-            'css/bootstrap-1.2.0.css',
             'css/main.css',
             'css/fereol.css',
             'css/common/schedule.css',
@@ -117,7 +109,6 @@ PIPELINE_CSS = {
     },
     'prototype': {
         'source_filenames': (
-            'css/bootstrap-1.2.0.css',
             'css/main.css',
             'css/fereol.css',
             'css/common/schedule.css',
@@ -131,7 +122,6 @@ PIPELINE_CSS = {
     },
     'mainpage': {
         'source_filenames': (
-            'css/bootstrap-1.2.0.css',
             'css/main.css',
             'css/fereol.css',
             'css/common/mainPage.css',
@@ -143,7 +133,6 @@ PIPELINE_CSS = {
     },
     'courseview': {
         'source_filenames': (
-            'css/bootstrap-1.2.0.css',
             'css/main.css',
             'css/fereol.css',
             'css/enrollment/courses.css'
@@ -155,7 +144,6 @@ PIPELINE_CSS = {
     },
     'userslist': {
         'source_filenames': (
-            'css/bootstrap-1.2.0.css',
             'css/main.css',
             'css/fereol.css',
             'css/enrollment/courses.css',
@@ -168,10 +156,8 @@ PIPELINE_CSS = {
             'media': 'screen,projection',
         },
     },
-
     'proposal': {
         'source_filenames': (
-            'css/bootstrap-1.2.0.css',
             'css/main.css',
             'css/fereol.css',
             'css/offer/proposal.css'
@@ -183,7 +169,6 @@ PIPELINE_CSS = {
     },
     'vote': {
         'source_filenames': (
-            'css/bootstrap-1.2.0.css',
             'css/main.css',
             'css/fereol.css',
             'css/offer/vote.css'
@@ -198,20 +183,20 @@ PIPELINE_CSS = {
 PIPELINE_JS = {
     'main': {
         'source_filenames': (
-            'js/jquery/jquery-1.5.2.js',
-            'js/jquery/jquery-ui-1.8.17.custom.js',
+            'js/jquery/jquery-3.2.1.min.js',
+            'js/jquery/jquery-ui.min.js',
             'js/jquery/jquery.cookies.2.2.0.min.js',
             'js/jquery/baseExtensions.js',
+            'js/bootstrap/bootstrap.bundle.min.js',
+            'js/bootstrap/bootstrap.min.js',
             'js/main.js',
             'js/common/bootstrap-dropdown.js',
             'js/cookieconsent.min.js',
-            ),
-            'output_filename': 'js/main.min.js',
-        },
+        ),
+        'output_filename': 'js/main.min.js',
+    },
     'vote_form': {
         'source_filenames': (
-            'js/jquery/jquery-1.5.2.js',
-            'js/jquery/jquery-ui-1.8.17.custom.js',
             'js/jquery/jquery.cookies.2.2.0.min.js',
             'js/jquery/baseExtensions.js',
             'js/main.js',
@@ -220,13 +205,11 @@ PIPELINE_JS = {
             'js/common/listFilter.js',
             'js/common/listFilter-courseType.js',
             'js/offer/vote.js'
-            ),
-            'output_filename': 'js/vote_form.min.js',
-        },
+        ),
+        'output_filename': 'js/vote_form.min.js',
+    },
     'correction_form': {
         'source_filenames': (
-            'js/jquery/jquery-1.5.2.js',
-            'js/jquery/jquery-ui-1.8.17.custom.js',
             'js/jquery/jquery.cookies.2.2.0.min.js',
             'js/jquery/baseExtensions.js',
             'js/main.js',
@@ -236,13 +219,11 @@ PIPELINE_JS = {
             'js/common/listFilter-courseType.js',
             'js/offer/vote.js',
             'js/offer/correction.js'
-            ),
-            'output_filename': 'js/correction_form.min.js',
-        },
+        ),
+        'output_filename': 'js/correction_form.min.js',
+    },
     'connectionchoice': {
         'source_filenames': (
-            'js/jquery/jquery-1.5.2.js',
-            'js/jquery/jquery-ui-1.8.17.custom.js',
             'js/jquery/jquery.cookies.2.2.0.min.js',
             'js/jquery/baseExtensions.js',
             'js/main.js',
@@ -250,61 +231,51 @@ PIPELINE_JS = {
             'js/jquery/tooltip.jquery.js',
             'js/grade/ticket_create/BigInt.js',
             'js/grade/ticket_create/ticket_create.js',
-            ),
-            'output_filename': 'js/connectionchoice.min.js',
-        },
+        ),
+        'output_filename': 'js/connectionchoice.min.js',
+    },
     'keysgenerate': {
         'source_filenames': (
-            'js/jquery/jquery-1.5.2.js',
-            'js/jquery/jquery-ui-1.8.17.custom.js',
             'js/jquery/jquery.cookies.2.2.0.min.js',
             'js/jquery/baseExtensions.js',
             'js/main.js',
             'js/common/bootstrap-dropdown.js',
             'js/grade/ticket_create/keys_generate.js'
-            ),
-            'output_filename': 'js/keysgenerate.min.js',
-        },
+        ),
+        'output_filename': 'js/keysgenerate.min.js',
+    },
     'pollresult': {
         'source_filenames': (
-            'js/jquery/jquery-1.5.2.js',
-            'js/jquery/jquery-ui-1.8.17.custom.js',
             'js/jquery/jquery.cookies.2.2.0.min.js',
             'js/jquery/baseExtensions.js',
             'js/main.js',
             'js/common/bootstrap-dropdown.js',
             'js/grade/poll/poll_results.js',
-            ),
-            'output_filename': 'js/pollresult.min.js',
-        },
+        ),
+        'output_filename': 'js/pollresult.min.js',
+    },
     'pollbase': {
         'source_filenames': (
-            'js/jquery/jquery-1.5.2.js',
-            'js/jquery/jquery-ui-1.8.17.custom.js',
             'js/jquery/jquery.cookies.2.2.0.min.js',
             'js/jquery/baseExtensions.js',
             'js/main.js',
             'js/common/bootstrap-dropdown.js',
             'js/grade/grade.js',
-            ),
-            'output_filename': 'js/pollbase.min.js',
-        },
+        ),
+        'output_filename': 'js/pollbase.min.js',
+    },
     'gradeuserpoll': {
         'source_filenames': (
-            'js/jquery/jquery-1.5.2.js',
-            'js/jquery/jquery-ui-1.8.17.custom.js',
             'js/jquery/jquery.cookies.2.2.0.min.js',
             'js/jquery/baseExtensions.js',
             'js/main.js',
             'js/common/bootstrap-dropdown.js',
             'js/grade/poll/poll_answer.js'
-            ),
-            'output_filename': 'js/gradeuserpoll.min.js',
-        },
+        ),
+        'output_filename': 'js/gradeuserpoll.min.js',
+    },
     'news': {
         'source_filenames': (
-            'js/jquery/jquery-1.5.2.js',
-            'js/jquery/jquery-ui-1.8.17.custom.js',
             'js/jquery/jquery.cookies.2.2.0.min.js',
             'js/jquery/baseExtensions.js',
             'js/main.js',
@@ -312,13 +283,11 @@ PIPELINE_JS = {
             'js/components/messageBox.js',
             'js/news.js',
             'js/components/topBarFilter.js'
-            ),
-            'output_filename': 'js/news.min.js',
-        },
+        ),
+        'output_filename': 'js/news.min.js',
+    },
     'courses': {
         'source_filenames': (
-            'js/jquery/jquery-1.5.2.js',
-            'js/jquery/jquery-ui-1.8.17.custom.js',
             'js/jquery/jquery.cookies.2.2.0.min.js',
             'js/jquery/baseExtensions.js',
             'js/main.js',
@@ -335,25 +304,15 @@ PIPELINE_JS = {
     },
     'schedule': {
         'source_filenames': (
-            'js/jquery/jquery-1.5.2.js',
-            'js/jquery/jquery-ui-1.8.17.custom.js',
             'js/jquery/jquery.cookies.2.2.0.min.js',
             'js/jquery/baseExtensions.js',
             'js/main.js',
             'js/common/bootstrap-dropdown.js',
-            # 'js/components/schedule.js',
-            # 'js/enrollment/records/course.js',
-            # 'js/enrollment/records/course-group.js',
-            # 'js/enrollment/records/schedule-course-term.js',
-            # 'js/enrollment/views/schedule.js',
         ),
-
         'output_filename': 'js/schedule.min.js',
     },
     'prototype': {
         'source_filenames': (
-            'js/jquery/jquery-1.5.2.js',
-            'js/jquery/jquery-ui-1.8.17.custom.js',
             'js/jquery/jquery.cookies.2.2.0.min.js',
             'js/jquery/baseExtensions.js',
             'js/main.js',
@@ -373,11 +332,8 @@ PIPELINE_JS = {
         ),
         'output_filename': 'js/prototype.min.js',
     },
-
     'employeelist': {
         'source_filenames': (
-            'js/jquery/jquery-1.5.2.js',
-            'js/jquery/jquery-ui-1.8.17.custom.js',
             'js/jquery/jquery.cookies.2.2.0.min.js',
             'js/jquery/baseExtensions.js',
             'js/main.js',
@@ -397,8 +353,6 @@ PIPELINE_JS = {
     },
     'studentlist': {
         'source_filenames': (
-            'js/jquery/jquery-1.5.2.js',
-            'js/jquery/jquery-ui-1.8.17.custom.js',
             'js/jquery/jquery.cookies.2.2.0.min.js',
             'js/jquery/baseExtensions.js',
             'js/main.js',
@@ -416,11 +370,8 @@ PIPELINE_JS = {
         ),
         'output_filename': 'js/studentlist.min.js',
     },
-
     'proposal': {
         'source_filenames': (
-            'js/jquery/jquery-1.5.2.js',
-            'js/jquery/jquery-ui-1.8.17.custom.js',
             'js/jquery/jquery.cookies.2.2.0.min.js',
             'js/jquery/baseExtensions.js',
             'js/main.js',
@@ -433,54 +384,39 @@ PIPELINE_JS = {
             'js/common/courses-list-filters-ui.js'
         ),
         'output_filename': 'js/proposal.min.js',
-
     },
-
     'proposal_edit': {
         'source_filenames': (
-            'js/jquery/jquery-1.5.2.js',
-            'js/jquery/jquery-ui-1.8.17.custom.js',
             'js/jquery/jquery.cookies.2.2.0.min.js',
             'js/jquery/baseExtensions.js',
             'js/main.js',
             'js/common/bootstrap-dropdown.js',
-        
-        'admin/js/core.js',
-        'admin/js/admin/RelatedObjectLookups.js',
-        'admin/js/jquery.js',
-        'admin/js/jquery.init.js',
-        'admin/js/actions.js',
-        'admin/js/urlify.js',
-        'admin/js/prepopulate.js',
-        'admin/js/SelectBox.js',
-        'admin/js/SelectFilter2.js',
-        'js/tinymce/tinymce.min.js',
-        'js/textareas.js',
-        'js/jquery/jquery.formset.js',
-        'js/offer/proposal/noAdmin.js',
-        'js/offer/proposal/proposal.js'
-
+            'admin/js/core.js',
+            'admin/js/admin/RelatedObjectLookups.js',
+            'admin/js/jquery.js',
+            'admin/js/jquery.init.js',
+            'admin/js/actions.js',
+            'admin/js/urlify.js',
+            'admin/js/prepopulate.js',
+            'admin/js/SelectBox.js',
+            'admin/js/SelectFilter2.js',
+            'js/tinymce/tinymce.min.js',
+            'js/textareas.js',
+            'js/jquery/jquery.formset.js',
+            'js/offer/proposal/noAdmin.js',
+            'js/offer/proposal/proposal.js'
         ),
         'output_filename': 'js/proposal_form.min.js',
-
     },
-
-
     'preferences': {
         'source_filenames': (
-            'js/jquery/jquery-1.5.2.js',
-            'js/jquery/jquery-ui-1.8.17.custom.js',
             'js/jquery/jquery.cookies.2.2.0.min.js',
             'js/jquery/baseExtensions.js',
             'js/main.js',
             'js/common/bootstrap-dropdown.js',
             'js/components/messageBox.js',
             'js/components/topBarFilter.js',
-            #'js/common/listFilter.js',
-            #'js/common/listFilter-courseType.js',
-            #'js/offer/proposal/proposals-list.js'
         ),
         'output_filename': 'js/preferenes.min.js',
-
     }
 }
