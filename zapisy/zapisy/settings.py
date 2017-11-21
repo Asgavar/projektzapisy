@@ -3,15 +3,21 @@
 import os
 import logging
 
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_PATH = os.path.abspath(os.path.dirname(__file__))
 
 DEBUG = False
+
 RELEASE = False
+
 TEMPLATE_DEBUG = False
 
-# With DEBUG = False Django will refuse to serve requests to hosts different
-# than this one.
-ALLOWED_HOSTS = ['zapisy.ii.uni.wroc.pl', 'localhost']
+ADMINS = (
+    # ('Your Name', 'your_email@domain.com'),
+)
+
+MANAGERS = ADMINS
+
+ALLOWED_HOSTS = ['zapisy.ii.uni.wroc.pl']
 EVENT_MODERATOR_EMAIL = 'zapisy@cs.uni.wroc.pl'
 
 """
@@ -44,7 +50,7 @@ DATABASES = {
 DATABASES = {
      'default' : {
         'ENGINE' : 'django.db.backends.sqlite3',
-        'NAME' : os.path.join(BASE_DIR, 'database/db.sqlite3'),
+        'NAME' : os.path.join(PROJECT_PATH, 'database/db.sqlite3'),
         'PORT' : '',
         'USER' : '',
         'PASSWORD' : '',
@@ -54,13 +60,33 @@ DATABASES = {
         }
 }
 
+
 # mass-mail account
 # You can test sending with:
 # $ python -m smtpd -n -c DebuggingServer localhost:1025
 
+# For gmail:
+#EMAIL_USE_TLS = True
+#EMAIL_HOST = 'smtp.gmail.com'
+#EMAIL_HOST_USER = 'youremail@gmail.com'
+#EMAIL_HOST_PASSWORD = 'password'
+#EMAIL_PORT = 587
+
+#EMAIL_HOST = 'localhost'
+#EMAIL_PORT = 1025
+#EMAIL_HOST_USER = ''
+#EMAIL_HOST_PASSWORD = ''
+
 MASS_MAIL_FROM = 'zapisy@cs.uni.wroc.pl'
+
 EMAIL_COURSE_PREFIX = '[System Zapisow] ' # please don't remove the trailing space
 
+#loggin settings:
+
+#LOG_FILE = os.path.join(PROJECT_PATH, "logs/log.log")
+#LOG_LEVEL = logging.NOTSET
+#INTERNAL_IPS = ('127.0.0.1',)
+#logging.basicConfig(level=LOG_LEVEL, filename=LOG_FILE, format = '%(asctime)s | %(levelname)s | %(message)s')
 LOGGING = {
         'version': 1,
         'disable_existing_loggers': False, # keep Django's default loggers
@@ -121,6 +147,7 @@ SITE_ID = 1
 # If you set this to False, Django will make some optimizations so as not
 # to load the internationalization machinery.
 USE_I18N = True
+
 USE_ETAGS = True
 
 # Make this unique, and don't share it with anybody.
@@ -130,11 +157,10 @@ SECRET_KEY = '6$u2ggeh-!^hxep3s4h$3z&2-+3c@sy7-sy8349+l-1m)9r0fn'
 
 TEMPLATE_LOADERS = (
     ('django.template.loaders.cached.Loader', (
-
-    'django.template.loaders.filesystem.Loader',
-    'django.template.loaders.app_directories.Loader',
-    'django.template.loaders.eggs.Loader',
-     )),
+        'django.template.loaders.filesystem.Loader',
+        'django.template.loaders.app_directories.Loader',
+        'django.template.loaders.eggs.Loader',
+    )),
 )
 
 TEMPLATE_CONTEXT_PROCESSORS = (
@@ -154,7 +180,6 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.locale.LocaleMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.transaction.TransactionMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     #'debug_toolbar.middleware.DebugToolbarMiddleware',
     #'middleware.mobile_detector.mobileDetectionMiddleware',
@@ -164,15 +189,14 @@ MIDDLEWARE_CLASSES = (
     'rollbar.contrib.django.middleware.RollbarNotifierMiddleware',
 )
 
-ROOT_URLCONF = 'zapisy.urls'
+ROOT_URLCONF = 'urls'
 
 TEMPLATE_DIRS = (
-    os.path.join(BASE_DIR, 'templates'),
+    os.path.join(PROJECT_PATH, 'templates'),
 )
 
 INSTALLED_APPS = (
     'modeltranslation', # needs to be before django.contrib.admin
-    
     # needed from 1.7 onwards to prevent Django from trying to apply
     # migrations when testing (slows down DB setup _a lot_)
     'test_without_migrations',
@@ -189,7 +213,6 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'mailer',
-    #'south',
     'pipeline',
     'apps.enrollment.courses',
     'apps.enrollment.records',
@@ -214,8 +237,7 @@ INSTALLED_APPS = (
     'apps.notifications',
     'django_cas_ng',
 
-    'test_app',
-    'webpack_loader',
+    'test_app'
 )
 
 MODELTRANSLATION_FALLBACK_LANGUAGES = ('pl',)
@@ -296,8 +318,8 @@ ISSUE_TRACKER_URL = "https://tracker-zapisy.ii.uni.wroc.pl"
 # As above, but takes the user straight to the "create new issue" page
 ISSUE_TRACKER_NEW_ISSUE_URL = "https://tracker-zapisy.ii.uni.wroc.pl/projects/zapisy-tracker/issues/new"
 
-if os.path.isfile(os.path.join(BASE_DIR, 'zapisy', 'pipeline.py')):
-    execfile(os.path.join(BASE_DIR, 'zapisy', 'pipeline.py'))
+if os.path.isfile(os.path.join(PROJECT_PATH, 'pipeline.py')):
+    execfile(os.path.join(PROJECT_PATH, 'pipeline.py'))
 
 PIPELINE = True
 PIPELINE_AUTO = False
@@ -306,34 +328,17 @@ PIPELINE_YUI_BINARY = 'java -jar libs/yuicompressor-2.4.7.jar'
 #PIPELINE_JS_COMPRESSOR = 'pipeline.compressors.jsmin.JSMinCompressor'
 #PIPELINE_CSS_COMPRESSOR = 'pipeline.compressors.csstidy.CSSTidyCompressor'
 
-LOCAL_SETTINGS = os.path.join(BASE_DIR, 'zapisy', 'settings_local.py')
-if os.path.isfile(LOCAL_SETTINGS):
-    print("Running local settings file {0}".format(LOCAL_SETTINGS))
-    execfile(LOCAL_SETTINGS)
-
-STATIC_ROOT = os.path.join(BASE_DIR, 'static/')
 STATIC_URL = '/static/'
-STATICFILES_DIRS = (
-	os.path.join(BASE_DIR, "compiled_assets"),
-)
-
+STATIC_ROOT =  os.path.join(PROJECT_PATH, 'site_media')
 STATICFILES_STORAGE = 'pipeline.storage.PipelineStorage'
 PIPELINE_STORAGE = 'pipeline.storage.PipelineFinderStorage'
 PIPELINE_VERSIONING = 'pipeline.versioning.hash.MD5Versioning'
 STATICFILES_FINDERS = (
   'pipeline.finders.PipelineFinder',
   'django.contrib.staticfiles.finders.FileSystemFinder',
+  'django.contrib.staticfiles.finders.AppDirectoriesFinder'
 )
 
-WEBPACK_LOADER = {
-    'DEFAULT': {
-        'CACHE': not DEBUG,
-		# This setting is badly named, it's the bundle dir relative
-		# to whatever you have in your STATICFILES_DIRS
-        'BUNDLE_DIR_NAME': '', # must end with slash
-        'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats.json'),
-        'POLL_INTERVAL': 0.1,
-        'TIMEOUT': None,
-        'IGNORE': ['.+\.hot-update.js', '.+\.map']
-    }
-}
+local_settings_file = os.path.join(PROJECT_PATH, 'settings_local.py')
+if os.path.isfile(local_settings_file):
+    execfile(local_settings_file)
