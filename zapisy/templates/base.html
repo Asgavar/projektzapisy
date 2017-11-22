@@ -75,7 +75,7 @@
     });
 </script>
 
-<div class="container-fluid">
+<div class="container-fluid p-0">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -137,24 +137,30 @@
                     </ul>
                 </div>
             {% else %}
-                <ul class="navbar-nav ml-auto">
-                    <li class="nav-item dropdown">
+                <ul class="navbar-nav mr-auto">
+                    <li class="nav-item dropdown" id="login-dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
                            data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                             <b>Zaloguj się</b><span class="caret"></span>
                         </a>
-                        <div class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <div class="row" id="login-dp">
-                                <div class="col-md-12">
-                                    <a href="{% url 'cas_ng_login' %}" class="btn" id="btn-usos">
-                                        <img src="{% static 'images/usos-login-logo.png' %}"
-                                             alt="Uniwersytet Wrocławski">Zaloguj się przez USOS</a>
+                        {# FIXME: https://getbootstrap.com/docs/4.0/components/dropdowns/#menu-forms #}
+                        <div id="login-dp" class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <div class="col-12 dropdown-item">
+                                <div class="row">
+                                    <div class="social-buttons">
+                                        <a href="{% url 'cas_ng_login' %}" class="btn" id="btn-usos">
+                                            <img src="{% static 'images/usos-login-logo.png' %}"
+                                                 alt="Uniwersytet Wrocławski">
+                                            <div class="clearfix"></div>
+                                            Zaloguj się przez USOS
+                                        </a>
+                                    </div>
                                     <button class="btn primary" id="btn-no-usos">
                                         lub użyj konta Systemu Zapisów
                                     </button>
                                     <div id="login-without-usos">
                                         <form action="{% url 'apps.users.views.login_plus_remember_me' %}"
-                                              method="POST">
+                                              method="POST" class="form" role="form">
                                             {% csrf_token %}
                                             {% if request.path == '/' %}
                                                 <input type="hidden" name="next"
@@ -172,7 +178,7 @@
                                             </div>
                                             <div class="form-group">
                                                 <button type="submit" tabindex="4"
-                                                        class="btn btn-primary btn-block">Zaloguj &raquo;
+                                                        class="btn btn-light btn-block">Zaloguj &raquo;
                                                 </button>
                                             </div>
                                             <div class="form-group">
@@ -188,76 +194,83 @@
                             </div>
                         </div>
                     </li>
+                    <li class="nav-item">
+                        <div class="col-2"></div> <!-- this will keep some space on the right. -->
+                    </li>
                 </ul>
             {% endif %}
         </div>
     </nav>
-</div>
-
-<div class="top">
-    <div class="header">
-
-        <div class="container">
-            <div class="logo">
-                <a href="/">
-                    <img src="{% static 'images/logotyp.jpg' %}" alt="Uniwersytet Wrocławski">
-                </a>
-            </div>
-        </div>
+    {#    <div class="top">#}
+    <div class="logo header">
+        <a href="/">
+            <img src="{% static 'images/logotyp.jpg' %}" alt="Uniwersytet Wrocławski">
+        </a>
     </div>
-    <!-- down-menu  -->
     <div class="topbar systemtopbar">
         <div class="fill">
             <div class="container">
                 <ul id="main-menu-list">
                     {% block system_menu %}
-                        {# end system_menu #}
                     {% endblock %}
                 </ul>
             </div>
         </div>
     </div>
-    <!-- end down-menu  -->
+    {#    </div>#}
 </div>
-
 <div class="container">
-    <div class="container space">
-        <div class="bread">
-            {% block bread %}
-            {% endblock %}
+    {% if request.path != '/' %}
+        <div class="row">
+            <nav aria-label="breadcrumb" role="navigation">
+                <ol class="breadcrumb">
+                    {% block bread %}
+                    {% endblock %}
+                </ol>
+            </nav>
         </div>
+    {% endif %}
+    <div class="row">
         {% block messages %}
             {% for message in messages %}
-                <div class="alert-message {{ message.tags }}">
+                <div class="alert alert-info {{ message.tags }}">
                     {{ message }}
                 </div>
             {% endfor %}
         {% endblock %}
-        <div id="main-content-container" class="row show-grid sidebar-right marginFix">
-            {% block topContent %}{% endblock %}
-            {% block center %}
-                <div class="span{% block content-width %}11{% endblock %} columns marginFix contentNoCollapse">
-                    <div id="main-content">
-                        {% block content %}
-                        {% endblock %}
-                    </div>
-                </div>
-                <div class="span{% block sidebar-width %}5{% endblock %} columns">
-                    {% block sidebar %}
+    </div>
+    <div class="row m-0">
+        {% block topContent %}{% endblock %}
+        {% block center %}
+            <div class="m-0 contentNoCollapse">
+                <div id="main-content">
+                    {% block content %}
                     {% endblock %}
                 </div>
-            {% endblock %}
-        </div>
+            </div>
+            <div class="span{% block sidebar-width %}5{% endblock %} columns">
+                {% block sidebar %}
+                {% endblock %}
+            </div>
+        {% endblock %}
     </div>
-    <footer>
-        <p>
-            {# <a href="{% url 'on-mobile' %}" class="go-mobile">Przejdź do wersji mobilnej</a> #}
-            &copy; {% now "Y" %} <a href="http://www.ii.uni.wroc.pl/">Instytut Informatyki UWr</a>
-            {% if user.is_authenticated %} | Nieprawidłowe dane należy zgłaszać na adres <a href="mailto:zapisy@cs.uni.wroc.pl">zapisy@cs.uni.wroc.pl</a>{% endif %}
-            | Błędy i uwagi: <a href="https://tracker-zapisy.ii.uni.wroc.pl/">[link]</a> Wygenerowano: {% now "H:i:s" %}
-            {% if "DEBUG"|settings_value == True or "II_ZAPISY_STAGING"|osenv_value == "True" %}| <strong>Django {% django_version %}</strong>{% endif %}
-        </p>
-    </footer>
+    <div class="row">
+        <footer>
+            <hr class="my-4">
+            <p class="text-left">
+                {# <a href="{% url 'on-mobile' %}" class="go-mobile">Przejdź do wersji mobilnej</a> #}
+                &copy; {% now "Y" %}<a href="http://www.ii.uni.wroc.pl/">Instytut Informatyki UWr</a>
+                {% if user.is_authenticated %} | Nieprawidłowe dane należy zgłaszać na adres
+                    <a href="mailto:zapisy@cs.uni.wroc.pl">zapisy@cs.uni.wroc.pl</a>
+                {% endif %}
+                | Błędy i uwagi:
+                <a href="https://tracker-zapisy.ii.uni.wroc.pl/">[link]</a>Wygenerowano: {% now "H:i:s" %}
+                {% if "DEBUG"|settings_value == True or "II_ZAPISY_STAGING"|osenv_value == "True" %}
+                    |<strong>Django {% django_version %}</strong>
+                {% endif %}
+            </p>
+        </footer>
+    </div>
 </div>
 <!-- /container -->
 <script type="text/javascript">
