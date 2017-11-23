@@ -111,29 +111,29 @@ div.header {
     background-color: #2696C4;
 }
 
-div.top .topbar .inline-inputs label {
-    float: none;
-    color: #FFFFFF;
-}
+/*div.top .topbar .inline-inputs label {*/
+/*float: none;*/
+/*color: #FFFFFF;*/
+/*}*/
 
-div.news_list {
-    padding: 20px;
-    margin-top: 20px;
-}
+/*div.news_list {*/
+/*padding: 20px;*/
+/*margin-top: 20px;*/
+/*}*/
 
-div.news_list p {
-    font-size: 14px;
-}
+/*div.news_list p {*/
+/*font-size: 14px;*/
+/*}*/
 
-.hero-unit {
-    padding-top: 30px;
-    padding-bottom: 45px;
-    margin-top: 10px;
-}
+/*.hero-unit {*/
+/*padding-top: 30px;*/
+/*padding-bottom: 45px;*/
+/*margin-top: 10px;*/
+/*}*/
 
-.hero-unit p {
-    font-size: 14px;
-}
+/*.hero-unit p {*/
+/*font-size: 14px;*/
+/*}*/
 
 div.loginbox {
     background-color: #f5f5f5;
@@ -297,10 +297,10 @@ input.small {
     width: auto;
 }
 
-.topbar div > ul .active a, .nav .active a {
-    background-color: rgba(0, 0, 0, 0.7);
-    font-weight: bold;
-}
+/*.topbar div > ul .active a, .nav .active a {*/
+/*background-color: rgba(0, 0, 0, 0.7);*/
+/*font-weight: bold;*/
+/*}*/
 
 #enr-schedulePrototype-other span,
 #enr-coursesList-other span {
@@ -382,22 +382,6 @@ table ul.voted-courses {
 
 .tableNameField {
     margin-right: 5px;
-}
-
-/* Bootstrap customizations/overrides */
-.marginFix {
-    margin-left: 0px !important;
-}
-
-/* If someone reports that the user name in the top bar is too long
- * and gets moved to the next line as a result, uncomment this
- * to squash the nav links and make room for the user name.
-/*.topBarLinkContainer li a {
-  padding: 10px 7px !important;
-}*/
-
-.topBarLinkContainer {
-    margin: 0px !important;
 }
 
 .content-loading {

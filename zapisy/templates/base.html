@@ -207,21 +207,15 @@
             <img src="{% static 'images/logotyp.jpg' %}" alt="Uniwersytet Wrocławski">
         </a>
     </div>
-    <div class="topbar systemtopbar">
-        <div class="fill">
-            <div class="container">
-                <ul id="main-menu-list">
-                    {% block system_menu %}
-                    {% endblock %}
-                </ul>
-            </div>
-        </div>
-    </div>
     {#    </div>#}
 </div>
-<div class="container">
+<div class="container p-0">
+    <ul class="nav nav-tabs">
+        {% block system_menu %}
+        {% endblock %}
+    </ul>
     {% if request.path != '/' %}
-        <div class="row">
+        <div class="row p-2">
             <nav aria-label="breadcrumb" role="navigation">
                 <ol class="breadcrumb">
                     {% block bread %}
@@ -248,10 +242,8 @@
                     {% endblock %}
                 </div>
             </div>
-            <div class="span{% block sidebar-width %}5{% endblock %} columns">
-                {% block sidebar %}
-                {% endblock %}
-            </div>
+            {% block sidebar %}
+            {% endblock %}
         {% endblock %}
     </div>
     <div class="row">

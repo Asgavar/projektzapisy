@@ -1,26 +1,31 @@
 {% load i18n %}
-<h3>{% trans "Konsultacje prowadzących" %}:</h3>
-<br>
-
-{% if employees %}
-    <table>
-        <thead>
-            <td>{% trans "Imię i nazwisko" %}</td>
-            <td>{% trans "Pokój" %}</td>
-            <td>{% trans "Konsultacje" %}</td>
-        </thead>
-        <tbody>
+<div class="col-8">
+    <h3>{% trans "Konsultacje prowadzących" %}:</h3>
+    {% if employees %}
+        <table class="table">
+            <thead>
+            <tr>
+                <th scope="col">>{% trans "Imię i nazwisko" %}</th>
+                <th scope="col">>{% trans "Pokój" %}</th>
+                <th scope="col">>{% trans "Konsultacje" %}</th>
+            </tr>
+            </thead>
+            <tbody>
             {% for employee in employees %}
                 <tr>
-                    <td><a href="{% url 'employee-profile' employee.user.id %}" class="person">
-                        {{ employee.user.get_full_name }}</a></td>
+                    <td>
+                        <a href="{% url 'employee-profile' employee.user.id %}" class="person">
+                            {{ employee.user.get_full_name }}
+                        </a>
+                    </td>
                     <td>{{ employee.room|default:"" }}</td>
                     <td>{{ employee.consultations }}</td>
                 </tr>
             {% endfor %}
-        </tbody>
-    </table>
-    <br>
-{% else %}
-    {% trans "Brak informacji" %}.
-{% endif %}
+            </tbody>
+        </table>
+    {% else %}
+        {% trans "Brak informacji" %}.
+    {% endif %}
+    <hr>
+</div>

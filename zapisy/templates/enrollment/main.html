@@ -1,23 +1,20 @@
 {% extends "enrollment/base.html" %}
 {% load static %}
-
 {% load i18n %}
 
 {% block styles %}
     {{ block.super }}
-    <link rel="stylesheet" href="{% static "css/common/mainPage.css" %}" type="text/css" />
+    <link rel="stylesheet" href="{% static "css/common/mainPage.css" %}" type="text/css"/>
 {% endblock %}
 
 {% block bread %}
-    <li><a href="/">{% trans "Strona główna" %}</a></li>
-    <li>{% trans "Zapisy" %}</li>
+    <li class="breadcrumb-item"><a href="/">{% trans "Strona główna" %}</a></li>
+    <li class="breadcrumb-item active">{% trans "Zapisy" %}</li>
 {% endblock %}
 
 {% block content %}
-    <div id="mainPage-container">
-        <div>
-            <a href="{% url 'enrollment-main' %}">{% trans "System zapisów" %}</a>
-            <span>{% trans "System zapisów na zajęcia w Instytucie Informatyki Uniwersytetu Wrocławskiego" %}.</span>
-        </div>
+    <div class="row">
+        <a href="{% url 'enrollment-main' %}">{% trans "System zapisów" %}</a>
+        <span>{% trans "System zapisów na zajęcia w Instytucie Informatyki Uniwersytetu Wrocławskiego" %}.</span>
     </div>
 {% endblock %}
