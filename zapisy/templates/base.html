@@ -63,17 +63,17 @@
     <script src="{% static "js/common/base.js" %}"></script>
 </head>
 <body>
-<form action="/" method="post" style="display: none">
-    <p><input type="hidden" name="data-invalidated" value="no"/></p>
-</form>
-<script type="text/javascript">
-    jQuery.dataInvalidate_check();
-    $(document).ready(function () {
-        $('.dropdown-menu input,label').click(function (e) {
-            e.stopPropagation(); //This will prevent the event from bubbling up and close the dropdown when you type/click on text boxes.
-        });
-    });
-</script>
+{#<form action="/" method="post" style="display: none">#}
+{#    <p><input type="hidden" name="data-invalidated" value="no"/></p>#}
+{#</form>#}
+{#<script type="text/javascript">#}
+{#    jQuery.dataInvalidate_check();#}
+{#    $(document).ready(function () {#}
+{#        $('.dropdown-menu input,label').click(function (e) {#}
+{#            e.stopPropagation(); //This will prevent the event from bubbling up and close the dropdown when you type/click on text boxes.#}
+{#        });#}
+{#    });#}
+{#</script>#}
 
 <div class="container-fluid p-0">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
