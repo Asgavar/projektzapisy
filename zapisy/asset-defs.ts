@@ -10,8 +10,9 @@ module.exports = {
 	],
 	bundles: {
         "main": [
+        	"common/_variables.scss",
         	"common/index.ts",
-			"common/index.css"
+			"common/index.scss"
         ],
     }
 };
