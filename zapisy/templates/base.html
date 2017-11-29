@@ -27,6 +27,8 @@
     <!-- Le styles -->
     <script type="text/javascript" src="{% static "vendor.js" %}"></script>
     {% render_bundle "main" %}
+    {% block rendered_bundles %}
+    {% endblock %}
     {% block styles %}
         {#        {% compressed_css 'main' %}#}
     {% endblock %}
@@ -234,13 +236,11 @@
             {% endfor %}
         {% endblock %}
     </div>
-    <div class="row m-0">
-        {% block topContent %}{% endblock %}
-        {% block center %}
-            {% block sidebar %}
-            {% endblock %}
+    {% block topContent %}{% endblock %}
+    {% block center %}
+        {% block sidebar %}
         {% endblock %}
-    </div>
+    {% endblock %}
     <div class="m-0 contentNoCollapse">
         {% block content %}
         {% endblock %}

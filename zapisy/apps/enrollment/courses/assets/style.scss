@@ -1,0 +1,12 @@
+$filter-bg-color: #f8f8f8;
+$filter-border-color: #cccccc;
+
+.filter-list {
+  background-color: $filter-bg-color;
+  border: 1px solid $filter-border-color;
+}
+
+#course-types {
+  max-height: 20vh;
+  overflow-y: scroll;
+}

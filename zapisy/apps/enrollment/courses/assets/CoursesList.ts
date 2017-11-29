@@ -15,6 +15,6 @@ class CourseList {
 }
 
 
-$(() => {
-    new CourseList("").loadCourses();
-});
+// $(() => {
+//     new CourseList("").loadCourses();
+// });
