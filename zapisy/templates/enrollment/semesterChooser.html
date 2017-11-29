@@ -1,15 +1,14 @@
 {% load i18n %}
 
-<span class="selectbox">
-				<label for="enr-courseFilter-semester">{% trans "Semestr" %}: </label>
-				<select id="enr-courseFilter-semester">
-					{% for semester in semester_courses %}
-                        <option value="{{ semester.id }}" {% if semester.id == default_semester.id %}
-                                selected="selected" {% endif %}>
-                            {{ semester.year }} {{ semester.get_type_display }}
-                            {% if semester.id == default_semester.id %} (bieżący){% endif %}
-                        </option>
-                    {% endfor %}
-				</select>
-			</span>
+<div class="form-row">
+    <label class="mr-sm-2" for="enr-courseFilter-semester">{% trans "Semestr" %}</label>
+    <select class="form-control mb-2 mr-sm-2 mb-sm-0 col-8" id="enr-courseFilter-semester">
+        {% for semester in semester_courses %}
+            <option value="{{ semester.id }}" {% if semester.id == default_semester.id %} selected{% endif %}>
+                {{ semester.year }} {{ semester.get_type_display }}
+                {% if semester.id == default_semester.id %} (bieżący){% endif %}
+            </option>
+        {% endfor %}
+    </select>
+</div>
 <hr class="filterListDivider">

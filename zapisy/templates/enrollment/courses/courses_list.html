@@ -12,7 +12,7 @@
     <a href="{% url "main-page" %}" class="breadcrumb-item">{% trans "Strona główna" %}</a>
     <a href="{% url "course-list" %}" class="breadcrumb-item active">{% trans "Przedmioty" %}</a>&nbsp;
     {% if user.is_staff %}
-        <a id="enr-course-edit-link" href="" class="hidden">{% trans "Edytuj przedmiot" %}</a>
+        <a id="enr-course-edit-link" href="" class="breadcrumb-item hidden">{% trans "Edytuj przedmiot" %}</a>
     {% endif %}
 {% endblock %}
 
