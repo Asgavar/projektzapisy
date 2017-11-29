@@ -119,7 +119,7 @@
                     </tr>
                     </thead>
                     <tbody>
-                    {#                    {% regroup groups by group.course as courses %}#}
+                    {% regroup groups by group.course as courses %}
                     {% for course in courses %}
                         <tr>
                             <td>
