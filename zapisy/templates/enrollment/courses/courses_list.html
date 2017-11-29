@@ -10,9 +10,12 @@
 
 {% block bread %}
     <a href="{% url "main-page" %}" class="breadcrumb-item">{% trans "Strona główna" %}</a>
-    <a href="{% url "course-list" %}" class="breadcrumb-item active">{% trans "Przedmioty" %}</a>&nbsp;
+    <a href="{% url "course-list" %}" class="breadcrumb-item">{% trans "Przedmioty" %}</a>&nbsp;
+    <span class="hidden" id="enr-course-name" class="breadcrumb-item active">{{ course.name }}</span>
     {% if user.is_staff %}
-        <a id="enr-course-edit-link" href="" class="breadcrumb-item hidden">{% trans "Edytuj przedmiot" %}</a>
+        <div class="mr-auto">
+            <a id="enr-course-edit-link" href="" class="breadcrumb-item hidden">{% trans "Edytuj przedmiot" %}</a>
+        </div>
     {% endif %}
 {% endblock %}
 
@@ -27,4 +30,14 @@
 {% block enrollment_menu_courses %} class="nav-item active"{% endblock %}
 
 {% block content %}
+    <div class="p-0">
+        <div class="alert alert-info alert-dismissible fade show">
+            <p>{% trans "Wybierz przedmiot z listy" %}</p>
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+    </div>
+    <div id="main-content">
+    </div>
 {% endblock %}

@@ -11,13 +11,9 @@
 {% block sidebar %}
     {% cache 3600 courses_list request.user %}
         <div class="row">
-            <div class="col-9 p-0">
-                <div class="alert alert-info alert-dismissible fade show">
-                    <p>{% trans "Wybierz przedmiot z listy" %}</p>
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
+            <div class="col-9">
+                {% block content %}
+                {% endblock %}
             </div>
             <div id="main-sidebar" class="col-3 pl-2">
                 <div id="course-list">

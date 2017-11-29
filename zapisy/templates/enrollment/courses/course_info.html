@@ -2,15 +2,17 @@
 {% include "enrollment/courses/course_head.html" %}
 {% for tutorial in tutorials %}
     {% if tutorial.groups %}
-        <div class="tutorial col-8">
+        <div class="">
             <h2>{{ tutorial.name }} {% if user.is_staff %}&nbsp;&nbsp;
-                <small class='right'>({% blocktrans %}Studenci w grupach: {{ tutorial.statistics.in_group }}, studenci
-                    bez
-                    grupy: {{ tutorial.statistics.in_queue }}{% endblocktrans %})
+                <small class='right text-muted'>
+                    ({% blocktrans %}
+                    Studenci w grupach: {{ tutorial.statistics.in_group }},
+                    studenci bez grupy: {{ tutorial.statistics.in_queue }}
+                {% endblocktrans %})
                 </small>
             {% endif %}</h2>
             <input type="hidden" name="tutorial-type" value="{{ tutorial.type }}"/>
-            <table class="zebra-striped">
+            <table class="table">
                 <thead>
                 <tr>
                     {# Translators: nagłówek tabeli #}
@@ -64,13 +66,15 @@
                             {% if t.limit_zamawiane or t.limit_zamawiane2012 or t.limit_isim %}
                                 {{ t.get_count_of_enrolled_non_zamawiane }}
                                 {% if t.limit_zamawiane %} + {{ t.get_count_of_enrolled_zamawiane }}{% endif %}
-                                {% if t.limit_zamawiane2012 %} + {{ t.get_count_of_enrolled_zamawiane2012 }}{% endif %}
+                                {% if t.limit_zamawiane2012 %} +
+                                    {{ t.get_count_of_enrolled_zamawiane2012 }}{% endif %}
                                 {% if t.limit_isim %} + {{ t.enrolled_isim }}{% endif %}
                             {% else %}
                                 {{ t.enrolled }}
                             {% endif %}
                         </td>
-                        <td class="number termQueuedCount">{% if t.queued %}{{ t.queued }}{% else %}0{% endif %}</td>
+                        <td class="number termQueuedCount">
+                            {% if t.queued %}{{ t.queued }}{% else %}0{% endif %}</td>
                         <td class="controls">
                             <input type="hidden" name="group-id" value="{{ t.id }}"/>
                             <input type="hidden" name="group-json-{% now "Hms" %}" value='{{ t.serialized }}'/>
@@ -114,7 +118,8 @@
 
                                                 {% else %}{% if t.priority %}
                                                     <input type="hidden" name="enroll" value="false"/>
-                                                    <button type="submit" class="btn small danger setEnrolledButton">
+                                                    <button type="submit"
+                                                            class="btn small danger setEnrolledButton">
                                                         {% trans "wypisz z kolejki" %}
                                                     </button>
                                                 {% else %}
@@ -147,7 +152,8 @@
                         {% if course.is_recording_open and user.student.is_active %}
                             <td class="priority">
                                 {% if t.priority %}
-                                    <form action="{% url 'records-set-queue-priority' %}" method="post">{% csrf_token %}
+                                    <form action="{% url 'records-set-queue-priority' %}"
+                                          method="post">{% csrf_token %}
                                         <div>
                                             <input type="hidden" name="id" value="{{ t.id }}"/>
                                             <input type="hidden" name="priority" value="{{ t.priority|add:-1 }}"/>
@@ -156,7 +162,8 @@
                                         </div>
                                     </form>
                                     <span>{{ t.priority }}</span>
-                                    <form action="{% url 'records-set-queue-priority' %}" method="post">{% csrf_token %}
+                                    <form action="{% url 'records-set-queue-priority' %}"
+                                          method="post">{% csrf_token %}
                                         <div>
                                             <input type="hidden" name="id" value="{{ t.id }}"/>
                                             <input type="hidden" name="priority" value="{{ t.priority|add:1 }}"/>

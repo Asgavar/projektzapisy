@@ -236,14 +236,15 @@
             {% endfor %}
         {% endblock %}
     </div>
-    {% block topContent %}{% endblock %}
-    {% block center %}
-        {% block sidebar %}
+    <div>
+        {% block topContent %}{% endblock %}
+        {% block center %}
+            {% block sidebar %}
+                {% block content %}
+                {% endblock %}
+            {% endblock %}
         {% endblock %}
-    {% endblock %}
-    <div class="m-0 contentNoCollapse">
-        {% block content %}
-        {% endblock %}
+
     </div>
     <div class="row">
         <footer>

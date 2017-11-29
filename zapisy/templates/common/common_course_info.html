@@ -1,13 +1,13 @@
 {% load i18n %}
 
 {% if course_entity.owner %}
-<tr>
-    <th>Prowadzący</th>
-    <td>
-        <a href="{% url 'employee-profile' course_entity.owner.user.id %}"
-           class="person">{{ course_entity.owner.user.get_full_name }}</a>
-    </td>
-</tr>
+    <tr>
+        <th>Prowadzący</th>
+        <td>
+            <a href="{% url 'employee-profile' course_entity.owner.user.id %}"
+               class="person">{{ course_entity.owner.user.get_full_name }}</a>
+        </td>
+    </tr>
 {% endif %}
 
 <tr>
@@ -27,43 +27,45 @@
 </tr>
 
 {% with course_entity.get_all_tags_with_weights as tagsList %}
-{% if tagsList|length > 0 %}
-    <tr>
-        <th>{% trans "Tagi" context "tagi przedmiotu" %}</th>
-        <td>
-            {% if tagsList|length > 1 %}
-                <ul class="tagEffectListInCourseHead">
-                    {% for tagInfo in tagsList %}
-                        <li><span class="label success">{{ tagInfo.tag }}</span>{% if tagInfo.weight %} - {{ tagInfo.weight }}%{% endif %}</li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                {% with tagsList.0 as tagInfo %}
-                    <span class="label success">{{ tagInfo.tag }}</span>{% if tagInfo.weight %} - {{ tagInfo.weight }}%{% endif %}
-                {% endwith %}
-            {% endif %}
-        </td>
-    </tr>
-{% endif %}
+    {% if tagsList|length > 0 %}
+        <tr>
+            <th>{% trans "Tagi" context "tagi przedmiotu" %}</th>
+            <td>
+                {% if tagsList|length > 1 %}
+                    <ul class="tagEffectListInCourseHead">
+                        {% for tagInfo in tagsList %}
+                            <li><span class="badge badge-pill badge-success">{{ tagInfo.tag }}</span>
+                                {% if tagInfo.weight %} - {{ tagInfo.weight }}%{% endif %}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    {% with tagsList.0 as tagInfo %}
+                        <span class="badge badge-pill badge-success">{{ tagInfo.tag }}</span>{% if tagInfo.weight %} -
+                        {{ tagInfo.weight }}%{% endif %}
+                    {% endwith %}
+                {% endif %}
+            </td>
+        </tr>
+    {% endif %}
 {% endwith %}
 
 {% with course_entity.get_all_effects as effectsList %}
-{% if effectsList|length > 0 %}
-    <tr>
-        <th>{% trans "Efekty kształcenia" %}</th>
-        <td>
-            {% if effectsList|length > 1 %}
-                <ul class="tagEffectListInCourseHead">
-                    {% for effect in effectsList %}
-                        <li>{{ effect }}</li>
-                    {% endfor %}
-                </ul>
-            {% else %}
-                {% with effectsList.0 as effect %}
-                    {{ effect }}
-                {% endwith %}
-            {% endif %}
-        </td>
-    </tr>
-{% endif %}
+    {% if effectsList|length > 0 %}
+        <tr>
+            <th>{% trans "Efekty kształcenia" %}</th>
+            <td>
+                {% if effectsList|length > 1 %}
+                    <ul class="tagEffectListInCourseHead">
+                        {% for effect in effectsList %}
+                            <li>{{ effect }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    {% with effectsList.0 as effect %}
+                        {{ effect }}
+                    {% endwith %}
+                {% endif %}
+            </td>
+        </tr>
+    {% endif %}
 {% endwith %}

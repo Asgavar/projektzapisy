@@ -1,4 +1,5 @@
-import * as $ from 'jquery';
+import * as $ from "jquery";
+import {loadCourseInfo} from './ajaxCourseLoad';
 
 interface Course {
     id: number;
@@ -7,6 +8,7 @@ interface Course {
 }
 
 class FilteredCoursesList {
+    courseList: Course[] = [];
     url: string;
 
     constructor(URL: string) {
@@ -15,7 +17,7 @@ class FilteredCoursesList {
 
     init() {
         this.fetchCourses()
-            .then(courses => this.renderCourses(courses.courseList))
+            .then(courses => this.renderCourses(courses))
             .then(() => document.getElementById("fetchingListMessage").className += " hidden");
     }
 
@@ -24,6 +26,10 @@ class FilteredCoursesList {
             .then(response => {
                 return response.json();
             })
+            .then(courses => {
+                this.courseList = courses.courseList;
+                return this.courseList;
+            });
     }
 
     protected createLinkFromCourse(course: Course): Node {
@@ -31,8 +37,10 @@ class FilteredCoursesList {
         let a = document.createElement("A");
         a.setAttribute("href", course.url);
         a.textContent = course.name;
-
-        // let text = document.createTextNode(course.name);
+        a.onclick = (e) => {
+            e.preventDefault();
+            loadCourseInfo(course.url);
+        };
         elem.appendChild(a);
 
         return elem;

@@ -1,18 +1,16 @@
 {% extends "enrollment/courses/courses_list.html" %}
 {% load url from future %}
-{#{% load render_bundle from webpack_loader %}#}
 {% load fereol_common %}
 {% load i18n %}
 
 {% block main-subtitle %}{{ course.name }}{% endblock %}
 
 {% block bread %}
-    {#    {% render_bundle "courses-course-details" %}#}
     <a href="{% url "main-page" %}" class="breadcrumb-item">{% trans "Strona główna" %}</a>
     <a href="{% url "course-list" %}" class="breadcrumb-item">{% trans "Przedmioty" %}</a>
     <a id="enr-course-name" class="breadcrumb-item active">{{ course.name }}</a>
     {% if user.is_staff %}
-        <div class="ml-0">
+        <div class="ml-2">
             <a id="enr-course-edit-link" href="{% url 'admin:courses_course_change' course.pk %}">
                 {% trans "Edytuj przedmiot" %}
             </a>
@@ -22,7 +20,9 @@
 
 
 {% block content %}
-    <div id="enr-course-view">
-        {% include "enrollment/courses/course_info.html" %}
+    <div id="main-content">
+        <div id="enr-course-view">
+            {% include "enrollment/courses/course_info.html" %}
+        </div>
     </div>
 {% endblock %}
