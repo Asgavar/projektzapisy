@@ -14,8 +14,8 @@ Schedule = function(container, options)
 
 		dayList: [0, 1, 2, 3, 4],
 
-		startTime: new Schedule.Time(8, 00),
-		endTime: new Schedule.Time(23, 00),
+		startTime: new Schedule.Time(8, 0),
+		endTime: new Schedule.Time(23, 0),
 
 		hourLabelHeight: 12
 	};
