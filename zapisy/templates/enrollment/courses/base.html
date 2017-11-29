@@ -11,7 +11,7 @@
 {% block sidebar %}
     {% cache 3600 courses_list request.user %}
         <div class="row">
-            <div class="col-10 p-0">
+            <div class="col-9 p-0">
                 <div class="alert alert-info alert-dismissible fade show">
                     <p>{% trans "Wybierz przedmiot z listy" %}</p>
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
@@ -19,7 +19,7 @@
                     </button>
                 </div>
             </div>
-            <div id="main-sidebar" class="col-2">
+            <div id="main-sidebar" class="pl-2">
                 <div id="course-list">
                     <p class="main-side-message hidden" id="fetchingListMessage">
                         Pobieranie listy przedmiotów...
