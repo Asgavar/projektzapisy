@@ -4,6 +4,7 @@
     "target": "es6",
     "alwaysStrict": true,
     "strict": true,
+    "strictNullChecks": false,
     "module": "commonjs",
     "baseUrl": "/vagrant/zapisy/assets/"
   },
