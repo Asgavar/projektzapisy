@@ -1,15 +1,19 @@
 {% extends "enrollment/base.html" %}
 {% load compressed %}
 {% load cache %}
+{% load render_bundle from webpack_loader %}
+
+{% block main-subtitle %}Lista pracowników{% endblock %}
 {#{% block styles %}#}
 {#    {% compressed_css 'userslist' %}#}
 {#{% endblock %}#}
-
-{% block main-subtitle %}Lista pracowników{% endblock %}
-
 {#{% block js %}#}
 {#    {% compressed_js 'employeelist' %}#}
 {#{% endblock %}#}
+
+{% block rendered_bundles %}
+    {% render_bundle 'employee-list' %}
+{% endblock %}
 
 {% block bread %}
     <a href="{% url 'main-page' %}" class="breadcrumb-item">Strona główna</a>
@@ -18,16 +22,18 @@
 {% endblock %}
 {% block enrollment_menu_employees %} class="active"{% endblock %}
 
-{#{% block content %}#}
-{#    <div class="p-0">#}
-{#        <div class="alert alert-info alert-dismissible fade show">#}
-{#            <p>Wybierz pracownika z listy</p>#}
-{#            <button type="button" class="close" data-dismiss="alert" aria-label="Close">#}
-{#                <span aria-hidden="true">&times;</span>#}
-{#            </button>#}
-{#        </div>#}
-{#    </div>#}
-{#{% endblock %}#}
+{% block content %}
+    {#    <div class="p-0">#}
+    {#        <div class="alert alert-info alert-dismissible fade show">#}
+    {#            <p>Wybierz pracownika z listy</p>#}
+    {#            <button type="button" class="close" data-dismiss="alert" aria-label="Close">#}
+    {#                <span aria-hidden="true">&times;</span>#}
+    {#            </button>#}
+    {#        </div>#}
+    {#    </div>#}
+    <div id="employee-profile">
+    </div>
+{% endblock %}
 
 {% block sidebar %}
     {% cache 10000 employees_list char %}
@@ -81,101 +87,100 @@
                         <ul class="list-inline">
                             <li class="list-inline-item">
                                 <a href="{% url 'employees-char-list' 'A' %}"
-                                   class="{% if char == 'A' %} active{% endif %}">{{ item }}</a>
+                                   class="btn p-0{% if char == 'A' %} disabled{% endif %}">A</a>
                             </li>
                             <li class="list-inline-item">
                                 <a href="{% url 'employees-char-list' 'B' %}"
-                                   class="{% if char == 'B' %} active{% endif %}">B</a>
+                                   class="btn p-0{% if char == 'B' %} disabled{% endif %}">B</a>
                             </li>
                             <li class="list-inline-item">
                                 <a href="{% url 'employees-char-list' 'C' %}"
-                                   class="{% if char == 'C' %} active{% endif %}">C</a>
+                                   class="btn p-0{% if char == 'C' %} disabled{% endif %}">C</a>
                             </li>
                             <li class="list-inline-item">
                                 <a href="{% url 'employees-char-list' 'D' %}"
-                                   class="{% if char == 'D' %} active{% endif %}">D</a>
+                                   class="btn p-0{% if char == 'D' %} disabled{% endif %}">D</a>
                             </li>
                             <li class="list-inline-item">
                                 <a href="{% url 'employees-char-list' 'E' %}"
-                                   class="{% if char == 'E' %} active{% endif %}">E</a>
+                                   class="btn p-0{% if char == 'E' %} disabled{% endif %}">E</a>
                             </li>
                             <li class="list-inline-item">
                                 <a href="{% url 'employees-char-list' 'F' %}"
-                                   class="{% if char == 'F' %} active{% endif %}">F</a>
+                                   class="btn p-0{% if char == 'F' %} disabled{% endif %}">F</a>
                             </li>
                             <li class="list-inline-item">
                                 <a href="{% url 'employees-char-list' 'G' %}"
-                                   class="{% if char == 'G' %} active{% endif %}">G</a>
+                                   class="btn p-0{% if char == 'G' %} disabled{% endif %}">G</a>
                             </li>
                             <li class="list-inline-item">
                                 <a href="{% url 'employees-char-list' 'H' %}"
-                                   class="{% if char == 'H' %} active{% endif %}">H</a>
+                                   class="btn p-0{% if char == 'H' %} disabled{% endif %}">H</a>
                             </li>
                             <li class="list-inline-item">
                                 <a href="{% url 'employees-char-list' 'I' %}"
-                                   class="{% if char == 'I' %} active{% endif %}">I</a>
+                                   class="btn p-0{% if char == 'I' %} disabled{% endif %}">I</a>
                             </li>
                             <li class="list-inline-item">
                                 <a href="{% url 'employees-char-list' 'J' %}"
-                                   class="{% if char == 'J' %} active{% endif %}">J</a>
+                                   class="btn p-0{% if char == 'J' %} disabled{% endif %}">J</a>
                             </li>
                             <li class="list-inline-item">
                                 <a href="{% url 'employees-char-list' 'K' %}"
-                                   class="{% if char == 'K' %} active{% endif %}">K</a>
+                                   class="btn p-0{% if char == 'K' %} disabled{% endif %}">K</a>
                             </li>
                             <li class="list-inline-item">
                                 <a href="{% url 'employees-char-list' 'L' %}"
-                                   class="{% if char == 'L' %} active{% endif %}">L</a>
+                                   class="btn p-0{% if char == 'L' %} disabled{% endif %}">L</a>
                             </li>
                             <li class="list-inline-item">
                                 <a href="{% url 'employees-char-list' 'M' %}"
-                                   class="{% if char == 'M' %} active{% endif %}">M</a>
+                                   class="btn p-0{% if char == 'M' %} disabled{% endif %}">M</a>
                             </li>
                             <li class="list-inline-item">
                                 <a href="{% url 'employees-char-list' 'N' %}"
-                                   class="{% if char == 'N' %} active{% endif %}">N</a>
+                                   class="btn p-0{% if char == 'N' %} disabled{% endif %}">N</a>
                             </li>
                             <li class="list-inline-item">
                                 <a href="{% url 'employees-char-list' 'O' %}"
-                                   class="{% if char == 'O' %} active{% endif %}">O</a>
+                                   class="btn p-0{% if char == 'O' %} disabled{% endif %}">O</a>
                             </li>
                             <li class="list-inline-item">
                                 <a href="{% url 'employees-char-list' 'P' %}"
-                                   class="{% if char == 'P' %} active{% endif %}">P</a>
+                                   class="btn p-0{% if char == 'P' %} disabled{% endif %}">P</a>
                             </li>
                             <li class="list-inline-item">
                                 <a href="{% url 'employees-char-list' 'R' %}"
-                                   class="{% if char == 'R' %} active{% endif %}">R</a>
+                                   class="btn p-0{% if char == 'R' %} disabled{% endif %}">R</a>
                             </li>
                             <li class="list-inline-item">
                                 <a href="{% url 'employees-char-list' 'S' %}"
-                                   class="{% if char == 'S' %} active{% endif %}">S</a>
+                                   class="btn p-0{% if char == 'S' %} disabled{% endif %}">S</a>
                             </li>
                             <li class="list-inline-item">
                                 <a href="{% url 'employees-char-list' 'T' %}"
-                                   class="{% if char == 'T' %} active{% endif %}">T</a>
+                                   class="btn p-0{% if char == 'T' %} disabled{% endif %}">T</a>
                             </li>
                             <li class="list-inline-item">
                                 <a href="{% url 'employees-char-list' 'U' %}"
-                                   class="{% if char == 'U' %} active{% endif %}">U</a>
+                                   class="btn p-0{% if char == 'U' %} disabled{% endif %}">U</a>
                             </li>
                             <li class="list-inline-item">
                                 <a href="{% url 'employees-char-list' 'W' %}"
-                                   class="{% if char == 'W' %} active{% endif %}">W</a>
+                                   class="btn p-0{% if char == 'W' %} disabled{% endif %}">W</a>
                             </li>
                             <li class="list-inline-item">
                                 <a href="{% url 'employees-char-list' 'Y' %}"
-                                   class="{% if char == 'Y' %} active{% endif %}">Y</a>
+                                   class="btn p-0{% if char == 'Y' %} disabled{% endif %}">Y</a>
                             </li>
                             <li class="list-inline-item">
                                 <a href="{% url 'employees-char-list' 'Z' %}"
-                                   class="{% if char == 'Z' %} active{% endif %}">Z</a>
+                                   class="btn p-0{% if char == 'Z' %} disabled{% endif %}">Z</a>
                             </li>
                             <li class="list-inline-item">
                                 <a href="{% url 'employees-char-list' 'All' %}"
-                                   class="{% if char == 'All' %} active{% endif %}">Wszyscy</a>
+                                   class="btn p-0{% if char == 'All' %} disabled{% endif %}">Wszyscy</a>
                             </li>
-
                         </ul>
                     </div>
                 </div>

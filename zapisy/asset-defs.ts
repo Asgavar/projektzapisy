@@ -34,6 +34,15 @@ module.exports = {
             "legacy/css/enrollment/schedule-prototype.css",
             "legacy/css/common/schedule.css",
             "legacy/css/common/schedule-courses.css"
+        ],
+        "employee-list": [
+            'legacy/js/common/listFilter.js',
+            // 'legacy/js/enrollment/records/course.js',
+            // 'legacy/js/enrollment/records/course-group.js',
+            // 'legacy/js/enrollment/records/schedule-course-term.js',
+            // 'legacy/js/enrollment/views/user-schedule.js',
+            'legacy/js/enrollment/users/templates/employee.js',
+            'legacy/js/enrollment/users/employees-list.js',
         ]
     }
 };
