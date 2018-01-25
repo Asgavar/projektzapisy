@@ -14,27 +14,62 @@
     <meta name="description"
           content="System obsługi cyklu dydaktycznego Instytut Informatyki Uniwersytetu Wrocławskiego">
     <meta name="author" content="KSI i Studenci Instytutu Informatyki Uniwersytetu Wrocławskiego">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-    <!-- Le HTML5 shim, for IE6-8 support of HTML elements -->
-    <!--[if lt IE 9]>
-      <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
-    <![endif]-->
     <!-- Le fav and touch icons -->
     <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
     <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
     <link rel="apple-touch-icon" sizes="72x72" href="{% static 'images/apple-touch-icon-72x72.png' %}">
     <link rel="apple-touch-icon" sizes="114x114" href="{% static 'images/apple-touch-icon-114x114.png' %}">
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-109984921-1"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+        gtag('config', 'UA-109984921-1');
+    </script>
     <!-- Le styles -->
-    <script type="text/javascript" src="{% static "vendor.js" %}"></script>
-    {% render_bundle "main" %}
-    {% block rendered_bundles %}
-    {% endblock %}
-    {% block styles %}
-        {#        {% compressed_css 'main' %}#}
-    {% endblock %}
-    <script type="text/javascript">
-        var user_is_authenticated = {% if request.user.is_authenticated %}true{% else %}false{% endif %},
-            user_is_student = {% if request.user.student %}true{% else %}false{% endif %};
+    <script type="text/javascript" src="{% static " vendor.js
+    " %}"></script>
+    {%
+        render_bundle
+        "main" %
+    }
+    {%
+        block
+        rendered_bundles %
+    }
+    {%
+        endblock %
+    }
+    {%
+        block
+        styles %
+    }
+    {#        {%
+        compressed_css
+        'main' %
+    }#
+    }
+    {%
+        endblock %
+    }
+    <
+    script
+    type = "text/javascript" >
+    const user_is_student = { %
+    if request.user.student %}
+    true
+    {% else %
+    }
+    false
+    {%
+        endif %
+    }
+    ;
     </script>
     {% block js %}{% endblock %}
     {% block rss %}{% endblock %}
@@ -62,21 +97,43 @@
             })
         });
     </script>
-    <script src="{% static "js/common/utils.js" %}"></script>
-    <script src="{% static "js/common/base.js" %}"></script>
+    <script src="{% static " js
+    /common/utils.js" %}"></script>
+    <
+    script
+    src = "{% static "
+    js / common / base.js
+    " %}" ></script>
 </head>
 <body>
-{#<form action="/" method="post" style="display: none">#}
-{#    <p><input type="hidden" name="data-invalidated" value="no"/></p>#}
-{#</form>#}
-{#<script type="text/javascript">#}
-{#    jQuery.dataInvalidate_check();#}
-{#    $(document).ready(function () {#}
-{#        $('.dropdown-menu input,label').click(function (e) {#}
-{#            e.stopPropagation(); //This will prevent the event from bubbling up and close the dropdown when you type/click on text boxes.#}
-{#        });#}
-{#    });#}
-{#</script>#}
+{#
+<form action="/" method="post" style="display: none">#}
+    {# <p><input type="hidden" name="data-invalidated" value="no"/></p>#}
+    {#
+</form>
+#}
+{#
+<script type="text/javascript">#
+}
+{#    jQuery.dataInvalidate_check();#
+}
+{#    $(document).ready(function () {#
+}
+    {#        $('.dropdown-menu input,label').click(function (e) {#
+    }
+        {#            e.stopPropagation(); //This will prevent the event from bubbling up and close the dropdown when you type/click on text boxes.#}
+            {#
+            }
+        )
+        ;#
+    }
+    {#
+    }
+)
+    ;#
+}
+{#</script>
+#}
 
 <div class="container-fluid p-0">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
@@ -86,131 +143,139 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
-                <li{% block enrollment_active %}{% endblock %} class="nav-item">
-                    <a href="{% url 'enrollment-main' %}" class="nav-link">System Zapisów</a>
+                <li
+                {% block enrollment_active %}{% endblock %} class="nav-item">
+                <a href="{% url 'enrollment-main' %}" class="nav-link">System Zapisów</a>
                 </li>
-                <li{% block grade_active %}{% endblock %} class="nav-item">
-                    <a href="{% url 'grade-main' %}" class="nav-link">Ocena Zajęć</a>
+                <li
+                {% block grade_active %}{% endblock %} class="nav-item">
+                <a href="{% url 'grade-main' %}" class="nav-link">Ocena Zajęć</a>
                 </li>
-                <li{% block offer_active %}{% endblock %} class="nav-item">
-                    <a href="{% url 'offer-main' %}" class="nav-link">Oferta</a>
+                <li
+                {% block offer_active %}{% endblock %} class="nav-item">
+                <a href="{% url 'offer-main' %}" class="nav-link">Oferta</a>
                 </li>
                 {% if perms.courses.view_stats %}
-                    <li{% block statistics_active %}{% endblock %} class="nav-item">
-                        <a href="{% url 'statistics:main' %}" class="nav-link">Statystyki</a>
-                    </li>
+                <li
+                {% block statistics_active %}{% endblock %} class="nav-item">
+                <a href="{% url 'statistics:main' %}" class="nav-link">Statystyki</a>
+                </li>
                 {% endif %}
-                <li{% block events_active %}{% endblock %}>
-                    <a href="{% url 'events:classrooms' %}" class="nav-link">Sale</a>
+                <li
+                {% block events_active %}{% endblock %}>
+                <a href="{% url 'events:classrooms' %}" class="nav-link">Sale</a>
                 </li>
             </ul>
             {% if user.is_authenticated %}
-                <div class="navbar-nav ml-auto">
+            <div class="navbar-nav ml-auto">
                 <span class="navbar-text">
                     <strong>
                         {{ user.get_full_name }}
                     </strong>
                 </span>
-                    <ul class="navbar-nav ml-auto">
-                        <li class="nav-item">
-                            <a href="{% url 'my-profile' %}" class="nav-link">Moje konto</a>
-                        </li>
-                        {% if user.is_staff %}
-                            <li class="nav-item">
-                                <a href="/fereol_admin/" class="nav-link">Admin</a>
-                            </li>
+                <ul class="navbar-nav ml-auto">
+                    <li class="nav-item">
+                        <a href="{% url 'my-profile' %}" class="nav-link">Moje konto</a>
+                    </li>
+                    {% if user.is_staff %}
+                    <li class="nav-item">
+                        <a href="/fereol_admin/" class="nav-link">Admin</a>
+                    </li>
+                    {% endif %}
+                    <li class="nav-item">
+                        {% if user.profile.is_student and user.student.get_number_of_news > 0 %}
+                        <a href="{% url 'news-all' %}"
+                           class="unread nav-link">Aktualności ({{ user.student.get_number_of_news }})</a>
+                        {% elif user.profile.is_employee and user.employee.get_number_of_news > 0 %}
+                        <a href="{% url 'news-all' %}"
+                           class="unread nav-link">Aktualności ({{ user.employee.get_number_of_news }})</a>
+                        {% else %}
+                        <a href="{% url 'news-all' %}" class="nav-link">Aktualności</a>
                         {% endif %}
-                        <li class="nav-item">
-                            {% if user.profile.is_student and user.student.get_number_of_news > 0 %}
-                                <a href="{% url 'news-all' %}"
-                                   class="unread nav-link">Aktualności ({{ user.student.get_number_of_news }})</a>
-                            {% elif user.profile.is_employee and user.employee.get_number_of_news > 0 %}
-                                <a href="{% url 'news-all' %}"
-                                   class="unread nav-link">Aktualności ({{ user.employee.get_number_of_news }})</a>
-                            {% else %}
-                                <a href="{% url 'news-all' %}" class="nav-link">Aktualności</a>
-                            {% endif %}
-                        </li>
-                        <li class="nav-item">
-                            <a href="{% url 'help' %}" class="nav-link">Pomoc</a>
-                        </li>
-                        <li class="nav-item">
-                            <a href="{% url 'cas_ng_logout' %}" class="nav-link">Wyloguj</a>
-                        </li>
-                    </ul>
-                </div>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'help' %}" class="nav-link">Pomoc</a>
+                    </li>
+                    <li class="nav-item">
+                        <a href="{% url 'cas_ng_logout' %}" class="nav-link">Wyloguj</a>
+                    </li>
+                </ul>
+            </div>
             {% else %}
-                <ul class="navbar-nav mr-auto">
-                    <li class="nav-item dropdown" id="login-dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
-                           data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                            <b>Zaloguj się</b><span class="caret"></span>
-                        </a>
-                        {# FIXME: https://getbootstrap.com/docs/4.0/components/dropdowns/#menu-forms #}
-                        <div id="login-dp" class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <div class="col-12 dropdown-item">
-                                <div class="row">
-                                    <div class="social-buttons">
-                                        <a href="{% url 'cas_ng_login' %}" class="btn" id="btn-usos">
-                                            <img src="{% static 'images/usos-login-logo.png' %}"
-                                                 alt="Uniwersytet Wrocławski">
-                                            <div class="clearfix"></div>
-                                            Zaloguj się przez USOS
-                                        </a>
-                                    </div>
-                                    <button class="btn primary" id="btn-no-usos">
-                                        lub użyj konta Systemu Zapisów
-                                    </button>
-                                    <div id="login-without-usos">
-                                        <form action="{% url 'apps.users.views.login_plus_remember_me' %}"
-                                              method="POST" class="form" role="form">
-                                            {% csrf_token %}
-                                            {% if request.path == '/' %}
-                                                <input type="hidden" name="next"
-                                                       value="{% url 'schedule-own' %}"/>
-                                            {% else %}
-                                                <input type="hidden" name="next" value="{{ request.path }}"/>
-                                            {% endif %}
-                                            <div class="form-group">
-                                                <input tabindex="1" type="text" id="id_login" name="username"
-                                                       placeholder="Użytkownik">
-                                            </div>
-                                            <div class="form-group">
-                                                <input tabindex="2" type="password" id="id_password"
-                                                       name="password" placeholder="Hasło">
-                                            </div>
-                                            <div class="form-group">
-                                                <button type="submit" tabindex="4"
-                                                        class="btn btn-light btn-block">Zaloguj &raquo;
-                                                </button>
-                                            </div>
-                                            <div class="form-group">
-                                                <label>
-                                                    <input type="checkbox" tabindex="3" value="true"
-                                                           id="xlInput3" name="remember_me">
-                                                    Pamiętaj mnie
-                                                </label>
-                                            </div>
-                                        </form>
-                                    </div>
+            <ul class="navbar-nav mr-auto">
+                <li class="nav-item dropdown" id="login-dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                       data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                        <b>Zaloguj się</b><span class="caret"></span>
+                    </a>
+                    {# FIXME: https://getbootstrap.com/docs/4.0/components/dropdowns/#menu-forms #}
+                    <div id="login-dp" class="dropdown-menu" aria-labelledby="navbarDropdown">
+                        <div class="col-12 dropdown-item">
+                            <div class="row">
+                                <div class="social-buttons">
+                                    <a href="{% url 'cas_ng_login' %}" class="btn" id="btn-usos">
+                                        <img src="{% static 'images/usos-login-logo.png' %}"
+                                             alt="Uniwersytet Wrocławski">
+                                        <div class="clearfix"></div>
+                                        Zaloguj się przez USOS
+                                    </a>
+                                </div>
+                                <button class="btn primary" id="btn-no-usos">
+                                    lub użyj konta Systemu Zapisów
+                                </button>
+                                <div id="login-without-usos">
+                                    <form action="{% url 'apps.users.views.login_plus_remember_me' %}"
+                                          method="POST" class="form" role="form">
+                                        {% csrf_token %}
+                                        {% if request.path == '/' %}
+                                        <input type="hidden" name="next"
+                                               value="{% url 'schedule-own' %}"/>
+                                        {% else %}
+                                        <input type="hidden" name="next" value="{{ request.path }}"/>
+                                        {% endif %}
+                                        <div class="form-group">
+                                            <input tabindex="1" type="text" id="id_login" name="username"
+                                                   placeholder="Użytkownik">
+                                        </div>
+                                        <div class="form-group">
+                                            <input tabindex="2" type="password" id="id_password"
+                                                   name="password" placeholder="Hasło">
+                                        </div>
+                                        <div class="form-group">
+                                            <button type="submit" tabindex="4"
+                                                    class="btn btn-light btn-block">Zaloguj &raquo;
+                                            </button>
+                                        </div>
+                                        <div class="form-group">
+                                            <label>
+                                                <input type="checkbox" tabindex="3" value="true"
+                                                       id="xlInput3" name="remember_me">
+                                                Pamiętaj mnie
+                                            </label>
+                                        </div>
+                                    </form>
                                 </div>
                             </div>
                         </div>
-                    </li>
-                    <li class="nav-item">
-                        <div class="col-2"></div> <!-- this will keep some space on the right. -->
-                    </li>
-                </ul>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <div class="col-2"></div> <!-- this will keep some space on the right. -->
+                </li>
+            </ul>
             {% endif %}
         </div>
     </nav>
-    {#    <div class="top">#}
-    <div class="logo header">
-        <a href="/">
-            <img src="{% static 'images/logotyp.jpg' %}" alt="Uniwersytet Wrocławski">
-        </a>
+    {#
+    <div class="top">#}
+        <div class="logo header">
+            <a href="/">
+                <img src="{% static 'images/logotyp.jpg' %}" alt="Uniwersytet Wrocławski">
+            </a>
+        </div>
+        {#
     </div>
-    {#    </div>#}
+    #}
 </div>
 <div class="container p-0">
     <ul class="nav nav-tabs">
@@ -218,31 +283,31 @@
         {% endblock %}
     </ul>
     {% if request.path != '/' %}
-        <div class="row p-2">
-            <nav aria-label="breadcrumb" role="navigation">
-                <ol class="breadcrumb">
-                    {% block bread %}
-                    {% endblock %}
-                </ol>
-            </nav>
-        </div>
+    <div class="row p-2">
+        <nav aria-label="breadcrumb" role="navigation">
+            <ol class="breadcrumb">
+                {% block bread %}
+                {% endblock %}
+            </ol>
+        </nav>
+    </div>
     {% endif %}
     <div class="row">
         {% block messages %}
-            {% for message in messages %}
-                <div class="alert alert-info {{ message.tags }}">
-                    {{ message }}
-                </div>
-            {% endfor %}
+        {% for message in messages %}
+        <div class="alert alert-info {{ message.tags }}">
+            {{ message }}
+        </div>
+        {% endfor %}
         {% endblock %}
     </div>
     <div>
         {% block topContent %}{% endblock %}
         {% block center %}
-            {% block sidebar %}
-                {% block content %}
-                {% endblock %}
-            {% endblock %}
+        {% block sidebar %}
+        {% block content %}
+        {% endblock %}
+        {% endblock %}
         {% endblock %}
 
     </div>
@@ -253,31 +318,27 @@
                 {# <a href="{% url 'on-mobile' %}" class="go-mobile">Przejdź do wersji mobilnej</a> #}
                 &copy; {% now "Y" %}<a href="http://www.ii.uni.wroc.pl/">Instytut Informatyki UWr</a>
                 {% if user.is_authenticated %} | Nieprawidłowe dane należy zgłaszać na adres
-                    <a href="mailto:zapisy@cs.uni.wroc.pl">zapisy@cs.uni.wroc.pl</a>
+                <a href="mailto:zapisy@cs.uni.wroc.pl">zapisy@cs.uni.wroc.pl</a>
                 {% endif %}
                 | Błędy i uwagi:
                 <a href="https://tracker-zapisy.ii.uni.wroc.pl/">[link]</a>Wygenerowano: {% now "H:i:s" %}
                 {% if "DEBUG"|settings_value == True or "II_ZAPISY_STAGING"|osenv_value == "True" %}
-                    |<strong>Django {% django_version %}</strong>
+                |<strong>Django {% django_version %}</strong>
                 {% endif %}
             </p>
         </footer>
     </div>
 </div>
-<!-- /container -->
-<script type="text/javascript">
-    let _gaq = _gaq || [];
-    _gaq.push(['_setAccount', 'UA-32366226-1']);
-    _gaq.push(['_trackPageview']);
-
-    (function () {
-        let ga = document.createElement('script');
-        ga.type = 'text/javascript';
-        ga.async = true;
-        ga.src = ('https:' === document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-        let s = document.getElementsByTagName('script')[0];
-        s.parentNode.insertBefore(ga, s);
-    })();
-</script>
+<footer>
+    <p>
+        {# <a href="{% url 'on-mobile' %}" class="go-mobile">Przejdź do wersji mobilnej</a> #}
+        &copy; {% now "Y" %} <a href="http://www.ii.uni.wroc.pl/">Instytut Informatyki UWr</a>
+        {% if user.is_authenticated %} | Nieprawidłowe dane należy zgłaszać na adres <a
+            href="mailto:zapisy@cs.uni.wroc.pl">zapisy@cs.uni.wroc.pl</a>{% endif %}
+        | Błędy i uwagi: <a href="https://tracker-zapisy.ii.uni.wroc.pl/">[link]</a> Wygenerowano: {% now "H:i:s" %}
+        {% if "DEBUG"|settings_value == True or "II_ZAPISY_STAGING"|osenv_value == "True" %}| <strong>Django {%
+        django_version %}</strong>{% endif %}
+    </p>
+</footer>
 </body>
 </html>

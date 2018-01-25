@@ -3,32 +3,34 @@
 import logging
 import json
 import datetime
+import unidecode
+import re
 
 from django.contrib import auth, messages
 from django.contrib.auth.models import User
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.decorators import permission_required
 from django.contrib.auth.views import login
-from django.shortcuts import render_to_response, redirect
-from django.template import RequestContext
+from django.shortcuts import render, redirect
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, HttpResponseRedirect
 from django.template.response import TemplateResponse
 from django.utils.translation import check_for_language, LANGUAGE_SESSION_KEY
 from django.conf import settings
 
-import vobject
+from vobject import iCalendar
 
+from apps.enrollment.records.utils import prepare_schedule_courses, prepare_schedule_data
 from apps.grade.ticket_create.models.student_graded import StudentGraded
 from apps.offer.vote.models.single_vote import SingleVote
 from apps.enrollment.courses.exceptions import MoreThanOneCurrentSemesterException
 from apps.users.utils import prepare_ajax_students_list, prepare_ajax_employee_list
-from apps.users.models import Employee, Student, BaseUser
+from apps.users.models import Employee, Student, BaseUser, UserProfile, OpeningTimesView
 from apps.enrollment.courses.models import Semester, Group
 from apps.enrollment.records.models import Record
 from apps.enrollment.utils import mailto
 from apps.users.forms import EmailChangeForm, BankAccountChangeForm, ConsultationsChangeForm, EmailToAllStudentsForm
-from apps.enrollment.records.utils import *
+from apps.users.exceptions import InvalidUserException
 from apps.notifications.forms import NotificationFormset
 from apps.notifications.models import NotificationPreferences
 from libs.ajax_messages import AjaxSuccessMessage
@@ -40,6 +42,7 @@ GTC = {'1': 'wy', '2': 'cw', '3': 'pr',
        '4': 'cw', '5': 'cw+prac',
        '6': 'sem', '7': 'lek', '8': 'WF',
        '9': 'rep', '10': 'proj'}
+BREAK_DURATION = datetime.timedelta(minutes=15)
 
 
 @login_required
@@ -65,22 +68,28 @@ def student_profile(request, user_id):
         })
 
         if request.is_ajax():
-            return render_to_response('users/student_profile_contents.html', data, context_instance=RequestContext(request))
+            return render(request, 'users/student_profile_contents.html', data)
         else:
             students = Student.get_list()
             enrolled_students = Record.recorded_students(students)
             data['students'] = enrolled_students
             data['char'] = "All"
-            return render_to_response('users/student_profile.html', data, context_instance=RequestContext(request))
+            return render(request, 'users/student_profile.html', data)
 
     except Student.DoesNotExist:
-        logger.error('Function student_profile(id = %d) throws NonStudentException while acessing to non existing student.' % int(user_id) )
+        logger.error(
+            'Function student_profile(id = {}) throws NonStudentException while acessing to non existing student.'
+            .format(str(user_id))
+        )
         messages.error(request, "Nie ma takiego studenta.")
-        return render_to_response('common/error.html', context_instance=RequestContext(request))
+        return render(request, 'common/error.html')
     except User.DoesNotExist:
-        logger.error('Function student_profile(id = %d) throws User.DoesNotExist while acessing to non existing user.' % int(user_id) )
+        logger.error(
+            'Function student_profile(id = {}) throws User.DoesNotExist while acessing to non existing user.'
+            .format(str(user_id))
+        )
         messages.error(request, "Nie ma takiego użytkownika.")
-        return render_to_response('common/error.html', context_instance=RequestContext(request))
+        return render(request, 'common/error.html')
 
 def employee_profile(request, user_id):
     """employee profile"""
@@ -94,11 +103,11 @@ def employee_profile(request, user_id):
     except Employee.DoesNotExist:
         logger.error('Function employee_profile(user_id = %s) throws NonEmployeeException while acessing to non existing employee.' % str(user_id) )
         messages.error(request, "Nie ma takiego pracownika.")
-        return render_to_response('common/error.html', context_instance=RequestContext(request))
+        return render(request, 'common/error.html')
     except User.DoesNotExist:
         logger.error('Function employee_profile(id = %s) throws User.DoesNotExist while acessing to non existing user.' % str(user_id) )
         messages.error(request, "Nie ma takiego użytkownika.")
-        return render_to_response('common/error.html', context_instance=RequestContext(request))
+        return render(request, 'common/error.html')
 
     try:
         courses = prepare_schedule_courses(request, for_employee=employee)
@@ -109,8 +118,7 @@ def employee_profile(request, user_id):
         })
 
         if request.is_ajax():
-            return render_to_response('users/employee_profile_contents.html',
-                data, context_instance=RequestContext(request))
+            return render(request, 'users/employee_profile_contents.html', data)
         else:
             semester = Semester.get_current_semester()
             employees = Employee.get_list()
@@ -123,14 +131,14 @@ def employee_profile(request, user_id):
             data['employees'] = active_employees
             data['char'] = 'All'
 
-            return render_to_response('users/employee_profile.html', data, context_instance=RequestContext(request))
+            return render(request, 'users/employee_profile.html', data)
 
 
     except MoreThanOneCurrentSemesterException:
         data = {'employee' : employee}
         logger.error('Function employee_profile throws MoreThanOneCurrentSemesterException.' )
         messages.error(request, "Przepraszamy, system jest obecnie nieaktywny z powodu niewłaściwej konfiguracji semestrów. Prosimy spróbować później.")
-        return render_to_response('users/employee_profile.html', data, context_instance=RequestContext(request))
+        return render(request, 'users/employee_profile.html', data)
 
 @login_required
 def set_language(request):
@@ -144,12 +152,8 @@ def set_language(request):
     redirect to the page in the request (the 'next' parameter) without changing
     any state.
     """
-    next = request.REQUEST.get('next', None)
-    if not next:
-        next = request.META.get('HTTP_REFERER', None)
-    if not next:
-        next = '/'
-    response = HttpResponseRedirect(next)
+    redirect_url = request.GET.get('next', request.META.get('HTTP_REFERER', '/'))
+    response = HttpResponseRedirect(redirect_url)
     if request.method == 'POST':
         lang_code = request.POST.get('language', None)
         if lang_code and check_for_language(lang_code):
@@ -176,7 +180,7 @@ def email_change(request):
 
             if user and user <> request.user:
                 messages.error(request, "Podany adres jest już przypisany do innego użytkownika!")
-                return render_to_response('users/email_change_form.html', {'form':form}, context_instance=RequestContext(request))
+                return render(request, 'users/email_change_form.html', {'form':form})
 
             form.save()
             logger.info('User (%s) changed email' % request.user.get_full_name())
@@ -184,7 +188,7 @@ def email_change(request):
             return HttpResponseRedirect(reverse('my-profile'))
     else:
         form = EmailChangeForm({'email' : request.user.email})
-    return render_to_response('users/email_change_form.html', {'form':form}, context_instance=RequestContext(request))
+    return render(request, 'users/email_change_form.html', {'form':form})
 
 @login_required
 def bank_account_change(request):
@@ -201,7 +205,7 @@ def bank_account_change(request):
     else:
         zamawiany = Student.get_zamawiany(request.user.id)
         form = BankAccountChangeForm({'bank_account': zamawiany.bank_account})
-    return render_to_response('users/bank_account_change_form.html', {'form':form}, context_instance=RequestContext(request))
+    return render(request, 'users/bank_account_change_form.html', {'form':form})
 
 @login_required
 def consultations_change(request):
@@ -218,11 +222,10 @@ def consultations_change(request):
                 return HttpResponseRedirect(reverse('my-profile'))
         else:
             form = ConsultationsChangeForm({'consultations': employee.consultations, 'homepage': employee.homepage, 'room': employee.room})
-        return render_to_response('users/consultations_change_form.html', {'form':form}, context_instance=RequestContext(request))
+        return render(request, 'users/consultations_change_form.html', {'form':form})
     except Employee.DoesNotExist:
         messages.error(request, 'Nie jesteś pracownikiem.')
-        return render_to_response('common/error.html',
-                context_instance=RequestContext(request))
+        return render(request, 'common/error.html')
 
 @login_required
 def password_change_done(request):
@@ -293,7 +296,7 @@ def employees_list(request, begin = 'All', query=None):
             "query": query
             }
 
-    return render_to_response('users/employees_list.html', data, context_instance=RequestContext(request))
+    return render(request, 'users/employees_list.html', data)
 
 def consultations_list(request, begin='A'):
 
@@ -309,7 +312,7 @@ def consultations_list(request, begin='A'):
             "employees" : employees,
             "char": begin
             }
-        return render_to_response('users/consultations_list.html', data, context_instance=RequestContext(request))
+        return render(request, 'users/consultations_list.html', data)
 
 
 @login_required
@@ -328,7 +331,7 @@ def students_list(request, begin = 'All', query=None):
             'mailto_group': mailto(request.user, students),
             'mailto_group_bcc': mailto(request.user, students, True)
         }
-        return render_to_response('users/students_list.html', data, context_instance=RequestContext(request))
+        return render(request, 'users/students_list.html', data)
 
 @login_required
 def logout(request):
@@ -358,32 +361,32 @@ def login_plus_remember_me(request, *args, **kwargs):
             request.session.set_expiry(0)  # Expires on browser closing.
     return login(request, *args, **kwargs)
 
+def get_ical_filename(user, semester):
+    name_with_semester = u"{}_{}".format(user.get_full_name(), semester.get_short_name())
+    name_ascii_only = unidecode.unidecode(name_with_semester)
+    path_safe_name = re.sub(r"[\s+/]", "_", name_ascii_only)
+    return "fereol_schedule_{}.ical".format(path_safe_name.lower())
+
 
 @login_required
 def create_ical_file(request):
     user = request.user
-    user_full_name = user.get_full_name()
     semester = Semester.get_default_semester()
 
-    cal = vobject.iCalendar()
+    cal = iCalendar()
     cal.add('x-wr-timezone').value = 'Europe/Warsaw'
     cal.add('version').value = '2.0'
     cal.add('prodid').value = 'Fereol'
     cal.add('calscale').value = 'GREGORIAN'
-    cal.add('calname').value = user_full_name + ' - schedule'
+    cal.add('calname').value = u"{} - schedule".format(user.get_full_name())
     cal.add('method').value = 'PUBLISH'
 
-    groups_employee = []
-    groups_student = []
-    try:
-        groups_student = filter(lambda x: x.course.semester==semester, Record.get_groups_for_student(user))
-    except Student.DoesNotExist:
-        pass
-    try:
-        groups_employee = map(lambda x: x, Group.objects.filter(course__semester = semester, teacher = user.employee))
-    except Employee.DoesNotExist:
-        pass
-    groups = groups_employee + groups_student
+    if BaseUser.is_student(user):
+        groups = [g for g in Record.get_groups_for_student(user) if g.course.semester == semester]
+    elif BaseUser.is_employee(user):
+        groups = list(Group.objects.filter(course__semester = semester, teacher = user.employee))
+    else:
+        raise InvalidUserException()
     for group in groups:
         course_name = group.course.name
         group_type = group.human_readable_type().decode('utf-8').lower()
@@ -393,11 +396,12 @@ def create_ical_file(request):
             continue
         for term in terms:
             start_datetime = datetime.datetime.combine(term.day, term.start)
+            start_datetime += BREAK_DURATION
             end_datetime = datetime.datetime.combine(term.day, term.end)
             event = cal.add('vevent')
-            event.add('summary').value = '%s - %s' % (course_name, group_type)
+            event.add('summary').value = u"{} - {}".format(course_name, group_type)
             if term.room:
-                event.add('location').value = 'sala '+term.room.number \
+                event.add('location').value = 'sala '+ term.room.number \
                     + u', Instytut Informatyki Uniwersytetu Wrocławskiego'
 
             event.add('description').value = u'prowadzący: ' \
@@ -407,7 +411,8 @@ def create_ical_file(request):
 
     cal_str = cal.serialize()
     response = HttpResponse(cal_str, content_type='application/calendar')
-    response['Content-Disposition'] = 'attachment; filename=schedule.ical'
+    ical_file_name = get_ical_filename(user, semester)
+    response['Content-Disposition'] = "attachment; filename={}".format(ical_file_name)
     return response
 
 
@@ -440,4 +445,4 @@ def email_students(request):
     else:
         form = EmailToAllStudentsForm(initial={'sender': 'zapisy@cs.uni.wroc.pl'})
         form.fields['sender'].widget.attrs['readonly'] = True
-    return render_to_response('users/email_students.html', {'form':form, 'students_mails': studentsmails}, context_instance=RequestContext(request))
+    return render(request, 'users/email_students.html', {'form':form, 'students_mails': studentsmails})

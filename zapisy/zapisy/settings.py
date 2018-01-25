@@ -7,7 +7,6 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 DEBUG = False
 RELEASE = False
-TEMPLATE_DEBUG = False
 
 # With DEBUG = False Django will refuse to serve requests to hosts different
 # than this one.
@@ -126,21 +125,29 @@ USE_ETAGS = True
 # Make this unique, and don't share it with anybody.
 SECRET_KEY = '6$u2ggeh-!^hxep3s4h$3z&2-+3c@sy7-sy8349+l-1m)9r0fn'
 
-# List of callables that know how to import templates from various sources.
-
-TEMPLATE_LOADERS = (
-    ('django.template.loaders.cached.Loader', (
-        'django.template.loaders.filesystem.Loader',
-        'django.template.loaders.app_directories.Loader',
-        'django.template.loaders.eggs.Loader',
-    )),
-)
-
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.contrib.messages.context_processors.messages',
-    'django.contrib.auth.context_processors.auth',
-    "django.core.context_processors.request",
-)
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [
+            os.path.join(BASE_DIR, 'templates'),
+        ],
+        'OPTIONS': {
+            "debug": False,
+            'context_processors': [
+                'django.contrib.messages.context_processors.messages',
+                'django.contrib.auth.context_processors.auth',
+                'django.template.context_processors.request',
+            ],
+            'loaders': [
+                ('django.template.loaders.cached.Loader', [
+                    'django.template.loaders.filesystem.Loader',
+                    'django.template.loaders.app_directories.Loader',
+                    'django.template.loaders.eggs.Loader',
+                ]),
+            ]
+        },
+    },
+]
 
 
 # Be careful with the order! I'm aware that SessionMiddleware
@@ -164,13 +171,11 @@ MIDDLEWARE_CLASSES = (
 
 ROOT_URLCONF = 'zapisy.urls'
 
-TEMPLATE_DIRS = (
-    os.path.join(BASE_DIR, 'templates'),
-)
-
 INSTALLED_APPS = (
     'modeltranslation', # needs to be before django.contrib.admin
-    
+
+    'rest_framework',
+
     # needed from 1.7 onwards to prevent Django from trying to apply
     # migrations when testing (slows down DB setup _a lot_)
     'test_without_migrations',
@@ -207,7 +212,7 @@ INSTALLED_APPS = (
     'django_extensions',
     'django_filters',
     'autoslug',
-    'endless_pagination',
+    'el_pagination',
     'apps.notifications',
     'django_cas_ng',
 
@@ -321,6 +326,19 @@ STATICFILES_FINDERS = (
   'pipeline.finders.PipelineFinder',
   'django.contrib.staticfiles.finders.FileSystemFinder',
 )
+
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
+}
+
+LOCAL_SETTINGS = os.path.join(BASE_DIR, 'zapisy', 'settings_local.py')
+if os.path.isfile(LOCAL_SETTINGS):
+    print("Running local settings file {0}".format(LOCAL_SETTINGS))
+    execfile(LOCAL_SETTINGS)
 
 WEBPACK_LOADER = {
     'DEFAULT': {
