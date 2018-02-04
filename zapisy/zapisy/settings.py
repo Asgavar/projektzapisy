@@ -150,10 +150,10 @@ TEMPLATES = [
 ]
 
 
-# Be careful with the order! I'm aware that SessionMiddleware
+# Be careful with the order! SessionMiddleware
 # and Authentication both must come before LocalePref which
 # must precede LocaleMiddleware, and Common must go afterwards.
-MIDDLEWARE_CLASSES = (
+MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'middleware.localePrefMiddleware.LocalePrefMiddleware',
@@ -161,13 +161,10 @@ MIDDLEWARE_CLASSES = (
     'django.middleware.common.CommonMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    #'debug_toolbar.middleware.DebugToolbarMiddleware',
-    #'middleware.mobile_detector.mobileDetectionMiddleware',
-    #'middleware.mobileMiddleware.SubdomainMiddleware',
     'middleware.error_handling.ErrorHandlerMiddleware',
     'pipeline.middleware.MinifyHTMLMiddleware',
     'rollbar.contrib.django.middleware.RollbarNotifierMiddleware',
-)
+]
 
 ROOT_URLCONF = 'zapisy.urls'
 
@@ -175,7 +172,7 @@ INSTALLED_APPS = (
     'modeltranslation', # needs to be before django.contrib.admin
 
     'rest_framework',
-
+    
     # needed from 1.7 onwards to prevent Django from trying to apply
     # migrations when testing (slows down DB setup _a lot_)
     'test_without_migrations',
@@ -284,9 +281,6 @@ CACHES = {
         'BACKEND': 'django.core.cache.backends.memcached.MemcachedCache',
         'LOCATION': '127.0.0.1:11211',
         'TIMEOUT': 86400,
-        'OPTIONS': {
-            'MAX_ENTRIES': 1000
-        }
     }
 }
         
@@ -325,15 +319,8 @@ PIPELINE_VERSIONING = 'pipeline.versioning.hash.MD5Versioning'
 STATICFILES_FINDERS = (
   'pipeline.finders.PipelineFinder',
   'django.contrib.staticfiles.finders.FileSystemFinder',
+  'django.contrib.staticfiles.finders.AppDirectoriesFinder',
 )
-
-REST_FRAMEWORK = {
-    # Use Django's standard `django.contrib.auth` permissions,
-    # or allow read-only access for unauthenticated users.
-    'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
-    ]
-}
 
 LOCAL_SETTINGS = os.path.join(BASE_DIR, 'zapisy', 'settings_local.py')
 if os.path.isfile(LOCAL_SETTINGS):
@@ -345,10 +332,17 @@ WEBPACK_LOADER = {
         'CACHE': not DEBUG,
 		# This setting is badly named, it's the bundle dir relative
 		# to whatever you have in your STATICFILES_DIRS
-        'BUNDLE_DIR_NAME': '', # must end with slash
-        'STATS_FILE': os.path.join(BASE_DIR, 'webpack-stats.json'),
+        'BUNDLE_DIR_NAME': '',
+        'STATS_FILE': os.path.join(BASE_DIR, "webpack_resources", 'webpack-stats.json'),
         'POLL_INTERVAL': 0.1,
         'TIMEOUT': None,
         'IGNORE': ['.+\.hot-update.js', '.+\.map']
     }
+}
+REST_FRAMEWORK = {
+    # Use Django's standard `django.contrib.auth` permissions,
+    # or allow read-only access for unauthenticated users.
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+    ]
 }

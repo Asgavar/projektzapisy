@@ -11,20 +11,21 @@ dependencies:
   override:
     - pip install --upgrade pip
     - pip install -r requirements.test.txt
+    - npm i -g npm  # Make sure we're using the latest npm version
+    - npm i -g yarn
+    - ./npm.sh
     - pip freeze
-    # npm
-    - npm i
-
 
 test:
   pre:
     - cp ../env/settings_local_test.py settings_local.py
   override:
     - mkdir logs
-    - npm run build
+    - NODE_PATH=/webpack_modules/node_modules yarn build
     - mkdir static
     - python manage.py collectstatic --noinput
     # - python manage.py test test_app --nomigrations
+    # - coverage run manage.py test test_app
     - coverage run manage.py test test_app --nomigrations
     - coverage run manage.py test apps.news.tests --nomigrations
     - coverage run manage.py test apps.schedule --nomigrations

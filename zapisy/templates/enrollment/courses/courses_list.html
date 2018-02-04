@@ -8,6 +8,8 @@
     {% compressed_css 'courseview' %}
 {% endblock %}
 
+{# WARNING if you change the enr- links below make sure you don't break
+    break assets/ajaxCourseLoad.ts as it depends on the DOM layout #}
 {% block bread %}
     <a href="{% url "main-page" %}" class="breadcrumb-item">{% trans "Strona główna" %}</a>
     <a href="{% url "course-list" %}" class="breadcrumb-item">{% trans "Przedmioty" %}</a>&nbsp;

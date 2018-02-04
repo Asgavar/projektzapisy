@@ -9,6 +9,7 @@ module.exports = merge(common({
 	vueCssOptions: {
 		sourceMap: false,
 		extract: true,
+		minifyCss: true,
 	}
 }), {
 	plugins: [

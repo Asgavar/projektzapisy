@@ -32,6 +32,7 @@ CoursesList.prototype.initCourseLists = function () {
     this.setCoursesFromData();
 };
 
+// Event dependencies: ajaxCourseLoad.ts
 const listChangedEvent = new Event("CoursesListChanged");
 CoursesList.prototype.setCoursesFromData = function () {
     // Using this.courses and this.currentSemester, update the UI;
