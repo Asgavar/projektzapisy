@@ -32,7 +32,7 @@
         gtag('config', 'UA-109984921-1');
     </script>
     <!-- Le styles -->
-    <script type="text/javascript" src="{% static " vendor.js" %}"></script>
+    <script type="text/javascript" src="{% static "vendor.js" %}"></script>
     {% render_bundle "main" %}
     {% block rendered_bundles %}
     {% endblock %}
@@ -79,26 +79,21 @@
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav mr-auto">
-                <li
-                        {% block enrollment_active %}{% endblock %} class="nav-item">
+                <li{% block enrollment_active %}{% endblock %} class="nav-item">
                     <a href="{% url 'enrollment-main' %}" class="nav-link">System Zapisów</a>
                 </li>
-                <li
-                        {% block grade_active %}{% endblock %} class="nav-item">
+                <li{% block grade_active %}{% endblock %} class="nav-item">
                     <a href="{% url 'grade-main' %}" class="nav-link">Ocena Zajęć</a>
                 </li>
-                <li
-                        {% block offer_active %}{% endblock %} class="nav-item">
+                <li{% block offer_active %}{% endblock %} class="nav-item">
                     <a href="{% url 'offer-main' %}" class="nav-link">Oferta</a>
                 </li>
                 {% if perms.courses.view_stats %}
-                    <li
-                            {% block statistics_active %}{% endblock %} class="nav-item">
+                    <li{% block statistics_active %}{% endblock %} class="nav-item">
                         <a href="{% url 'statistics:main' %}" class="nav-link">Statystyki</a>
                     </li>
                 {% endif %}
-                <li
-                        {% block events_active %}{% endblock %}>
+                <li{% block events_active %}{% endblock %}>
                     <a href="{% url 'events:classrooms' %}" class="nav-link">Sale</a>
                 </li>
             </ul>
@@ -202,16 +197,13 @@
             {% endif %}
         </div>
     </nav>
-    {#
-    <div class="top">#}
+    <div class="top">
         <div class="logo header">
             <a href="/">
                 <img src="{% static 'images/logotyp.jpg' %}" alt="Uniwersytet Wrocławski">
             </a>
         </div>
-        {#
     </div>
-    #}
 </div>
 <div class="container p-0">
     <ul class="nav nav-tabs">
@@ -237,15 +229,10 @@
             {% endfor %}
         {% endblock %}
     </div>
-    <div>
+    <div class="row">
         {% block topContent %}{% endblock %}
-        {% block center %}
-            {% block sidebar %}
-                {% block content %}
-                {% endblock %}
-            {% endblock %}
+        {% block content %}
         {% endblock %}
-
     </div>
     <div class="row">
         <footer>
@@ -257,7 +244,7 @@
                     <a href="mailto:zapisy@cs.uni.wroc.pl">zapisy@cs.uni.wroc.pl</a>
                 {% endif %}
                 | Błędy i uwagi:
-                <a href="https://tracker-zapisy.ii.uni.wroc.pl/">[link]</a>Wygenerowano: {% now "H:i:s" %}
+                <a href="https://tracker-zapisy.ii.uni.wroc.pl/">[link]</a> Wygenerowano: {% now "H:i:s" %}
                 {% if "DEBUG"|settings_value == True or "II_ZAPISY_STAGING"|osenv_value == "True" %}
                     |<strong>Django {% django_version %}</strong>
                 {% endif %}
@@ -265,16 +252,16 @@
         </footer>
     </div>
 </div>
-<footer>
-    <p>
-        {# <a href="{% url 'on-mobile' %}" class="go-mobile">Przejdź do wersji mobilnej</a> #}
-        &copy; {% now "Y" %} <a href="http://www.ii.uni.wroc.pl/">Instytut Informatyki UWr</a>
-        {% if user.is_authenticated %} | Nieprawidłowe dane należy zgłaszać na adres <a
-                href="mailto:zapisy@cs.uni.wroc.pl">zapisy@cs.uni.wroc.pl</a>{% endif %}
-        | Błędy i uwagi: <a href="https://tracker-zapisy.ii.uni.wroc.pl/">[link]</a> Wygenerowano: {% now "H:i:s" %}
-        {% if "DEBUG"|settings_value == True or "II_ZAPISY_STAGING"|osenv_value == "True" %}| <strong>Django {%
-            django_version %}</strong>{% endif %}
-    </p>
-</footer>
+{#<footer>#}
+{#    <p>#}
+{# <a href="{% url 'on-mobile' %}" class="go-mobile">Przejdź do wersji mobilnej</a> #}
+{#        &copy; {% now "Y" %} <a href="http://www.ii.uni.wroc.pl/">Instytut Informatyki UWr</a>#}
+{#        {% if user.is_authenticated %} | Nieprawidłowe dane należy zgłaszać na adres <a#}
+{#                href="mailto:zapisy@cs.uni.wroc.pl">zapisy@cs.uni.wroc.pl</a>{% endif %}#}
+{#        | Błędy i uwagi: <a href="https://tracker-zapisy.ii.uni.wroc.pl/">[link]</a> Wygenerowano: {% now "H:i:s" %}#}
+{#        {% if "DEBUG"|settings_value == True or "II_ZAPISY_STAGING"|osenv_value == "True" %}|#}
+{#            <strong>Django {% django_version %}</strong>{% endif %}#}
+{#    </p>#}
+{#</footer>#}
 </body>
 </html>
