@@ -101,7 +101,6 @@
     <p><input type="hidden" name="data-invalidated" value="no"/></p>
 </form>
 <script type="text/javascript">
-    jQuery.dataInvalidate_check();
     $(document).ready(function() {
         $('.dropdown-menu input,label').click(function(e) {
                 e.stopPropagation(); //This will prevent the event from bubbling up and close the dropdown when you type/click on text boxes.
@@ -113,7 +112,7 @@
     <div class="topbar">
         <div class="fill">
             <!-- up-menu  -->
-            <div class="container">
+            <div id="top_menu_container" class="container">
 
                 <ul class="topBarLinkContainer">
                     <li{% block enrollment_active %}{% endblock %}>
@@ -210,16 +209,13 @@
     </div>
 
 
-    <div class="header">
-
-        <div class="container">
-            <div class="logo">
-                <a href="/">
-                    <img src="{% static 'images/logotyp.jpg'%}" alt="Uniwersytet Wrocławski">
-                </a>
-            </div>
-        </div>
-    </div>
+    {% block uwr_logo %}
+        <div id="logo_container"><div class="container">
+            <a href="/">
+                <img src="{% static 'images/logotyp.jpg'%}" alt="Uniwersytet Wrocławski">
+            </a>
+        </div></div>
+    {% endblock %}
     <!-- down-menu  -->
     <div class="topbar systemtopbar">
         <div class="fill">
@@ -255,6 +251,7 @@
             </div>
         {% endfor %}
         {% endblock %}
+        {% block full_width_content %}
         <div id="main-content-container" class="row show-grid sidebar-right marginFix">
             {% block topContent %}{% endblock %}
             {% block center %}
@@ -271,6 +268,7 @@
                 </div>
             {% endblock %}
         </div>
+        {% endblock %}
     </div>
 
 
