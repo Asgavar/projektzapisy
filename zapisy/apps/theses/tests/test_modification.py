@@ -1,3 +1,5 @@
+from typing import Callable
+
 from rest_framework import status
 from django.urls import reverse
 
@@ -205,6 +207,30 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         self.vote_to_accept_thesis_required_times(rejecter)
         modified_thesis = self.get_modified_thesis()
         self.assertEqual(modified_thesis["status"], ThesisStatus.returned_for_corrections.value)
+
+    def _test_action_does_not_change_status(self, status: ThesisStatus, action: Callable[[], None]):
+        self.thesis.status = status.value
+        self.thesis.save()
+        action()
+        modified_thesis = self.get_modified_thesis()
+        self.assertEqual(modified_thesis["status"], status.value)
+
+    def test_enough_votes_dont_accept_in_progress_or_archived(self):
+        self._test_action_does_not_change_status(
+            ThesisStatus.in_progress, lambda: self.vote_to_accept_thesis_required_times()
+        )
+        self._test_action_does_not_change_status(
+            ThesisStatus.defended, lambda: self.vote_to_accept_thesis_required_times()
+        )
+
+    def test_single_vote_doesnt_reject_in_progress_or_archived(self):
+        voter = self.get_random_board_member()
+        self._test_action_does_not_change_status(
+            ThesisStatus.in_progress, lambda: self.reject_thesis_once(voter)
+        )
+        self._test_action_does_not_change_status(
+            ThesisStatus.defended, lambda: self.reject_thesis_once(voter)
+        )
 
     def _test_cannot_modify_thesis_duplicate_title_as_user(self, user: BaseUser):
         other_thesis = self.make_thesis()
