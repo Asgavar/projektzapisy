@@ -24,5 +24,3 @@ class ThesesSystemSettingsAdmin(admin.ModelAdmin):
 
 
 admin.site.register(models.ThesesSystemSettings, ThesesSystemSettingsAdmin)
-
-admin.site.register(models.ThesisVoteBinding)
