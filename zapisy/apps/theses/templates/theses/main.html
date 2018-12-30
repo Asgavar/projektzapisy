@@ -1,6 +1,12 @@
 {% extends "base.html" %}
+{% load render_bundle from webpack_loader %}
 
 {% block main-subtitle %}System prac dyplomowych{% endblock %}
+
+{% block js %}
+	{{ block.super }}
+	{% render_bundle "theses-main" %}
+{% endblock %}
 
 {% block uwr_logo %}
 {% endblock %}
