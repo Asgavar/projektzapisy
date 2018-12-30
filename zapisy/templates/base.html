@@ -137,7 +137,11 @@
                             <a href="{% url 'events:event_show' %}">Sale</a>
                         {% endif %}
                     </li>
-
+                    {% if user.is_authenticated %}
+                        <li>
+                            <a href="{% url 'theses:main' %}">Prace dyplomowe</a>
+                        </li>
+                    {% endif %}
                 </ul>
                 {% if user.is_authenticated %}
                     <div class="user-panel">
