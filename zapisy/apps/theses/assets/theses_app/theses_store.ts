@@ -8,10 +8,10 @@
 import { observable, action, flow, configure, computed } from "mobx";
 import { clone } from "lodash";
 
-import { Thesis, AppUser, ThesisTypeFilter, Employee, BasePerson } from "./types";
+import { Thesis, AppUser, ThesisTypeFilter, Employee, ThesisVote, BasePerson } from "./types";
 import {
 	getThesesList, saveModifiedThesis, saveNewThesis,
-	getCurrentUser, getThesesBoard, FAKE_USER,
+	getCurrentUser, FAKE_USER, getThesesBoard, getNumUngraded,
 } from "./backend_callers";
 import {
 	ApplicationState, ThesisWorkMode, isPerformingBackendOp,
@@ -19,6 +19,7 @@ import {
 } from "./types/misc";
 import { roundUp, wait } from "common/utils";
 import { CancellablePromise } from "mobx/lib/api/flow";
+import { adjustDomForUngraded } from "./utils";
 import { ThesisEmptyTitle } from "./errors";
 
 /** Tell MobX to ensure that @observable fields are only modified in actions */
@@ -84,6 +85,9 @@ class ThesesStore {
 	/** Represents the current asynchronous filter edition action */
 	private stringFilterPromise: CancellablePromise<any> | null = null;
 
+	/** Has the user changed the thesis type filter manually? */
+	private hasChangedFilterManually: boolean = false;
+
 	/** Other parts of the system need to be told whenever the list changes */
 	private onListChangedCallback: ((mode: LoadMode) => void) | null = null;
 	public registerOnListChanged(cb: (mod: LoadMode) => void) {
@@ -121,6 +125,7 @@ class ThesesStore {
 		try {
 			this.user = yield getCurrentUser();
 			this.thesesBoard = yield getThesesBoard();
+			yield this.adjustFiltersForUngradedTheses(yield this.getNumUngraded());
 			yield this.refreshTheses();
 			this.applicationState = ApplicationState.Normal;
 		} catch (err) {
@@ -134,6 +139,24 @@ class ThesesStore {
 	public isThesesBoardMember(user: BasePerson): boolean {
 		return !!this.thesesBoard.find(member => member.isEqual(user));
 	}
+
+	/** Get the number of ungraded theses for the current user.
+	 * Returns 0 if the user is not a member of the theses board.
+	 */
+	private async getNumUngraded() {
+		return this.isThesesBoardMember(this.user.user) ? getNumUngraded() : 0;
+	}
+
+	/** For theses board members we'll want to switch to ungraded theses
+	 * unless they've changed the filter manually, don't interrupt them then
+	 */
+	private adjustFiltersForUngradedTheses = flow(
+	function*(this: ThesesStore, numUngraded: number): any {
+		if (this.hasChangedFilterManually) {
+			return;
+		}
+		this.params.type = numUngraded ? ThesisTypeFilter.Ungraded : ThesisTypeFilter.Default;
+	});
 
 	private checkCanPerformBackendOp() {
 		if (isPerformingBackendOp(this.applicationState)) {
@@ -387,15 +410,45 @@ class ThesesStore {
 			throw err;
 		}
 
+		const numUngraded = yield this.getNumUngraded();
+		yield this.adjustFiltersForUngradedTheses(numUngraded);
+
 		// Reload without losing the current position
 		yield this.loadTheses(LoadMode.Replace, this.lastRowIndex);
 
-		const toSelect = this.theses.find(t => t.id === id) || null;
+		const toSelect = this.thesisToSelectAfterAction(thesis!.original, id);
 		this.applicationState = ApplicationState.Normal;
 		// no matter what the work mode was, if we have a thesis we end up in the edit view
 		this.workMode = toSelect ? ThesisWorkMode.Editing : ThesisWorkMode.Viewing;
 		this.thesis = compositeThesisForThesis(toSelect);
+		adjustDomForUngraded(numUngraded);
 	});
+
+	// Either the same thesis we just saved, or the next ungraded thesis
+	// if the current user is a theses board member and has the filter set to ungraded
+	private thesisToSelectAfterAction(oldThesis: Thesis, savedId: number) {
+		const { user } = this;
+		if (
+			this.isThesesBoardMember(user.user) &&
+			this.params.type === ThesisTypeFilter.Ungraded
+		) {
+			// The first nonvoted-for thesis
+			const result = this.theses.find(t =>
+				!t.isEqual(oldThesis) &&
+				t.getMemberVote(user.user) === ThesisVote.None
+			);
+			if (result) {
+				return result;
+			}
+			// and if not, return whatever they were working on
+		}
+
+		// We'll want to find the thesis we just saved
+		// Note that it _could_ technically be absent from the new list
+		// but the odds are absurdly low (it would have to be deleted by someone
+		// else or the admin in the time between those two requests above)
+		return this.theses.find(t => t.id === savedId) || null;
+	}
 }
 
 async function modifyExistingThesis(thesis: CompositeThesis) {

@@ -14,10 +14,13 @@ from rest_framework.pagination import LimitOffsetPagination
 from dal import autocomplete
 
 from apps.users.models import Student, Employee
-from .models import Thesis, ThesisStatus, ThesisKind
+from .models import (
+    Thesis, ThesisStatus, ThesisKind,
+    get_num_ungraded_for_emp, filter_ungraded_for_emp
+)
 from . import serializers
 from .drf_permission_classes import ThesisPermissions
-from .users import wrap_user, get_theses_board
+from .users import wrap_user, get_theses_board, is_theses_board_member
 
 """Names of processing parameters in query strings"""
 THESIS_TYPE_FILTER_NAME = "type"
@@ -42,6 +45,7 @@ class ThesisTypeFilter(Enum):
     available_engineers = 7
     available_bachelors = 8
     available_bachelors_isim = 9
+    ungraded = 10
 
     default = all_current
 
@@ -79,8 +83,9 @@ class ThesesViewSet(viewsets.ModelViewSet):
         sort_dir = self.request.query_params.get(THESIS_SORT_DIR_NAME, "")
 
         base_qs = generate_base_queryset()
+        wrapped_user = wrap_user(self.request.user)
         filtered = filter_queryset(
-            base_qs,
+            base_qs, wrapped_user,
             requested_thesis_type, requested_thesis_title, requested_advisor_name,
         )
         return sort_queryset(filtered, sort_column, sort_dir)
@@ -97,6 +102,8 @@ def generate_base_queryset() -> QuerySet:
             *fields_for_prefetching("advisor"),
             *fields_for_prefetching("auxiliary_advisor"),
         ) \
+        .prefetch_related("votes") \
+        .prefetch_related("votes__voter") \
         .annotate(
             advisor_name=Concat(
                 "advisor__user__first_name", Value(" "), "advisor__user__last_name"
@@ -125,10 +132,11 @@ def fields_for_prefetching(base_field: str) -> List[str]:
 
 
 def filter_queryset(
-    qs, thesis_type: ThesisTypeFilter, title: str, advisor_name: str
+    qs, user: Employee,
+    thesis_type: ThesisTypeFilter, title: str, advisor_name: str
 ) -> QuerySet:
     """Filter the specified theses queryset based on the passed conditions"""
-    result = filter_theses_queryset_for_type(qs, thesis_type)
+    result = filter_theses_queryset_for_type(qs, user, thesis_type)
     if title:
         result = result.filter(title__icontains=title)
     if advisor_name:
@@ -164,7 +172,16 @@ def available_thesis_filter(queryset: QuerySet) -> QuerySet:
         .exclude(reserved=True)
 
 
-def filter_theses_queryset_for_type(queryset: QuerySet, thesis_type: ThesisTypeFilter) -> QuerySet:
+def ungraded_theses_filter(queryset, user: Employee):
+    """Returns only theses that are ungraded by the currently logged in board member"""
+    if not is_theses_board_member(user):
+        raise exceptions.NotFound()
+    return filter_ungraded_for_emp(queryset, user)
+
+
+def filter_theses_queryset_for_type(
+    queryset, user: Employee, thesis_type: ThesisTypeFilter,
+) -> QuerySet:
     """Returns only theses matching the specified type filter from the specified queryset"""
     if thesis_type == ThesisTypeFilter.all_current:
         return queryset.exclude(is_archived=True)
@@ -186,6 +203,8 @@ def filter_theses_queryset_for_type(queryset: QuerySet, thesis_type: ThesisTypeF
         return available_thesis_filter(queryset.filter(kind=ThesisKind.bachelors.value))
     elif thesis_type == ThesisTypeFilter.available_bachelors_isim:
         return available_thesis_filter(queryset.filter(kind=ThesisKind.isim.value))
+    elif thesis_type == ThesisTypeFilter.ungraded:
+        return ungraded_theses_filter(queryset, user)
     else:
         raise exceptions.ParseError()
 
@@ -199,13 +218,23 @@ class ThesesBoardViewSet(viewsets.ModelViewSet):
         return get_theses_board()
 
 
-@api_view()
+@api_view(http_method_names=["get"])
 @permission_classes((permissions.IsAuthenticated,))
 def get_current_user(request):
     """Allows the front end to query the current thesis user role"""
     wrapped_user = wrap_user(request.user)
     serializer = serializers.CurrentUserSerializer(wrapped_user)
     return Response(serializer.data)
+
+
+@api_view(http_method_names=["get"])
+@permission_classes((permissions.IsAuthenticated,))
+def get_num_ungraded(request):
+    """Allows the front end to query the number of ungraded theses for the current user"""
+    wrapped_user = wrap_user(request.user)
+    if not is_theses_board_member(wrapped_user):
+        raise exceptions.NotFound()
+    return Response(get_num_ungraded_for_emp(wrapped_user))
 
 
 @login_required

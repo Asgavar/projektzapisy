@@ -6,7 +6,7 @@ import * as Mousetrap from "mousetrap";
 import "mousetrap-global-bind";
 import { Moment } from "moment";
 
-import { Thesis, ThesisStatus, ThesisKind, Employee, AppUser } from "../../types";
+import { Thesis, ThesisStatus, ThesisKind, Employee, AppUser, ThesisVote } from "../../types";
 import { ThesisTopRow } from "./ThesisTopRow";
 import { ThesisMiddleForm } from "./ThesisMiddleForm";
 import { ThesisVotes } from "./ThesisVotes";
@@ -55,6 +55,7 @@ const RightDetailsContainer = styled.div`
 
 type Props = {
 	thesis: Thesis;
+	thesesBoard: Employee[];
 	appState: ApplicationState;
 	hasUnsavedChanges: boolean;
 	mode: ThesisWorkMode;
@@ -122,7 +123,12 @@ export class ThesisDetails extends React.PureComponent<Props> {
 
 	private renderThesisRightPanel() {
 		return <>
-			<ThesisVotes/>
+			<ThesisVotes
+				thesis={this.props.thesis}
+				thesesBoard={this.props.thesesBoard}
+				user={this.props.user}
+				onChange={this.onVoteChanged}
+			/>
 			{this.renderSaveButton()}
 		</>;
 	}
@@ -195,5 +201,12 @@ export class ThesisDetails extends React.PureComponent<Props> {
 
 	private onDescriptionChanged = (newDesc: string): void => {
 		this.updateThesisState({ description: { $set: newDesc } });
+	}
+
+	private onVoteChanged = (voter: Employee, newValue: ThesisVote): void => {
+		const newVotes = Object.assign({}, this.props.thesis.votes, {
+			[voter.id]: newValue,
+		});
+		this.updateThesisState({ votes: { $set: newVotes } });
 	}
 }

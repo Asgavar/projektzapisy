@@ -50,3 +50,8 @@ def can_change_status(user: BaseUser) -> bool:
 def can_set_advisor(user: BaseUser, advisor: Employee) -> bool:
     """Is the specified user permitted to set the given advisor (may be None)?"""
     return is_thesis_staff(user) or user == advisor
+
+
+def can_cast_vote_as_user(caster: Employee, user: Employee) -> bool:
+    """Can the specified user cast a vote in the other user's name?"""
+    return get_user_type(caster) == ThesisUserType.admin or caster == user

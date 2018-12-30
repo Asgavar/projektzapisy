@@ -5,15 +5,18 @@ to objects used in the theses system, that is:
 * fine-grained permissions checks
 * performing modifications/adding new objects
 """
-from typing import Dict, Any, Optional, Callable
+from typing import Dict, Any, List, Optional, Callable
 
 from rest_framework import serializers, exceptions
 from django.db.models import QuerySet
 
 from apps.users.models import Employee, Student, BaseUser
-from .models import Thesis, ThesisStatus, MAX_THESIS_TITLE_LEN
-from .users import wrap_user, get_user_type
-from .permissions import can_set_status, can_set_advisor, can_change_status, can_change_title
+from .models import Thesis, ThesisStatus, ThesisVote, MAX_THESIS_TITLE_LEN
+from .users import wrap_user, get_user_type, is_theses_board_member
+from .permissions import (
+    can_set_status, can_set_advisor,
+    can_cast_vote_as_user, can_change_status, can_change_title
+)
 from .drf_errors import ThesisNameConflict
 
 GenericDict = Dict[str, Any]
@@ -40,6 +43,16 @@ class PersonSerializerForThesis(serializers.Serializer):
         return {"id": person_id}
 
 
+def serialize_thesis_votes(thesis: Thesis):
+    """Serializes the votes of the given thesis into a dict"""
+    vote_tpls = (
+        (vote.voter.pk, vote.value)
+        for vote in thesis.votes.all()
+        if vote.value != ThesisVote.none.value
+    )
+    return dict(vote_tpls)
+
+
 def get_person(queryset: QuerySet, person_data: GenericDict) -> BaseUser:
     """Given a person object of the format specified above (in PersonSerializer.to_internal_value)
     and a queryset, try to return the corresponding model instance
@@ -61,11 +74,36 @@ def copy_if_present(
         dst[key] = converter(src[key]) if converter else src[key]
 
 
-def copy_optional_fields(result: GenericDict, data: GenericDict):
+def validate_thesis_vote(value):
+    """Check if the given vote value is valid"""
+    return value in [vote.value for vote in ThesisVote]
+
+
+def validate_votes(votes,):
+    """Validate the votes dict for a thesis"""
+    if type(votes) is not dict:
+        raise serializers.ValidationError("\"votes\" must be an object")
+    result = []
+    for key, value in votes.items():
+        if not validate_thesis_vote(value):
+            raise serializers.ValidationError("invalid thesis vote value")
+        try:
+            voter_id = int(key)
+            voter = Employee.objects.get(pk=voter_id)
+            if not is_theses_board_member(voter):
+                raise serializers.ValidationError("voter is not a member of the theses board")
+            result.append((voter, ThesisVote(value)))
+        except (ValueError, Employee.DoesNotExist):
+            raise serializers.ValidationError("bad voter id")
+    return result
+
+
+def handle_optional_fields(result: GenericDict, data: GenericDict):
     """Extract optional fields from the source dictionary (sent by the client),
     perform any necessary conversions, then place it in the result dictionary
     """
     copy_if_present(result, data, "description")
+    copy_if_present(result, data, "votes", lambda votes: validate_votes(votes))
     copy_if_present(result, data, "auxiliary_advisor", lambda a: get_person(Employee, a))
     copy_if_present(result, data, "student", lambda s: get_person(Student, s))
     copy_if_present(result, data, "student_2", lambda s: get_person(Student, s))
@@ -88,6 +126,13 @@ def validate_new_title_for_instance(title: str, instance: Optional[Thesis]):
         raise ThesisNameConflict()
 
 
+def check_votes_permissions(user: BaseUser, votes: List):
+    """Check that the specified user is permitted to modify the votes as specified"""
+    for voter, _ in votes:
+        if not can_cast_vote_as_user(user, voter):
+            raise exceptions.PermissionDenied("this user cannot change that user's vote")
+
+
 def check_advisor_permissions(user: BaseUser, advisor: Employee):
     """Check that the current user is permitted to set the specified advisor"""
     if not can_set_advisor(user, advisor):
@@ -101,6 +146,13 @@ class ThesisSerializer(serializers.ModelSerializer):
     student_2 = PersonSerializerForThesis(allow_null=True, required=False)
     added_date = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S%z", required=False)
     modified_date = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S%z", required=False)
+    votes = serializers.SerializerMethodField()
+
+    def to_internal_value(self, data):
+        result = super().to_internal_value(data)
+        if "votes" in data:
+            result["votes"] = data["votes"]
+        return result
 
     # We need to define this field here manually to disable DRF's unique validator which
     # isn't flexible enough to override the error code it returns (throws a 400, we want 409)
@@ -139,7 +191,7 @@ class ThesisSerializer(serializers.ModelSerializer):
             "status": data["status"],
             "advisor": advisor,
         }
-        copy_optional_fields(result, data)
+        handle_optional_fields(result, data)
         if "description" not in result:
             result["description"] = ""
 
@@ -158,7 +210,7 @@ class ThesisSerializer(serializers.ModelSerializer):
         copy_if_present(result, data, "title")
         copy_if_present(result, data, "reserved")
         copy_if_present(result, data, "kind")
-        copy_optional_fields(result, data)
+        handle_optional_fields(result, data)
 
         return result
 
@@ -174,8 +226,10 @@ class ThesisSerializer(serializers.ModelSerializer):
         status = validated_data["status"]
         if not can_set_status(user, ThesisStatus(status)):
             raise exceptions.PermissionDenied(f'This type of user cannot set status to {status}')
+        if "votes" in validated_data:
+            check_votes_permissions(user, validated_data["votes"])
 
-        return Thesis.objects.create(
+        new_instance = Thesis.objects.create(
             title=validated_data.get("title"),
             kind=validated_data.get("kind"),
             status=validated_data.get("status"),
@@ -186,6 +240,9 @@ class ThesisSerializer(serializers.ModelSerializer):
             student=validated_data.get("student"),
             student_2=validated_data.get("student_2"),
         )
+        if "votes" in validated_data:
+            new_instance.process_new_votes(validated_data["votes"])
+        return new_instance
 
     def update(self, instance: Thesis, validated_data: GenericDict):
         """Called in response to a successfully validated PATCH request"""
@@ -197,6 +254,8 @@ class ThesisSerializer(serializers.ModelSerializer):
             raise exceptions.PermissionDenied("This type of user cannot modify the status")
         if "title" in validated_data and not can_change_title(user, self.instance):
             raise exceptions.PermissionDenied("This type of user cannot change the title")
+        if "votes" in validated_data:
+            check_votes_permissions(user, validated_data["votes"])
 
         instance.title = validated_data.get("title", instance.title)
         instance.kind = validated_data.get("kind", instance.kind)
@@ -210,7 +269,12 @@ class ThesisSerializer(serializers.ModelSerializer):
         instance.student = validated_data.get("student", instance.student)
         instance.student_2 = validated_data.get("student_2", instance.student_2)
         instance.save()
+        if "votes" in validated_data:
+            instance.process_new_votes(validated_data["votes"])
         return instance
+
+    def get_votes(self, instance):
+        return serialize_thesis_votes(instance)
 
     class Meta:
         model = Thesis
@@ -219,6 +283,7 @@ class ThesisSerializer(serializers.ModelSerializer):
             "id", "title", "advisor", "auxiliary_advisor",
             "kind", "reserved", "description", "status",
             "student", "student_2", "added_date", "modified_date",
+            "votes",
         )
 
 

@@ -4,6 +4,7 @@
  * the Python equivalent in models.py
  */
 import * as moment from "moment";
+import { isEqual } from "lodash";
 
 export const MAX_THESIS_TITLE_LEN = 300;
 
@@ -62,6 +63,7 @@ export const enum ThesisTypeFilter {
 	AvailableEngineers,
 	AvailableBachelors,
 	AvailableBachelorsISIM,
+	Ungraded,	// board members only
 
 	Default = AllCurrent,
 }
@@ -82,6 +84,7 @@ export function thesisTypeFilterToString(type: ThesisTypeFilter) {
 		case ThesisTypeFilter.AvailableEngineers: return "Inżynierskie - dostępne";
 		case ThesisTypeFilter.AvailableBachelors: return "Licencjackie - dostępne";
 		case ThesisTypeFilter.AvailableBachelorsISIM: return "Licencjackie ISIM - dostępne";
+		case ThesisTypeFilter.Ungraded: return "Wszystkie nieocenione";
 	}
 }
 
@@ -118,6 +121,9 @@ export class BasePerson {
 	}
 }
 
+/** Represents a list of votes, mapping the ID of the voter to the vote value */
+export type VoteMap = { [id: number]: ThesisVote };
+
 /**
  * Represents a university employee in the thesis system
  */
@@ -143,6 +149,7 @@ export type ThesisJson = {
 	student_2?: PersonJson;
 	added_date: string;
 	modified_date: string;
+	votes: VoteMap;
 };
 
 /**
@@ -161,6 +168,7 @@ export class Thesis {
 	public secondStudent: Student | null;
 	public addedDate: moment.Moment;
 	public modifiedDate: moment.Moment;
+	public votes: VoteMap;
 
 	/**
 	 * Construct a thesis object from JSON if present,
@@ -188,6 +196,7 @@ export class Thesis {
 		this.secondStudent = json.student_2 ? Employee.fromJson(json.student_2) : null;
 		this.addedDate = moment(json.added_date);
 		this.modifiedDate = moment(json.modified_date);
+		this.votes = json.votes;
 	}
 
 	private initNewThesis() {
@@ -203,6 +212,7 @@ export class Thesis {
 		this.secondStudent = null;
 		this.addedDate = moment();
 		this.modifiedDate = moment();
+		this.votes = {};
 	}
 
 	/**
@@ -213,6 +223,14 @@ export class Thesis {
 	 */
 	public isEqual = (other: Thesis): boolean => {
 		return this.id === other.id;
+	}
+
+	/**
+	 * Get the vote value for the given theses board member
+	 * @param emp The board member whose vote to return
+	 */
+	public getMemberVote(emp: Employee): ThesisVote {
+		return this.votes[emp.id] || ThesisVote.None;
 	}
 
 	/**
@@ -235,7 +253,8 @@ export class Thesis {
 			this.kind === other.kind &&
 			this.reserved === other.reserved &&
 			this.status === other.status &&
-			this.modifiedDate.isSame(other.modifiedDate)
+			this.modifiedDate.isSame(other.modifiedDate) &&
+			isEqual(this.onlyDefiniteVotes(), other.onlyDefiniteVotes())
 		);
 	}
 
@@ -244,6 +263,13 @@ export class Thesis {
 			p1 === null && p2 === null ||
 			p1 !== null && p2 !== null && p1.isEqual(p2)
 		);
+	}
+
+	private onlyDefiniteVotes(): VoteMap {
+		return Object.keys(this.votes)
+			.map(Number)
+			.filter(id => this.votes[id] !== ThesisVote.None)
+			.reduce((acc, id) => (acc[id] = this.votes[id], acc), {} as VoteMap);
 	}
 }
 

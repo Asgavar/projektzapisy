@@ -5,6 +5,7 @@
 {% load debug_info %}
 {% load i18n %}
 {% load render_bundle from webpack_loader %}
+{% load num_ungraded_theses %}
 
 <!DOCTYPE html>
 <html lang="pl">
@@ -101,7 +102,6 @@
     <p><input type="hidden" name="data-invalidated" value="no"/></p>
 </form>
 <script type="text/javascript">
-    jQuery.dataInvalidate_check();
     $(document).ready(function() {
         $('.dropdown-menu input,label').click(function(e) {
                 e.stopPropagation(); //This will prevent the event from bubbling up and close the dropdown when you type/click on text boxes.
@@ -139,7 +139,12 @@
                     </li>
                     {% if user.is_authenticated %}
                         <li>
-                            <a href="{% url 'theses:main' %}">Prace dyplomowe</a>
+                            {% num_ungraded_theses user as num_ungraded %}
+                            <a href="{% url 'theses:main' %}">Prace dyplomowe
+                                <span id="num_ungraded_theses">
+                                    {% if num_ungraded > 0 %}({{ num_ungraded }}){% endif %}
+                                </span>
+                            </a>
                         </li>
                     {% endif %}
                 </ul>

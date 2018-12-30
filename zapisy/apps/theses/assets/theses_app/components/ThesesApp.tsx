@@ -102,6 +102,7 @@ class ThesesAppInternal extends React.Component<any, State> {
 				onTitleChange={this.onTitleChanged}
 				titleValue={store.params.title}
 				state={store.applicationState}
+				displayUngraded={store.isThesesBoardMember(store.user.user)}
 				stringFilterBeingChanged={store.stringFilterBeingChanged}
 			/>
 			{shouldShowNewBtn ? <AddNewButton onClick={this.setupForAddingThesis}/> : null}
@@ -140,6 +141,7 @@ class ThesesAppInternal extends React.Component<any, State> {
 	private renderThesisDetails() {
 		return <ThesisDetails
 			thesis={store.thesis!.modified}
+			thesesBoard={store.thesesBoard}
 			appState={store.applicationState}
 			hasUnsavedChanges={store.hasUnsavedChanges()}
 			mode={store.workMode!}

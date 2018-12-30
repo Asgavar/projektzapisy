@@ -2,7 +2,10 @@
  * Defines types that will be dispatched to the backend
  * as well as functions to operate on them
  */
-import { ThesisKind, ThesisStatus, Thesis, BasePerson, MAX_THESIS_TITLE_LEN } from ".";
+import {
+	ThesisKind, ThesisStatus, Thesis, BasePerson,
+	MAX_THESIS_TITLE_LEN, VoteMap,
+} from ".";
 
 /**
  * The representation of a person sent to the backend
@@ -24,6 +27,7 @@ export type ThesisAddDispatch = {
 	status?: ThesisStatus;
 	student?: PersonDispatch | null;
 	student_2?: PersonDispatch | null;
+	votes?: VoteMap;
 };
 
 /**
@@ -115,6 +119,17 @@ export function getThesisModDispatch(orig: Thesis, mod: Thesis): ThesisModDispat
 	}
 	if (orig.status !== mod.status) {
 		result.status = mod.status;
+	}
+
+	const votesDiff = Object.keys(mod.votes)
+		.map(Number)
+		.reduce((acc, id) => (
+			// if the vote for this id changed, assign it to acc (result)
+			// otherwise pass acc untouched
+			orig.votes[id] === mod.votes[id] ? acc : (acc[id] = mod.votes[id], acc)
+		), {} as VoteMap);
+	if (Object.keys(votesDiff).length) {
+		result.votes = votesDiff;
 	}
 
 	return result;

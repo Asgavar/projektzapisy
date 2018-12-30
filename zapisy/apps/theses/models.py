@@ -1,8 +1,11 @@
 from enum import Enum
 
 from django.db import models
+from django.db.models.expressions import RawSQL
 
 from apps.users.models import Employee, Student
+from .validators import validate_num_required_votes
+from .system_settings import get_num_required_votes
 
 MAX_THESIS_TITLE_LEN = 300
 
@@ -64,6 +67,38 @@ class Thesis(models.Model):
     added_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
 
+    def process_new_votes(self, votes):
+        """Whenever one or more votes for a thesis change, this function
+        should be called to process & save them
+        """
+        for voter, vote in votes:
+            try:
+                existing_vote = ThesisVoteBinding.objects.get(thesis=self, voter=voter)
+                existing_vote.value = vote.value
+                existing_vote.save()
+            except ThesisVoteBinding.DoesNotExist:
+                ThesisVoteBinding.objects.create(thesis=self, voter=voter, value=vote.value)
+        self.check_for_vote_status_change()
+
+    def check_for_vote_status_change(self):
+        """If we have enough approving votes, accept this thesis - unless there's a rejecting
+        vote, then we return it for corrections
+        Don't change the status if it's in progress/defended
+        """
+        if self.status in [ThesisStatus.in_progress.value, ThesisStatus.defended.value]:
+            return
+        approve_votes_cnt = ThesisVoteBinding.objects.filter(
+            thesis=self, value=ThesisVote.accepted.value
+        ).count()
+        reject_votes_cnt = ThesisVoteBinding.objects.filter(
+            thesis=self, value=ThesisVote.rejected.value
+        ).count()
+        if reject_votes_cnt:
+            self.status = ThesisStatus.returned_for_corrections.value
+        elif approve_votes_cnt >= get_num_required_votes():
+            self.status = ThesisStatus.accepted.value
+        self.save()
+
     def __str__(self) -> str:
         return self.title
 
@@ -112,8 +147,42 @@ class ThesisVoteBinding(models.Model):
         return f'Głos {self.voter} na {self.thesis} - {vote_to_string(self.value)}'
 
 
+def filter_ungraded_for_emp(qs, emp: Employee):
+    """
+    Filter the given queryset to only contain
+    all _ungraded_ theses for a given board member.
+    A thesis is _ungraded_ if the voter has not cast a vote at all
+    or manually set it to none (not possible from the client UI currently)
+    """
+    # Uses custom SQL - I couldn't get querysets to do what I wanted them to;
+    # doing .exclude(votes__value__ne=none, votes__voter=emp) doesn't do what you want,
+    # it ands two selects together rather than and two conditions in one select
+    return qs \
+        .annotate(definite_votes=RawSQL(
+            """
+            select count(*) from theses_thesisvotebinding where
+            thesis_id=theses_thesis.id and voter_id=%s and value<>%s
+            """,
+            (emp.pk, ThesisVote.none.value)
+        )) \
+        .filter(definite_votes=0)
+
+
+def get_num_ungraded_for_emp(emp: Employee) -> int:
+    """Get the number of ungraded theses for the given employee"""
+    ungraded_qs = filter_ungraded_for_emp(Thesis.objects, emp)
+    return ungraded_qs.count()
+
+
 class ThesesSystemSettings(models.Model):
-    num_required_votes = models.SmallIntegerField()
+    num_required_votes = models.SmallIntegerField(
+        verbose_name="Liczba głosów wymaganych do zaakceptowania",
+        validators=[validate_num_required_votes]
+    )
+
+    def __str__(self):
+        return "Ustawienia systemu"
 
     class Meta:
+        verbose_name = "ustawienia systemu prac dyplomowych"
         verbose_name_plural = "ustawienia systemu prac dyplomowych"

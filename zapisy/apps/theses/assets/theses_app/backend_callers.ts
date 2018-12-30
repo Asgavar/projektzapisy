@@ -125,6 +125,13 @@ export async function getThesesBoard() {
 	return json.map(pj => Employee.fromJson(pj) as Employee);
 }
 
+/**
+ * Get the number of ungraded theses for the current board member
+ */
+export async function getNumUngraded() {
+	return Number(await getData(`${BASE_API_URL}/num_ungraded/`));
+}
+
 export const enum PersonType {
 	Employee,
 	Student,

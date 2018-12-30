@@ -1,7 +1,7 @@
 /**
  * @file Theses app permission checks, mostly analogous to permissions.py
  */
-import { AppUser, UserType, Thesis, ThesisStatus } from "./types";
+import { AppUser, UserType, Thesis, Employee, ThesisStatus } from "./types";
 import { thesesStore } from "./theses_store";
 
 /**
@@ -10,6 +10,15 @@ import { thesesStore } from "./theses_store";
  */
 function isThesisStaff(user: AppUser) {
 	return user.type === UserType.Admin || thesesStore.isThesesBoardMember(user.user);
+}
+
+/**
+ * Determine whether the specified app user can cast a vote as the specified user
+ * @param appUser The app user
+ * @param user The user to cast a vote as
+ */
+export function canCastVoteAsUser(appUser: AppUser, user: Employee) {
+	return appUser.type === UserType.Admin || appUser.user.isEqual(user);
 }
 
 /**
