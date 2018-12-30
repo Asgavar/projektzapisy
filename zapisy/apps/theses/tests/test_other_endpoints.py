@@ -1,17 +1,13 @@
 from typing import List
 import json
-import random
 
 from rest_framework import status
 from django.urls import reverse
 
-from apps.users.models import Employee, BaseUser
-
-from ..models import ThesisStatus, ThesisVote
+from apps.users.models import BaseUser
 from ..users import ThesisUserType
-from ..system_settings import get_num_required_votes
 from .base import ThesesBaseTestCase
-from .factory_utils import random_definite_vote, make_employee_with_name, make_student_with_name
+from .utils import make_employee_with_name, make_student_with_name, exactly_one
 
 
 class OtherEndpointsTestCase(ThesesBaseTestCase):
@@ -31,7 +27,7 @@ class OtherEndpointsTestCase(ThesesBaseTestCase):
         self.assertIsInstance(data, list)
         self.assertEqual(len(self.board_members), len(data))
         for member in self.board_members:
-            self.assertTrue(any(recvd_member["id"] == member.pk for recvd_member in data))
+            self.assertTrue(exactly_one(recvd_member["id"] == member.pk for recvd_member in data))
 
     def test_theses_board_ok_for_logged_in(self):
         """Ensure that logged in users of various types can access the theses board"""
@@ -80,7 +76,7 @@ class OtherEndpointsTestCase(ThesesBaseTestCase):
         results = data["results"]
         self.assertEqual(len(results), len(matching_users))
         for matching_user in matching_users:
-            self.assertTrue(any(
+            self.assertTrue(exactly_one(
                 int(recvd_user["id"]) == matching_user.pk and
                 recvd_user["text"] == matching_user.get_full_name()
                 for recvd_user in results)
@@ -123,20 +119,10 @@ class OtherEndpointsTestCase(ThesesBaseTestCase):
     def test_num_ungraded_ok_for_board_member(self):
         """Ensure that the num ungraded endpoint works correctly for board members"""
         board_member = self.get_random_board_member()
-        num_theses = random.randint(10, 20)
-        theses = [self.make_thesis() for i in range(num_theses)]
-        for thesis in theses:
-            # This is needed since the thesis vote bindings created below need a pk
-            # to reference
-            thesis.save()
-        num_graded = num_theses // 2
-        graded_theses = random.sample(theses, num_graded)
-        for graded in graded_theses:
-            votes = [(board_member, random_definite_vote())]
-            graded.process_new_votes(votes)
+        graded_theses, _ = self.create_theses_for_ungraded_testing(board_member)
         response = self.get_num_ungraded_response_for_user(board_member)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, len(theses) - len(graded_theses))
+        self.assertEqual(response.data, len(graded_theses))
 
     def test_num_ungraded_returns_404_for_non_board_member(self):
         """Ensure that if a user that isn't a board member makes a num ungraded request,

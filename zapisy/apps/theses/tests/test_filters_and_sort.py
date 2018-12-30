@@ -3,9 +3,9 @@ import random
 from ..models import Thesis, ThesisStatus, ThesisKind
 from ..views import ThesisTypeFilter
 from .base import ThesesBaseTestCase, PAGE_SIZE
-from .factory_utils import (
+from .utils import (
     random_current_status, random_available_status,
-    random_status, make_employee_with_name
+    random_status, make_employee_with_name, exactly_one,
 )
 
 
@@ -100,6 +100,15 @@ class ThesesFiltersAndSortingTestCase(ThesesBaseTestCase):
             self.assertNotEqual(thesis["status"], ThesisStatus.in_progress.value)
             self.assertNotEqual(thesis["status"], ThesisStatus.defended.value)
             self.assertFalse(thesis["reserved"])
+
+    def test_ungraded_filter(self):
+        board_member = self.get_random_board_member()
+        _, ungraded_theses = self.create_theses_for_ungraded_testing(board_member)
+        self.login_as(board_member)
+        theses = self.get_theses_with_data({"type": ThesisTypeFilter.ungraded.value})
+        self.assertEqual(len(ungraded_theses), len(theses))
+        for graded in ungraded_theses:
+            self.assertTrue(exactly_one(recv_thesis["id"] == graded.pk for recv_thesis in theses))
 
     def test_title_sort(self):
         """Test that sorting by title works correctly"""

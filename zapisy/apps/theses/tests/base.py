@@ -7,13 +7,13 @@ from django.contrib.auth.models import Group
 
 from apps.users.models import Employee, Student, BaseUser
 from apps.users.tests.factories import EmployeeFactory, StudentFactory
-from ..models import Thesis
+from ..models import Thesis, ThesisVote
 from ..users import THESIS_BOARD_GROUP_NAME
 
-from .factory_utils import (
+from .utils import (
     random_title, random_bool,
     random_kind, random_status, random_reserved,
-    random_description,
+    random_description, random_definite_vote,
 )
 
 PAGE_SIZE = 100
@@ -123,3 +123,27 @@ class ThesesBaseTestCase(APITestCase):
         response = self.get_response_with_data(data)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         return response.data["results"]
+
+    def create_theses_for_ungraded_testing(self, board_member: Employee):
+        """
+        Create two batches of theses, one graded, the other one not
+        graded or graded with indeterminate vote values for the given
+        board member"""
+        num_theses = random.randint(10, 20)
+        graded_theses = [self.make_thesis() for i in range(num_theses)]
+        ungraded_theses = [self.make_thesis() for i in range(num_theses)]
+        all_theses = graded_theses + ungraded_theses
+        for thesis in all_theses:
+            # This is needed since the thesis vote bindings created below need a pk
+            # to reference
+            thesis.save()
+        for graded in graded_theses:
+            votes = [(board_member, random_definite_vote())]
+            graded.process_new_votes(votes)
+        # Also cast "indeterminate" votes for some "ungraded" theses,
+        # they should still count as ungraded with those vote values
+        ungraded_with_indeterminate = random.sample(ungraded_theses, random.randrange(num_theses))
+        for thesis in ungraded_with_indeterminate:
+            votes = [(board_member, ThesisVote.none)]
+            thesis.process_new_votes(votes)
+        return graded_theses, ungraded_theses

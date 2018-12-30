@@ -1,5 +1,6 @@
 import random
 import sys
+from typing import List, Any
 
 from faker import Faker
 
@@ -78,3 +79,8 @@ def make_employee_with_name(name: str) -> Employee:
 
 def make_student_with_name(name: str) -> Student:
     return StudentFactory(user__first_name=name, user__last_name="")
+
+
+def exactly_one(l: List[Any]) -> bool:
+    """Check that exactly one element in the list is truthy"""
+    return sum(bool(e) for e in l) == 1

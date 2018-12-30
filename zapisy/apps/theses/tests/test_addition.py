@@ -3,7 +3,7 @@ from django.urls import reverse
 
 from apps.users.models import Employee, BaseUser
 from ..models import ThesisStatus
-from .factory_utils import random_title, random_kind, random_reserved
+from .utils import random_title, random_kind, random_reserved
 from .base import ThesesBaseTestCase
 
 

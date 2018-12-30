@@ -8,7 +8,7 @@ from apps.users.models import Employee, BaseUser
 from ..models import ThesisStatus, ThesisVote
 from ..system_settings import get_num_required_votes
 from .base import ThesesBaseTestCase
-from .factory_utils import random_vote
+from .utils import random_vote
 
 
 class ThesesModificationTestCase(ThesesBaseTestCase):
