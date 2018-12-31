@@ -5,7 +5,7 @@ to objects used in the theses system, that is:
 * fine-grained permissions checks
 * performing modifications/adding new objects
 """
-from typing import Dict, Any, List, Optional, Callable, Tuple
+from typing import Dict, Any, List, Optional, Callable
 
 from rest_framework import serializers, exceptions
 from django.db.models import QuerySet
