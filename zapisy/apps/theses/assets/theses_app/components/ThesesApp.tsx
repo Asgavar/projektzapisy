@@ -239,6 +239,9 @@ class ThesesAppInternal extends React.Component<any, State> {
 
 	private onSave = async () => {
 		try {
+			if (!store.hasUnsavedChanges()) {
+				return;
+			}
 			const oldWorkMode = store.workMode;
 			await store.save();
 			this.props.alert.success(messageForWorkMode(oldWorkMode));

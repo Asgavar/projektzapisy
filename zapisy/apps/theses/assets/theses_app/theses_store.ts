@@ -85,9 +85,6 @@ class ThesesStore {
 	/** Represents the current asynchronous filter edition action */
 	private stringFilterPromise: CancellablePromise<any> | null = null;
 
-	/** Has the user changed the thesis type filter manually? */
-	private hasChangedFilterManually: boolean = false;
-
 	/** Other parts of the system need to be told whenever the list changes */
 	private onListChangedCallback: ((mode: LoadMode) => void) | null = null;
 	public registerOnListChanged(cb: (mod: LoadMode) => void) {
@@ -125,8 +122,15 @@ class ThesesStore {
 		try {
 			this.user = yield getCurrentUser();
 			this.thesesBoard = yield getThesesBoard();
-			yield this.adjustFiltersForUngradedTheses(yield this.getNumUngraded());
+			const ungraded = yield this.getNumUngraded();
+			if (ungraded) {
+				this.params.type = ThesisTypeFilter.Ungraded;
+			}
 			yield this.refreshTheses();
+			if (this.params.type === ThesisTypeFilter.Ungraded && this.theses.length) {
+				// automatically select a thesis to grade if any
+				this.selectThesis(this.theses[0]);
+			}
 			this.applicationState = ApplicationState.Normal;
 		} catch (err) {
 			this.handleError(err);
@@ -146,17 +150,6 @@ class ThesesStore {
 	private async getNumUngraded() {
 		return this.isThesesBoardMember(this.user.user) ? getNumUngraded() : 0;
 	}
-
-	/** For theses board members we'll want to switch to ungraded theses
-	 * unless they've changed the filter manually, don't interrupt them then
-	 */
-	private adjustFiltersForUngradedTheses = flow(
-	function*(this: ThesesStore, numUngraded: number): any {
-		if (this.hasChangedFilterManually) {
-			return;
-		}
-		this.params.type = numUngraded ? ThesisTypeFilter.Ungraded : ThesisTypeFilter.Default;
-	});
 
 	private checkCanPerformBackendOp() {
 		if (isPerformingBackendOp(this.applicationState)) {
@@ -411,7 +404,10 @@ class ThesesStore {
 		}
 
 		const numUngraded = yield this.getNumUngraded();
-		yield this.adjustFiltersForUngradedTheses(numUngraded);
+		if (!numUngraded && this.params.type === ThesisTypeFilter.Ungraded) {
+			// switch away to the default, this list would be empty
+			this.params.type = ThesisTypeFilter.Default;
+		}
 
 		// Reload without losing the current position
 		yield this.loadTheses(LoadMode.Replace, this.lastRowIndex);

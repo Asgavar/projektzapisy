@@ -14,7 +14,7 @@ import "./style.less";
 import { Spinner } from "../Spinner";
 import { getDisabledStyle } from "../../utils";
 import { ThesisWorkMode, ApplicationState, isPerformingBackendOp } from "../../types/misc";
-import { canModifyThesis } from "../../permissions";
+import { canModifyThesis, canVote } from "../../permissions";
 
 const SaveButton = React.memo(Button.extend`
 	&:disabled:hover {
@@ -74,9 +74,12 @@ export class ThesisDetails extends React.PureComponent<Props> {
 			}
 			ev.preventDefault();
 		});
+		Mousetrap.bind("a", this.onAcceptThesis);
+		Mousetrap.bind("r", this.onRejectThesis);
 	}
 
 	public componentWillUnmount() {
+		Mousetrap.unbind(["a", "r"]);
 		Mousetrap.unbindGlobal("ctrl+s");
 	}
 
@@ -152,6 +155,24 @@ export class ThesisDetails extends React.PureComponent<Props> {
 
 	private getActionDescription() {
 		return this.props.mode === ThesisWorkMode.Adding ? "Dodaj nową pracę" : "Zapisz zmiany";
+	}
+
+	private onAcceptThesis = () => {
+		this.onShortcutVoteCast(ThesisVote.Accepted);
+	}
+	private onRejectThesis = () => {
+		this.onShortcutVoteCast(ThesisVote.Rejected);
+	}
+	private onShortcutVoteCast(vote: ThesisVote) {
+		const { props } = this;
+		if (
+			canVote(props.user) &&
+			!props.hasUnsavedChanges &&
+			props.mode === ThesisWorkMode.Editing
+		) {
+			this.onVoteChanged(props.user.user, vote);
+			props.onSaveRequested();
+		}
 	}
 
 	private updateThesisState(updateObject: object) {
