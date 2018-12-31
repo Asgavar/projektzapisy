@@ -85,11 +85,19 @@ class ThesesAdditionTestCase(ThesesBaseTestCase):
         self.assertEqual(response.status_code, status.HTTP_409_CONFLICT)
 
     # Titles must be unique, for all users
-    def test_admin_cannot_add_thesis_with_duplicate_title(self):
-        self.ensure_409_with_user(self.get_admin())
+    def test_no_one_can_add_thesis_with_duplicate_title(self):
+        self.run_test_with_privileged_users(self.ensure_409_with_user)
 
-    def test_board_member_cannot_add_thesis_with_duplicate_title(self):
-        self.ensure_409_with_user(self.get_random_board_member_different_from(self.get_admin()))
+    def ensure_cannot_add_invalid_kind_as_user(self, user: BaseUser):
+        response = self.add_thesis(user, kind=123)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
-    def test_emp_cannot_add_thesis_with_duplicate_title(self):
-        self.ensure_409_with_user(self.get_random_emp())
+    def test_cannot_add_invalid_kind(self):
+        self.run_test_with_privileged_users(self.ensure_cannot_add_invalid_kind_as_user)
+
+    def ensure_cannot_add_invalid_status_as_user(self, user: BaseUser):
+        response = self.add_thesis(user, status=123)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
+    def test_cannot_add_invalid_status(self):
+        self.run_test_with_privileged_users(self.ensure_cannot_add_invalid_status_as_user)

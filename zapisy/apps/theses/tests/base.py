@@ -1,4 +1,5 @@
 import random
+from typing import Callable
 
 from rest_framework.test import APITestCase
 from rest_framework import status
@@ -147,3 +148,22 @@ class ThesesBaseTestCase(APITestCase):
             votes = [(board_member, ThesisVote.none)]
             thesis.process_new_votes(votes)
         return graded_theses, ungraded_theses
+
+    def run_test_with_privileged_users(
+        self, test_func: Callable[[Employee], None],
+    ):
+        """Run the provided testing function with all privileged user types,
+        that is an employee, a non admin board member, and the admin
+        """
+        test_func(self.get_random_emp())
+        self.run_test_with_board_members(test_func)
+
+    def run_test_with_board_members(
+        self, test_func: Callable[[Employee], None],
+    ):
+        """Run the provided testing function with a non admin board member
+        and the admin
+        """
+        admin = self.get_admin()
+        test_func(self.get_random_board_member_different_from(admin))
+        test_func(admin)
