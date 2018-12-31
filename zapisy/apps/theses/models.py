@@ -1,4 +1,5 @@
 from enum import Enum
+from typing import Tuple
 
 from django.db import models
 from django.db.models.expressions import RawSQL
@@ -45,6 +46,24 @@ THESIS_STATUS_CHOICES = (
 )
 
 
+class ThesisVote(Enum):
+    none = 1
+    rejected = 2
+    accepted = 3
+    user_missing = 4  # not sure about this one
+
+
+THESIS_VOTE_CHOICES = (
+    (ThesisVote.none.value, "brak głosu"),
+    (ThesisVote.rejected.value, "odrzucona"),
+    (ThesisVote.accepted.value, "zaakceptowana"),
+    (ThesisVote.user_missing.value, "brak użytkownika"),
+)
+
+
+VotesInfo = Tuple[Employee, ThesisVote]
+
+
 class Thesis(models.Model):
     title = models.CharField(max_length=MAX_THESIS_TITLE_LEN, unique=True)
     advisor = models.ForeignKey(
@@ -67,7 +86,7 @@ class Thesis(models.Model):
     added_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
 
-    def process_new_votes(self, votes):
+    def process_new_votes(self, votes: VotesInfo):
         """Whenever one or more votes for a thesis change, this function
         should be called to process & save them
         """
@@ -80,12 +99,14 @@ class Thesis(models.Model):
                 ThesisVoteBinding.objects.create(thesis=self, voter=voter, value=vote.value)
         self.check_for_vote_status_change()
 
+    STATUSES_UNCHANGEABLE_BY_VOTE = (ThesisStatus.in_progress, ThesisStatus.defended)
+
     def check_for_vote_status_change(self):
         """If we have enough approving votes, accept this thesis - unless there's a rejecting
         vote, then we return it for corrections
         Don't change the status if it's in progress/defended
         """
-        if self.status in [ThesisStatus.in_progress.value, ThesisStatus.defended.value]:
+        if ThesisStatus(self.status) in Thesis.STATUSES_UNCHANGEABLE_BY_VOTE:
             return
         approve_votes_cnt = ThesisVoteBinding.objects.filter(
             thesis=self, value=ThesisVote.accepted.value
@@ -113,21 +134,6 @@ class Thesis(models.Model):
     class Meta:
         verbose_name = "praca dyplomowa"
         verbose_name_plural = "prace dyplomowe"
-
-
-class ThesisVote(Enum):
-    none = 1
-    rejected = 2
-    accepted = 3
-    user_missing = 4  # not sure about this one
-
-
-THESIS_VOTE_CHOICES = (
-    (ThesisVote.none.value, "brak głosu"),
-    (ThesisVote.rejected.value, "odrzucona"),
-    (ThesisVote.accepted.value, "zaakceptowana"),
-    (ThesisVote.user_missing.value, "brak użytkownika"),
-)
 
 
 def vote_to_string(vote_value: int) -> str:

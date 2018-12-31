@@ -5,13 +5,13 @@ to objects used in the theses system, that is:
 * fine-grained permissions checks
 * performing modifications/adding new objects
 """
-from typing import Dict, Any, List, Optional, Callable
+from typing import Dict, Any, List, Optional, Callable, Tuple
 
 from rest_framework import serializers, exceptions
 from django.db.models import QuerySet
 
 from apps.users.models import Employee, Student, BaseUser
-from .models import Thesis, ThesisStatus, ThesisVote, MAX_THESIS_TITLE_LEN
+from .models import Thesis, ThesisStatus, ThesisVote, MAX_THESIS_TITLE_LEN, VotesInfo
 from .users import wrap_user, get_user_type, is_theses_board_member
 from .permissions import (
     can_set_status, can_set_advisor,
@@ -43,14 +43,13 @@ class PersonSerializerForThesis(serializers.Serializer):
         return {"id": person_id}
 
 
-def serialize_thesis_votes(thesis: Thesis):
+def serialize_thesis_votes(thesis: Thesis) -> Dict[int, int]:
     """Serializes the votes of the given thesis into a dict"""
-    vote_tpls = (
-        (vote.voter.pk, vote.value)
+    return {
+        vote.voter.pk: vote.value
         for vote in thesis.votes.all()
         if vote.value != ThesisVote.none.value
-    )
-    return dict(vote_tpls)
+    }
 
 
 def get_person(queryset: QuerySet, person_data: GenericDict) -> BaseUser:
@@ -74,27 +73,24 @@ def copy_if_present(
         dst[key] = converter(src[key]) if converter else src[key]
 
 
-def validate_thesis_vote(value):
-    """Check if the given vote value is valid"""
-    return value in [vote.value for vote in ThesisVote]
-
-
-def validate_votes(votes,):
+def validate_votes(votes) -> VotesInfo:
     """Validate the votes dict for a thesis"""
-    if type(votes) is not dict:
+    if not isinstance(votes, dict):
         raise serializers.ValidationError("\"votes\" must be an object")
     result = []
     for key, value in votes.items():
-        if not validate_thesis_vote(value):
+        try:
+            vote = ThesisVote(value)
+        except ValueError:
             raise serializers.ValidationError("invalid thesis vote value")
         try:
             voter_id = int(key)
             voter = Employee.objects.get(pk=voter_id)
-            if not is_theses_board_member(voter):
-                raise serializers.ValidationError("voter is not a member of the theses board")
-            result.append((voter, ThesisVote(value)))
         except (ValueError, Employee.DoesNotExist):
             raise serializers.ValidationError("bad voter id")
+        if not is_theses_board_member(voter):
+            raise serializers.ValidationError("voter is not a member of the theses board")
+        result.append((voter, vote))
     return result
 
 
@@ -130,7 +126,7 @@ def check_votes_permissions(user: BaseUser, votes: List):
     """Check that the specified user is permitted to modify the votes as specified"""
     for voter, _ in votes:
         if not can_cast_vote_as_user(user, voter):
-            raise exceptions.PermissionDenied("this user cannot change that user's vote")
+            raise exceptions.PermissionDenied(f'user {user} cannot change the vote of {voter}')
 
 
 def check_advisor_permissions(user: BaseUser, advisor: Employee):
