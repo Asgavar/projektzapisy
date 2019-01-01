@@ -64,6 +64,10 @@ THESIS_VOTE_CHOICES = (
 VotesInfo = Tuple[Employee, ThesisVote]
 
 
+"""If a thesis is in one of those statuses, a vote will not reject/accept it"""
+STATUSES_UNCHANGEABLE_BY_VOTE = (ThesisStatus.in_progress, ThesisStatus.defended)
+
+
 class Thesis(models.Model):
     title = models.CharField(max_length=MAX_THESIS_TITLE_LEN, unique=True)
     advisor = models.ForeignKey(
@@ -99,14 +103,12 @@ class Thesis(models.Model):
                 ThesisVoteBinding.objects.create(thesis=self, voter=voter, value=vote.value)
         self.check_for_vote_status_change()
 
-    STATUSES_UNCHANGEABLE_BY_VOTE = (ThesisStatus.in_progress, ThesisStatus.defended)
-
     def check_for_vote_status_change(self):
         """If we have enough approving votes, accept this thesis - unless there's a rejecting
         vote, then we return it for corrections
         Don't change the status if it's in progress/defended
         """
-        if ThesisStatus(self.status) in Thesis.STATUSES_UNCHANGEABLE_BY_VOTE:
+        if ThesisStatus(self.status) in STATUSES_UNCHANGEABLE_BY_VOTE:
             return
         approve_votes_cnt = ThesisVoteBinding.objects.filter(
             thesis=self, value=ThesisVote.accepted.value
