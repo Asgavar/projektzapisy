@@ -45,7 +45,7 @@ class ThesesBaseTestCase(APITestCase):
         cls.staff_user.user.save()
 
         cls.board_members = []
-        for i in range(0, cls.NUM_BOARD_MEMBERS):
+        for i in range(cls.NUM_BOARD_MEMBERS):
             member = Employee.objects.all()[i]
             cls.board_members.append(member)
             cls.board_group.user_set.add(member.user)
@@ -131,8 +131,8 @@ class ThesesBaseTestCase(APITestCase):
         graded or graded with indeterminate vote values for the given
         board member"""
         num_theses = random.randint(10, 20)
-        graded_theses = [self.make_thesis() for i in range(num_theses)]
-        ungraded_theses = [self.make_thesis() for i in range(num_theses)]
+        graded_theses = [self.make_thesis() for _ in range(num_theses)]
+        ungraded_theses = [self.make_thesis() for _ in range(num_theses)]
         all_theses = graded_theses + ungraded_theses
         for thesis in all_theses:
             # This is needed since the thesis vote bindings created below need a pk
