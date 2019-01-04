@@ -11,7 +11,7 @@ environ.Env.read_env(os.path.join(BASE_DIR, os.pardir, 'env', '.env'))
 
 DEBUG = env.bool('DEBUG')
 RELEASE = env.bool('RELEASE')
-TESTING = sys.argv[1:2] = ["test"]
+TESTING = sys.argv[1:2] == ["test"]
 
 # With DEBUG = False Django will refuse to serve requests to hosts different than this one.
 ALLOWED_HOSTS = env.list('ALLOWED_HOSTS')
