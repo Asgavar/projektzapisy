@@ -288,6 +288,14 @@ class ThesesStore {
 	});
 
 	/**
+	 * Find a thesis in the current store by ID
+	 * @param id The ID of the thesis to find
+	 */
+	private findById(id: number): Thesis | null {
+		return this.theses.find(t => t.id === id) || null;
+	}
+
+	/**
 	 * Set the specified thesis as selected
 	 * @param thesis The thesis to select; must be in the local theses list
 	 */
@@ -412,7 +420,7 @@ class ThesesStore {
 		// Reload without losing the current position
 		yield this.loadTheses(LoadMode.Replace, this.lastRowIndex);
 
-		const toSelect = this.thesisToSelectAfterAction(thesis!.original, id);
+		const toSelect = this.thesisToSelectAfterAction(thesis!.modified, id);
 		this.applicationState = ApplicationState.Normal;
 		// no matter what the work mode was, if we have a thesis we end up in the edit view
 		this.workMode = toSelect ? ThesisWorkMode.Editing : ThesisWorkMode.Viewing;
@@ -422,17 +430,16 @@ class ThesesStore {
 
 	// Either the same thesis we just saved, or the next ungraded thesis
 	// if the current user is a theses board member and has the filter set to ungraded
-	private thesisToSelectAfterAction(oldThesis: Thesis, savedId: number) {
+	private thesisToSelectAfterAction(modifiedThesis: Thesis, savedId: number) {
 		const { user } = this;
 		if (
 			this.isThesesBoardMember(user.user) &&
-			this.params.type === ThesisTypeFilter.Ungraded
+			this.params.type === ThesisTypeFilter.Ungraded &&
+			// don't switch away from this thesis if it's not graded still
+			!isUngraded(modifiedThesis, user.user)
 		) {
-			// The first nonvoted-for thesis
-			const result = this.theses.find(t =>
-				!t.isEqual(oldThesis) &&
-				t.getMemberVote(user.user) === ThesisVote.None
-			);
+			// The first ungraded thesis
+			const result = this.theses.find(t => isUngraded(t, user.user));
 			if (result) {
 				return result;
 			}
@@ -443,7 +450,7 @@ class ThesesStore {
 		// Note that it _could_ technically be absent from the new list
 		// but the odds are absurdly low (it would have to be deleted by someone
 		// else or the admin in the time between those two requests above)
-		return this.theses.find(t => t.id === savedId) || null;
+		return this.findById(savedId) || null;
 	}
 }
 
@@ -464,6 +471,10 @@ function thesisIndexInList(thesis: Thesis | null, theses: Thesis[]) {
 
 function compositeThesisForThesis(t: Thesis | null) {
 	return t ? { original: t, modified: clone(t) } : null;
+}
+
+function isUngraded(t: Thesis, forUser: Employee): boolean {
+	return t.getMemberVote(forUser) === ThesisVote.None;
 }
 
 const thesesStore = new ThesesStore();
