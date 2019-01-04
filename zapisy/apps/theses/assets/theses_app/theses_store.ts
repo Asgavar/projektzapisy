@@ -8,7 +8,10 @@
 import { observable, action, flow, configure, computed } from "mobx";
 import { clone } from "lodash";
 
-import { Thesis, AppUser, ThesisTypeFilter, Employee, ThesisVote, BasePerson } from "./types";
+import {
+	Thesis, AppUser, ThesisTypeFilter, Employee,
+	ThesisVote, BasePerson, UserType,
+} from "./types";
 import {
 	getThesesList, saveModifiedThesis, saveNewThesis,
 	getCurrentUser, FAKE_USER, getThesesBoard, getNumUngraded,
@@ -126,6 +129,10 @@ class ThesesStore {
 			const ungraded = yield this.getNumUngraded();
 			if (ungraded) {
 				this.params.type = ThesisTypeFilter.Ungraded;
+			}
+			if (this.user.type === UserType.Employee && !this.isThesesBoardMember(this.user.user)) {
+				// employees are most likely only interested in their own theses
+				this.params.onlyMine = true;
 			}
 			yield this.refreshTheses();
 			if (this.params.type === ThesisTypeFilter.Ungraded && this.theses.length) {
