@@ -46,7 +46,6 @@ type Props = {
 	onTitleChange: (titleSubstr: string) => void;
 	titleValue: string;
 
-	displayOnlyMine: boolean;
 	state: ApplicationState;
 	stringFilterBeingChanged: ChangedStringFilter;
 };
@@ -139,7 +138,7 @@ export class ListFilters extends React.PureComponent<Props> {
 				/>
 			</div>
 
-			{this.props.displayOnlyMine ? <OnlyMineContainer>
+			<OnlyMineContainer>
 				<OnlyMineCheckbox
 					type="checkbox"
 					checked={this.props.onlyMine}
@@ -147,7 +146,7 @@ export class ListFilters extends React.PureComponent<Props> {
 					disabled={!isNormalState}
 				/>
 				<span style={labelStyle}>Tylko moje</span>
-			</OnlyMineContainer> : null}
+			</OnlyMineContainer>
 		</FiltersContainer>;
 	}
 }
