@@ -76,6 +76,7 @@ class ThesesStore {
 	/** Current filtering/sort params */
 	@observable public params: ThesesProcessParams = observable({
 		type: ThesisTypeFilter.Default,
+		onlyMine: false,
 		title: "",
 		advisor: "",
 		sortColumn: SortColumn.None,
@@ -167,11 +168,20 @@ class ThesesStore {
 	});
 
 	@action
-	public onTypeFilterChanged = (value: ThesisTypeFilter) => {
+	public onTypeFilterChanged(value: ThesisTypeFilter) {
 		if (!this.checkCanPerformBackendOp()) {
 			return;
 		}
 		this.params.type = value;
+		this.refetch();
+	}
+
+	@action
+	public onOnlyMineChanged(value: boolean) {
+		if (!this.checkCanPerformBackendOp()) {
+			return;
+		}
+		this.params.onlyMine = value;
 		this.refetch();
 	}
 
