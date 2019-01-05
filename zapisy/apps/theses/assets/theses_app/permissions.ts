@@ -22,14 +22,6 @@ export function canCastVoteAsUser(appUser: AppUser, user: Employee) {
 }
 
 /**
- * Determine whether the specified app user can vote for a thesis
- * @param appUser The app user
- */
-export function canVote(appUser: AppUser) {
-	return isThesisStaff(appUser);
-}
-
-/**
  * Determine whether the specified app user is permitted to add new objects
  * @param user The app user
  */

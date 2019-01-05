@@ -14,7 +14,7 @@ import "./style.less";
 import { Spinner } from "../Spinner";
 import { getDisabledStyle } from "../../utils";
 import { ThesisWorkMode, ApplicationState, isPerformingBackendOp } from "../../types/misc";
-import { canModifyThesis, canVote } from "../../permissions";
+import { canModifyThesis } from "../../permissions";
 
 const SaveButton = React.memo(Button.extend`
 	&:disabled:hover {
@@ -165,8 +165,10 @@ export class ThesisDetails extends React.PureComponent<Props> {
 	}
 	private onShortcutVoteCast(vote: ThesisVote) {
 		const { props } = this;
+		const isUserBoardMember = !!props.thesesBoard.find(props.user.user.isEqual);
 		if (
-			canVote(props.user) &&
+			isUserBoardMember &&
+			canModifyThesis(props.user, props.thesis) &&
 			!props.hasUnsavedChanges &&
 			props.mode === ThesisWorkMode.Editing
 		) {
