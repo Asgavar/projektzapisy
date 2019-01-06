@@ -6,7 +6,6 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Value, When, Case, BooleanField, QuerySet, Q
 from django.db.models.functions import Concat, Lower
 from django.core.exceptions import PermissionDenied
-from django.http import Http404
 from rest_framework import viewsets, permissions
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -114,11 +113,11 @@ def generate_base_queryset() -> QuerySet:
         .prefetch_related("votes") \
         .prefetch_related("votes__voter") \
         .annotate(
-            advisor_name=Concat(
+            _advisor_name=Concat(
                 "advisor__user__first_name", Value(" "), "advisor__user__last_name"
             )
         ) \
-        .annotate(is_archived=Case(
+        .annotate(_is_archived=Case(
             When(status=ThesisStatus.defended.value, then=True),
             default=Value(False),
             output_field=BooleanField()
@@ -151,7 +150,7 @@ def filter_queryset(
     if title:
         result = result.filter(title__icontains=title)
     if advisor_name:
-        result = result.filter(advisor_name__icontains=advisor_name)
+        result = result.filter(_advisor_name__icontains=advisor_name)
     return result
 
 
@@ -162,24 +161,24 @@ def sort_queryset(qs: QuerySet, sort_column: str, sort_dir: str) -> QuerySet:
     """
     db_column = ""
     if sort_column == "advisor":
-        db_column = "advisor_name"
+        db_column = "_advisor_name"
     elif sort_column == "title":
         db_column = "title"
 
-    resulting_ordering = "-added_date"
+    resulting_ordering = "-modified_date"
     if db_column:
         orderer = Lower(db_column)
         resulting_ordering = orderer.desc() if sort_dir == "desc" else orderer.asc()
 
     # We want to first order by archived
-    return qs.order_by("is_archived", resulting_ordering)
+    return qs.order_by("_is_archived", resulting_ordering)
 
 
 def available_thesis_filter(qs: QuerySet) -> QuerySet:
     """Returns only theses that are considered "available" from the specified queryset"""
     return qs \
         .exclude(status=ThesisStatus.in_progress.value) \
-        .exclude(is_archived=True) \
+        .exclude(_is_archived=True) \
         .exclude(reserved=True)
 
 
@@ -195,7 +194,7 @@ def filter_theses_queryset_for_type(
 ) -> QuerySet:
     """Returns only theses matching the specified type filter from the specified queryset"""
     if thesis_type == ThesisTypeFilter.all_current:
-        return qs.exclude(is_archived=True)
+        return qs.exclude(_is_archived=True)
     elif thesis_type == ThesisTypeFilter.all:
         return qs
     elif thesis_type == ThesisTypeFilter.masters:
@@ -224,9 +223,7 @@ def filter_theses_queryset_for_only_mine(qs: QuerySet, user: BaseUser):
     user_type = get_user_type(user)
     if user_type == ThesisUserType.student:
         return qs.filter(Q(student=user) | Q(student_2=user))
-    elif user_type == ThesisUserType.employee:
-        return qs.filter(Q(advisor=user) | Q(auxiliary_advisor=user))
-    raise Http404()
+    return qs.filter(Q(advisor=user) | Q(auxiliary_advisor=user))
 
 
 class ThesesBoardViewSet(viewsets.ModelViewSet):
@@ -273,11 +270,11 @@ def build_autocomplete_view_with_queryset(queryset):
             qs = queryset.objects \
                 .select_related("user") \
                 .annotate(
-                    full_name=Concat(
+                    _full_name=Concat(
                         "user__first_name", Value(" "), "user__last_name"
                     )
                 ) \
-                .order_by("full_name")
+                .order_by("_full_name")
             if self.q:
                 qs = qs.filter(full_name__icontains=self.q)
             return qs.all()

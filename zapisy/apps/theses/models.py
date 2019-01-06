@@ -50,14 +50,12 @@ class ThesisVote(Enum):
     none = 1
     rejected = 2
     accepted = 3
-    user_missing = 4  # not sure about this one
 
 
 THESIS_VOTE_CHOICES = (
     (ThesisVote.none.value, "brak głosu"),
     (ThesisVote.rejected.value, "odrzucona"),
     (ThesisVote.accepted.value, "zaakceptowana"),
-    (ThesisVote.user_missing.value, "brak użytkownika"),
 )
 
 
@@ -121,6 +119,9 @@ class Thesis(models.Model):
         elif approve_votes_cnt >= get_num_required_votes():
             self.status = ThesisStatus.accepted.value
         self.save()
+
+    def is_archived(self):
+        return self.status == ThesisStatus.defended.value
 
     def __str__(self) -> str:
         return self.title

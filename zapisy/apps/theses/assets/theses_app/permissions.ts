@@ -1,8 +1,10 @@
 /**
  * @file Theses app permission checks, mostly analogous to permissions.py
  */
-import { AppUser, UserType, Thesis, Employee, ThesisStatus } from "./types";
-import { thesesStore } from "./theses_store";
+import { thesesStore } from "./theses_logic";
+import { AppUser, Employee } from "./users";
+import { UserType, ThesisStatus } from "./protocol_types";
+import { Thesis } from "./thesis";
 
 /**
  * Determine whether the specified app user has a thesis staff role
@@ -34,12 +36,8 @@ export function canAddThesis(user: AppUser) {
  * @param user The app user
  * @param thesis The thesis
  */
-function isOwnerOfThesis(user: AppUser, thesis: Thesis) {
-	return (
-		thesis.advisor !== null &&
-		user.type === UserType.Employee &&
-		thesis.advisor.id === user.user.id
-	);
+function isOwnerOfThesis(user: AppUser, thesis: Thesis): boolean {
+	return !!thesis.advisor && thesis.advisor.isEqual(user.user);
 }
 
 /**
@@ -48,12 +46,14 @@ function isOwnerOfThesis(user: AppUser, thesis: Thesis) {
  * @param thesis The thesis
  */
 export function canModifyThesis(user: AppUser, thesis: Thesis) {
-	return (
-		isThesisStaff(user) ||
-		user.type === UserType.Employee &&
-		isOwnerOfThesis(user, thesis)
-	);
+	if (thesis.isArchived()) {
+		return user.type === UserType.Admin;
+	}
+	return isThesisStaff(user) || isOwnerOfThesis(user, thesis);
 }
+
+// The functions below will only be used if the one above returns true,
+// so they don't need to repeat its checks
 
 /**
  * Determine if the specified user is permitted to change the title of the specified thesis
@@ -61,12 +61,12 @@ export function canModifyThesis(user: AppUser, thesis: Thesis) {
  * @param thesis The thesis
  */
 export function canChangeTitle(user: AppUser, thesis: Thesis) {
-	const frozenStatuses = [
-		ThesisStatus.Accepted, ThesisStatus.Defended, ThesisStatus.InProgress,
+	const allowedStatuses = [
+		ThesisStatus.BeingEvaluated, ThesisStatus.ReturnedForCorrections,
 	];
 	return (
 		isThesisStaff(user) ||
-		isOwnerOfThesis(user, thesis) && !frozenStatuses.includes(thesis.status)
+		isOwnerOfThesis(user, thesis) && allowedStatuses.includes(thesis.status)
 	);
 }
 

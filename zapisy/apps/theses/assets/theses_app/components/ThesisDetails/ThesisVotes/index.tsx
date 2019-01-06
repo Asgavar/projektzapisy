@@ -1,8 +1,10 @@
 import * as React from "react";
 
-import { Employee, Thesis, ThesisVote, AppUser } from "../../../types";
 import { SingleVote } from "./SingleVote";
 import styled from "styled-components";
+import { Thesis } from "../../../thesis";
+import { Employee, AppUser } from "../../../users";
+import { ThesisVote } from "../../../protocol_types";
 
 type Props = {
 	thesis: Thesis,
@@ -20,7 +22,7 @@ export const ThesisVotes = React.memo(function(props: Props) {
 		<SingleVote
 			key={i}
 			voter={emp}
-			value={props.thesis.getMemberVote(emp)}
+			value={props.thesis.votes}
 			user={props.user}
 			onChange={props.onChange}
 		/>

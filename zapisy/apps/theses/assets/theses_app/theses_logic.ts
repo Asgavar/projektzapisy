@@ -9,21 +9,20 @@ import { observable, action, flow, configure, computed } from "mobx";
 import { clone } from "lodash";
 
 import {
-	Thesis, AppUser, ThesisTypeFilter, Employee,
-	ThesisVote, BasePerson, UserType,
-} from "./types";
-import {
 	getThesesList, saveModifiedThesis, saveNewThesis,
 	getCurrentUser, FAKE_USER, getThesesBoard, getNumUngraded,
 } from "./backend_callers";
 import {
 	ApplicationState, ThesisWorkMode, isPerformingBackendOp,
 	ThesesProcessParams, SortColumn, SortDirection,
-} from "./types/misc";
+} from "./app_types";
 import { roundUp, wait } from "common/utils";
 import { CancellablePromise } from "mobx/lib/api/flow";
 import { adjustDomForUngraded } from "./utils";
 import { ThesisEmptyTitle } from "./errors";
+import { Thesis } from "./thesis";
+import { ThesisTypeFilter, UserType, ThesisVote } from "./protocol_types";
+import { AppUser, Employee, Person } from "./users";
 
 /** Tell MobX to ensure that @observable fields are only modified in actions */
 configure({ enforceActions: "observed" });
@@ -148,7 +147,7 @@ class ThesesStore {
 	/**
 	 * Checks whether the given user is a member of the theses board
 	 */
-	public isThesesBoardMember(user: BasePerson): boolean {
+	public isThesesBoardMember(user: Person): boolean {
 		return !!this.thesesBoard.find(member => member.isEqual(user));
 	}
 
@@ -453,10 +452,10 @@ class ThesesStore {
 			this.isThesesBoardMember(user.user) &&
 			this.params.type === ThesisTypeFilter.Ungraded &&
 			// don't switch away from this thesis if it's not graded still
-			!isUngraded(modifiedThesis, user.user)
+			!isUngraded(modifiedThesis, user.user as Employee)
 		) {
 			// The first ungraded thesis
-			const result = this.theses.find(t => isUngraded(t, user.user));
+			const result = this.theses.find(t => isUngraded(t, user.user as Employee));
 			if (result) {
 				return result;
 			}
@@ -491,7 +490,8 @@ function compositeThesisForThesis(t: Thesis | null) {
 }
 
 function isUngraded(t: Thesis, forUser: Employee): boolean {
-	return t.getMemberVote(forUser) === ThesisVote.None;
+	const voteDetails = t.getVoteDetails();
+	return voteDetails.getVoteForMember(forUser as Employee) === ThesisVote.None;
 }
 
 const thesesStore = new ThesesStore();
