@@ -11,7 +11,6 @@
     "baseUrl": "./assets",
     "noUnusedParameters": true,
     "noUnusedLocals": true,
-    "strictPropertyInitialization": false,
     "experimentalDecorators": true,
     "types": [
       "jquery",
