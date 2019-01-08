@@ -40,7 +40,7 @@ export class Thesis {
 		this.secondStudent = null;
 		this.addedDate = moment();
 		this.modifiedDate = moment();
-		this.votes = new ThesisVoteDetails(new Map());
+		this.votes = new ThesisVoteDetails(new Map(), []);
 	}
 
 	public toString() {

@@ -12,20 +12,17 @@ export class ThesisVoteDetails {
 	// on object pointer equality - we could easily have multiple
 	// objects representing the same member
 	private votes: Map<number, ThesisVote>;
-	private emps: Employee[];
+	private voters: Employee[];
 
-	public constructor(votes: ThesisVotes) {
-		this.emps = Array.from(votes.keys());
-		const transformedPairs = Array.from(votes.entries()).map(([emp, vote]) => (
-			[emp.id, vote]
-		)) as Array<[number, ThesisVote]>;
-		this.votes = new Map(transformedPairs);
+	public constructor(votes: Map<number, ThesisVote>, voters: Employee[]) {
+		this.voters = voters;
+		this.votes = votes;
 	}
 
 	public setVote(emp: Employee, vote: ThesisVote) {
 		this.votes.set(emp.id, vote);
-		if (!this.emps.find(emp.isEqual)) {
-			this.emps.push(emp);
+		if (!this.voters.find(emp.isEqual)) {
+			this.voters.push(emp);
 		}
 	}
 
@@ -45,7 +42,7 @@ export class ThesisVoteDetails {
 	 */
 	public getAllVotes(): ThesisVotes {
 		const transformedPairs = Array.from(this.votes.entries()).map(([id, vote]) => (
-			[this.emps.find(e => e.id === id), vote]
+			[this.voters.find(e => e.id === id), vote]
 		)) as Array<[Employee, ThesisVote]>;
 		return new Map(transformedPairs);
 	}

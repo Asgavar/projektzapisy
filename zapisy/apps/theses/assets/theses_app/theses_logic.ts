@@ -286,11 +286,12 @@ class ThesesStore {
 				console.assert(untilRow > this.lastRowIndex, "Already loaded");
 				const result = yield getThesesList(
 					this.params, this.lastRowIndex, untilRow - this.lastRowIndex,
+					this.thesesBoard,
 				);
 				this.theses = this.theses.concat(result.theses);
 				this.totalCount = result.total;
 			} else {
-				const result = yield getThesesList(this.params, 0, untilRow);
+				const result = yield getThesesList(this.params, 0, untilRow, this.thesesBoard);
 				this.theses = result.theses;
 				this.totalCount = result.total;
 			}

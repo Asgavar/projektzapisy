@@ -1,13 +1,20 @@
 import * as moment from "moment";
 
-import { ThesisKind, ThesisStatus, UserType } from "./protocol_types";
+import { ThesisKind, ThesisStatus, UserType, ThesisVote } from "./protocol_types";
 import { Thesis } from "./thesis";
 import { Employee, Student, AppUser } from "./users";
+import { ThesisVoteCounts, ThesisVoteDetails } from "./votes";
 
 type PersonInJson = {
 	id: number;
 	display_name: string;
 };
+
+type ThesisVotesInJson = {
+	vote_values: { [_: number]: ThesisVote },
+	old_voters: PersonInJson[],
+};
+type ThesisCountsInJson = { accept_cnt: number, reject_cnt: number };
 
 /**
  * This is the format in which we receive theses from the backend
@@ -25,6 +32,7 @@ export type ThesisInJson = {
 	student_2?: PersonInJson;
 	added_date: string;
 	modified_date: string;
+	votes: ThesisVotesInJson | ThesisCountsInJson;
 };
 
 type CurrentUserInJson = {
@@ -40,7 +48,7 @@ export function deserializeStudent(json: PersonInJson) {
 	return new Student(json.id, json.display_name);
 }
 
-export function deserializeThesis(json: ThesisInJson) {
+export function deserializeThesis(json: ThesisInJson, thesesBoard: Employee[]) {
 	const result = new Thesis();
 	result.id = json.id;
 	result.title = json.title;
@@ -54,7 +62,22 @@ export function deserializeThesis(json: ThesisInJson) {
 	result.secondStudent = json.student_2 ? deserializeStudent(json.student_2) : null;
 	result.addedDate = moment(json.added_date);
 	result.modifiedDate = moment(json.modified_date);
+	result.votes = deserializeVotes(json.votes, thesesBoard);
 	return result;
+}
+
+function deserializeVotes(
+	votes: ThesisVotesInJson | ThesisCountsInJson, thesesBoard: Employee[],
+) {
+	if ("accept_cnt" in votes && "reject_cnt" in votes) {
+		return new ThesisVoteCounts(votes.accept_cnt, votes.reject_cnt);
+	}
+	const entries = Object
+		.entries(votes.vote_values)
+		.map(([idStr, value]) => [Number(idStr), value]) as Array<[number, ThesisVote]>;
+	const oldVoters = votes.old_voters.map(deserializeEmployee);
+	const allVoters = thesesBoard.concat(oldVoters);
+	return new ThesisVoteDetails(new Map(entries), allVoters);
 }
 
 export function deserializeCurrentUser(json: CurrentUserInJson) {
