@@ -10,7 +10,6 @@ import { ThesisStatusIndicator } from "./ThesisStatusIndicator";
 import { ThesisWorkMode } from "../../../app_types";
 import { canChangeStatus, canModifyThesis } from "../../../permissions";
 import { Thesis } from "../../../thesis";
-import { AppUser } from "../../../users";
 import { ThesisStatus } from "../../../protocol_types";
 
 const TopRowContainer = styled.div`
@@ -25,7 +24,6 @@ width: 100%;
 type Props = {
 	thesis: Thesis;
 	mode: ThesisWorkMode;
-	user: AppUser;
 	onReservationChanged: (nr: boolean) => void;
 	onDateChanged: (nd: Moment) => void;
 	onStatusChanged: (ns: ThesisStatus) => void;
@@ -53,7 +51,7 @@ function ReservationCheckbox(props: {
 
 export class ThesisTopRow extends React.PureComponent<Props> {
 	public render() {
-		const readOnly = !canModifyThesis(this.props.user, this.props.thesis);
+		const readOnly = !canModifyThesis(this.props.thesis);
 		const { mode, thesis } = this.props;
 		return <TopRowContainer>
 			<ReservationCheckbox
@@ -68,7 +66,7 @@ export class ThesisTopRow extends React.PureComponent<Props> {
 			<ThesisStatusIndicator
 				onChange={this.props.onStatusChanged}
 				value={thesis.status}
-				enabled={!readOnly && canChangeStatus(this.props.user)}
+				enabled={!readOnly && canChangeStatus()}
 			/>
 		</TopRowContainer>;
 	}

@@ -7,7 +7,7 @@ import { ThesisKindField } from "./ThesisKindField";
 import { AddRemoveIcon, IconType } from "./AddRemoveIcon";
 import { canSetArbitraryAdvisor, canModifyThesis, canChangeTitle } from "../../../permissions";
 import { Thesis, MAX_THESIS_TITLE_LEN } from "../../../thesis";
-import { AppUser, Employee, Student } from "../../../users";
+import { Employee, Student } from "../../../users";
 import { ThesisKind } from "../../../protocol_types";
 
 const MidFormTable = styled.table`
@@ -42,7 +42,6 @@ type Props = {
 	thesis: Thesis;
 	/** Should the title field be highlighted to indicate an error? */
 	titleError: boolean;
-	user: AppUser;
 	onTitleChanged: (nt: string) => void;
 	onKindChanged: (nk: ThesisKind) => void;
 	onAdvisorChanged: (na: Employee | null) => void;
@@ -91,7 +90,7 @@ export class ThesisMiddleForm extends React.PureComponent<Props, State> {
 	}
 
 	public render() {
-		const readOnly = !canModifyThesis(this.props.user, this.props.thesis);
+		const readOnly = !canModifyThesis(this.props.thesis);
 
 		return <div>
 			<MidFormTable>
@@ -117,7 +116,7 @@ export class ThesisMiddleForm extends React.PureComponent<Props, State> {
 				border: "1px solid red"
 			});
 		}
-		const titleReadOnly = readOnly || !canChangeTitle(this.props.user, this.props.thesis);
+		const titleReadOnly = readOnly || !canChangeTitle(this.props.thesis);
 		return <tr>
 			<td>Tytuł</td>
 			<td><textarea
@@ -153,7 +152,7 @@ export class ThesisMiddleForm extends React.PureComponent<Props, State> {
 						onChange={this.props.onAdvisorChanged}
 						personConstructor={Employee}
 						value={this.props.thesis.advisor}
-						readOnly={readOnly || !canSetArbitraryAdvisor(this.props.user)}
+						readOnly={readOnly || !canSetArbitraryAdvisor()}
 					/>
 					{ readOnly
 						? null

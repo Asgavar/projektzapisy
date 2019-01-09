@@ -12,11 +12,12 @@ import { ThesisVotes } from "./ThesisVotes";
 import "./style.less";
 import { Spinner } from "../Spinner";
 import { getDisabledStyle } from "../../utils";
-import { ThesisWorkMode, ApplicationState, isPerformingBackendOp } from "../../app_types";
+import { ThesisWorkMode, ApplicationState } from "../../app_types";
 import { canModifyThesis } from "../../permissions";
 import { Thesis } from "../../thesis";
 import { AppUser, Employee, Student } from "../../users";
 import { ThesisStatus, ThesisKind, ThesisVote } from "../../protocol_types";
+import { AppMode } from "../../app_logic/app_mode";
 
 const SaveButton = React.memo(Button.extend`
 	&:disabled:hover {
@@ -61,8 +62,9 @@ type Props = {
 	appState: ApplicationState;
 	hasUnsavedChanges: boolean;
 	mode: ThesisWorkMode;
-	user: AppUser;
 	hasTitleError: boolean;
+	user: AppUser;
+	isBoardMember: boolean;
 	onThesisModified: (thesis: Thesis) => void;
 	onSaveRequested: () => void;
 	onChangedTitle: () => void;
@@ -92,7 +94,7 @@ export class ThesisDetails extends React.PureComponent<Props> {
 				: null
 			}
 			<MainDetailsContainer
-				style={isPerformingBackendOp(this.props.appState) ? getDisabledStyle() : {}}
+				style={AppMode.isPerformingBackendOp() ? getDisabledStyle() : {}}
 			>
 				<LeftDetailsContainer>{this.renderThesisLeftPanel()}</LeftDetailsContainer>
 				<RightDetailsContainer>{this.renderThesisRightPanel()}</RightDetailsContainer>
@@ -105,7 +107,6 @@ export class ThesisDetails extends React.PureComponent<Props> {
 		return <>
 			<ThesisTopRow
 				mode={this.props.mode}
-				user={this.props.user}
 				thesis={thesis}
 				onReservationChanged={this.onReservationChanged}
 				onDateChanged={this.onDateUpdatedChanged}
@@ -114,7 +115,6 @@ export class ThesisDetails extends React.PureComponent<Props> {
 			<ThesisMiddleForm
 				thesis={thesis}
 				titleError={this.props.hasTitleError}
-				user={this.props.user}
 				onTitleChanged={this.onTitleChanged}
 				onKindChanged={this.onKindChanged}
 				onAdvisorChanged={this.onAdvisorChanged}
@@ -139,7 +139,7 @@ export class ThesisDetails extends React.PureComponent<Props> {
 	}
 
 	private renderSaveButton() {
-		const readOnly = !canModifyThesis(this.props.user, this.props.thesis);
+		const readOnly = !canModifyThesis(this.props.thesis);
 		if (readOnly) {
 			return null;
 		}
@@ -167,14 +167,13 @@ export class ThesisDetails extends React.PureComponent<Props> {
 	}
 	private onShortcutVoteCast(vote: ThesisVote) {
 		const { props } = this;
-		const isUserBoardMember = !!props.thesesBoard.find(props.user.user.isEqual);
 		if (
-			isUserBoardMember &&
-			canModifyThesis(props.user, props.thesis) &&
+			props.isBoardMember &&
+			canModifyThesis(props.thesis) &&
 			!props.hasUnsavedChanges &&
 			props.mode === ThesisWorkMode.Editing
 		) {
-			this.onVoteChanged(props.user.user as Employee, vote);
+			this.onVoteChanged(props.user.person as Employee, vote);
 			props.onSaveRequested();
 		}
 	}
