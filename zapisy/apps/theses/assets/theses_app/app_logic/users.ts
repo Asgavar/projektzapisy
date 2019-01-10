@@ -1,4 +1,6 @@
 import { observable, flow } from "mobx";
+import { memoize } from "lodash";
+
 import { getCurrentUser, getThesesBoard, FAKE_USER } from "../backend_callers";
 import { Employee, AppUser } from "../users";
 import { UserType } from "../protocol_types";
@@ -13,9 +15,11 @@ class UsersC {
 	});
 
 	/** Determine whether the current user a member of the theses board */
-	public isUserMemberOfBoard() {
+	// We can memoize the result - this won't change during
+	// the app's lifetime, and calculating it does involve list search
+	public isUserMemberOfBoard = memoize(() => {
 		return !!this.thesesBoard.find(this.currentUser.person.isEqual);
-	}
+	});
 
 	/** Determine whether the current app user an admin */
 	public isUserAdmin() {

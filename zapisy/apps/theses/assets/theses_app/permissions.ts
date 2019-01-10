@@ -46,6 +46,14 @@ export function canModifyThesis(thesis: Thesis) {
 // so they don't need to repeat their checks
 
 /**
+ * Determine whether the current app user can cast a vote for the specified thesis
+ * @param thesis The thesis to vote for
+ */
+export function canCastVoteForThesis(thesis: Thesis) {
+	return thesis.status !== ThesisStatus.InProgress;
+}
+
+/**
  * Determine if the specified user is permitted to change the title of the specified thesis
  * @param thesis The thesis
  */

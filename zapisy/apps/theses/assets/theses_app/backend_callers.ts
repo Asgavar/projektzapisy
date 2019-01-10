@@ -93,8 +93,7 @@ function sortDirToBackendStr(dir: SortDirection) {
  * @param thesesBoard All current members of the theses board - needed for deserialization
  */
 export async function getThesesList(
-	params: ThesesProcessParams, offset: number, limit: number,
-	thesesBoard: Employee[],
+	params: ThesesProcessParams, offset: number, limit: number
 ) {
 	const paginatedResults: PaginatedThesesResult = await getData(
 		`${BASE_API_URL}/theses/`,
@@ -109,7 +108,7 @@ export async function getThesesList(
 		}},
 	);
 	return {
-		theses: paginatedResults.results.map(t => deserializeThesis(t, thesesBoard)),
+		theses: paginatedResults.results.map(deserializeThesis),
 		total: paginatedResults.count,
 	};
 }

@@ -1,7 +1,7 @@
 import * as React from "react";
 import styled from "styled-components";
 
-import { ThesisVote } from "../../../types";
+import { ThesisVote } from "../../../../protocol_types";
 
 type Props = {
 	value: ThesisVote;
@@ -19,7 +19,6 @@ function paramsForValue(value: ThesisVote) {
 		case ThesisVote.None: return { text: "\u{2B1C}" };
 		case ThesisVote.Accepted: return { text: "\u{2705}", color: "green" };
 		case ThesisVote.Rejected: return { text: "\u{274C}", color: "red" };
-		case ThesisVote.UserMissing: return { text: "\u{2753}" };
 	}
 }
 

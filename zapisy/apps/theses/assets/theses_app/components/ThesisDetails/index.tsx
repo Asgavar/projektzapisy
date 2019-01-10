@@ -13,7 +13,7 @@ import "./style.less";
 import { Spinner } from "../Spinner";
 import { getDisabledStyle } from "../../utils";
 import { ThesisWorkMode, ApplicationState } from "../../app_types";
-import { canModifyThesis } from "../../permissions";
+import { canModifyThesis, canCastVoteForThesis } from "../../permissions";
 import { Thesis } from "../../thesis";
 import { AppUser, Employee, Student } from "../../users";
 import { ThesisStatus, ThesisKind, ThesisVote } from "../../protocol_types";
@@ -65,6 +65,7 @@ type Props = {
 	hasTitleError: boolean;
 	user: AppUser;
 	isBoardMember: boolean;
+	isStaff: boolean;
 	onThesisModified: (thesis: Thesis) => void;
 	onSaveRequested: () => void;
 	onChangedTitle: () => void;
@@ -131,6 +132,7 @@ export class ThesisDetails extends React.PureComponent<Props> {
 			<ThesisVotes
 				thesis={this.props.thesis}
 				thesesBoard={this.props.thesesBoard}
+				isStaff={this.props.isStaff}
 				user={this.props.user}
 				onChange={this.onVoteChanged}
 			/>
@@ -170,6 +172,7 @@ export class ThesisDetails extends React.PureComponent<Props> {
 		if (
 			props.isBoardMember &&
 			canModifyThesis(props.thesis) &&
+			canCastVoteForThesis(props.thesis) &&
 			!props.hasUnsavedChanges &&
 			props.mode === ThesisWorkMode.Editing
 		) {

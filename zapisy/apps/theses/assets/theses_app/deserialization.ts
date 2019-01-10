@@ -4,6 +4,7 @@ import { ThesisKind, ThesisStatus, UserType, ThesisVote } from "./protocol_types
 import { Thesis } from "./thesis";
 import { Employee, Student, AppUser } from "./users";
 import { ThesisVoteCounts, ThesisVoteDetails } from "./votes";
+import { Users } from "./app_logic/users";
 
 type PersonInJson = {
 	id: number;
@@ -48,7 +49,7 @@ export function deserializeStudent(json: PersonInJson) {
 	return new Student(json.id, json.display_name);
 }
 
-export function deserializeThesis(json: ThesisInJson, thesesBoard: Employee[]) {
+export function deserializeThesis(json: ThesisInJson) {
 	const result = new Thesis();
 	result.id = json.id;
 	result.title = json.title;
@@ -62,12 +63,12 @@ export function deserializeThesis(json: ThesisInJson, thesesBoard: Employee[]) {
 	result.secondStudent = json.student_2 ? deserializeStudent(json.student_2) : null;
 	result.addedDate = moment(json.added_date);
 	result.modifiedDate = moment(json.modified_date);
-	result.votes = deserializeVotes(json.votes, thesesBoard);
+	result.votes = deserializeVotes(json.votes);
 	return result;
 }
 
 function deserializeVotes(
-	votes: ThesisVotesInJson | ThesisCountsInJson, thesesBoard: Employee[],
+	votes: ThesisVotesInJson | ThesisCountsInJson
 ) {
 	if ("accept_cnt" in votes && "reject_cnt" in votes) {
 		return new ThesisVoteCounts(votes.accept_cnt, votes.reject_cnt);
@@ -76,7 +77,7 @@ function deserializeVotes(
 		.entries(votes.vote_values)
 		.map(([idStr, value]) => [Number(idStr), value]) as Array<[number, ThesisVote]>;
 	const oldVoters = votes.old_voters.map(deserializeEmployee);
-	const allVoters = thesesBoard.concat(oldVoters);
+	const allVoters = Users.thesesBoard.concat(oldVoters);
 	return new ThesisVoteDetails(new Map(entries), allVoters);
 }
 

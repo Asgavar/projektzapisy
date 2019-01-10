@@ -3,8 +3,9 @@
  */
 import * as moment from "moment";
 import { Employee, Student, Person } from "./users";
-import { ThesisKind, ThesisStatus } from "./protocol_types";
+import { ThesisKind, ThesisStatus, ThesisVote } from "./protocol_types";
 import { ThesisVoteCounts, ThesisVoteDetails } from "./votes";
+import { Users } from "./app_logic/users";
 
 export const MAX_THESIS_TITLE_LEN = 300;
 
@@ -111,5 +112,15 @@ export class Thesis {
 
 	public hasVoteDetails() {
 		return this.votes instanceof ThesisVoteDetails;
+	}
+
+	public isUngraded(): boolean {
+		if (!this.hasVoteDetails() || !Users.isUserMemberOfBoard()) {
+			return false;
+		}
+		const voteDetails = this.getVoteDetails();
+		return voteDetails.getVoteForMember(
+			Users.currentUser.person as Employee
+		) === ThesisVote.None;
 	}
 }

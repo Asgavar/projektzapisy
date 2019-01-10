@@ -7,6 +7,10 @@ import { saveModifiedThesis, saveNewThesis } from "../backend_callers";
 import { ThesisWorkMode, ApplicationState } from "../app_types";
 import { AppMode } from "./app_mode";
 import { List } from "./theses_list";
+import { Users } from "./users";
+import { ThesisTypeFilter, ThesisVote } from "../protocol_types";
+import { Employee } from "../users";
+import { adjustDomForUngraded } from "../utils";
 
 /** The currently selected thesis */
 type CompositeThesis = {
@@ -18,6 +22,14 @@ type CompositeThesis = {
 
 class C {
 	@observable thesis: CompositeThesis | null = null;
+
+	@action
+	public initialize() {
+		if (List.shouldSelectUngradedThesis()) {
+			// automatically select a thesis to grade if any
+			this.selectThesis(List.theses[0]);
+		}
+	}
 
 	/**
 	 * Set the specified thesis as selected
@@ -122,36 +134,37 @@ class C {
 	 * if there are no unsaved changes.
 	 */
 	public save = flow(function*(this: C) {
-		if (!this.preSaveAsserts()) {
-			return;
-		}
-		this.performPreSaveChecks();
-
-		const thesis = this.thesis!;
-		const { workMode } = AppMode;
-
-		AppMode.applicationState = ApplicationState.Saving;
-		type NonViewModes = (ThesisWorkMode.Adding | ThesisWorkMode.Editing);
-		const handler = C.handlerForWorkMode[workMode as NonViewModes];
-
-		let id: number;
 		try {
-			id = yield handler(thesis);
-		} catch (err) {
+			if (!this.preSaveAsserts()) {
+				return;
+			}
+			this.performPreSaveChecks();
+
+			const thesis = this.thesis!;
+			const { workMode } = AppMode;
+
+			AppMode.applicationState = ApplicationState.Saving;
+			type NonViewModes = (ThesisWorkMode.Adding | ThesisWorkMode.Editing);
+			const handler = C.handlerForWorkMode[workMode as NonViewModes];
+
+			const id = yield handler(thesis);
+
+			const numUngraded = yield List.getNumUngraded();
+			List.adjustFiltersPostSave(numUngraded);
+
+			// Reload without losing the current position
+			yield List.reloadTheses();
+
+			const toSelect = thesisToSelectAfterAction(thesis.modified, id);
+			// no matter what the work mode was, if we have a thesis we end up in the edit view
+			if (toSelect) {
+				this.selectThesis(toSelect);
+			} else {
+				AppMode.workMode = ThesisWorkMode.Viewing;
+			}
+			adjustDomForUngraded(numUngraded);
+		} finally {
 			AppMode.applicationState = ApplicationState.Normal;
-			throw err;
-		}
-
-		// Reload without losing the current position
-		yield List.reloadTheses();
-
-		const toSelect = List.getThesisById(id);
-		AppMode.applicationState = ApplicationState.Normal;
-		// no matter what the work mode was, if we have a thesis we end up in the edit view
-		if (toSelect) {
-			this.selectThesis(toSelect);
-		} else {
-			AppMode.workMode = ThesisWorkMode.Viewing;
 		}
 	});
 }
@@ -167,6 +180,25 @@ function addNewThesis(thesis: CompositeThesis) {
 
 function compositeThesisForThesis(t: Thesis | null) {
 	return t ? { original: t, modified: clone(t) } : null;
+}
+
+function thesisToSelectAfterAction(modifiedThesis: Thesis, savedId: number) {
+	const shouldSelectOtherUngraded = (
+		Users.isUserMemberOfBoard() &&
+		List.params.type === ThesisTypeFilter.Ungraded &&
+		// don't switch away from this thesis if it's not graded still
+		!modifiedThesis.isUngraded()
+	);
+
+	return (
+		shouldSelectOtherUngraded && List.findUngraded() ||
+		// We'll want to find the thesis we just saved
+		// Note that it _could_ technically be absent from the new list
+		// but the odds are absurdly low (it would have to be deleted by someone
+		// else or the admin in the time between those two requests above)
+		List.getThesisById(savedId) ||
+		null
+	);
 }
 
 export const ThesisEditing = new C();

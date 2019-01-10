@@ -41,10 +41,8 @@ export class ThesisVoteDetails {
 	 * Returns all votes
 	 */
 	public getAllVotes(): ThesisVotes {
-		const transformedPairs = Array.from(this.votes.entries()).map(([id, vote]) => (
-			[this.voters.find(e => e.id === id), vote]
-		)) as Array<[Employee, ThesisVote]>;
-		return new Map(transformedPairs);
+		const entries = this.voters.map(v => [v, this.getVoteForMember(v)]) as Array<[Employee, ThesisVote]>;
+		return new Map(entries);
 	}
 }
 

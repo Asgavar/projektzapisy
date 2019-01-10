@@ -1,8 +1,9 @@
 import * as React from "react";
-import { ThesisVote, Employee, AppUser } from "../../../types";
+import { ThesisVote } from "../../../../protocol_types";
 import styled from "styled-components";
-import { canCastVoteAsUser } from "../../../permissions";
+import { canCastVoteAsUser } from "../../../../permissions";
 import { VoteIndicator } from "./VoteIndicator";
+import { Employee, AppUser } from "../../../../users";
 
 type Props = {
 	user: AppUser;
@@ -16,8 +17,8 @@ const voteCycle = [ThesisVote.None, ThesisVote.Accepted, ThesisVote.Rejected];
 export class SingleVote extends React.PureComponent<Props> {
 	public render() {
 		const { user, voter } = this.props;
-		const allowAction = canCastVoteAsUser(user, voter);
-		const sameUser = user.user.isEqual(voter);
+		const allowAction = canCastVoteAsUser(voter);
+		const sameUser = user.person.isEqual(voter);
 		const content = <>
 			<VoteIndicator active={allowAction} value={this.props.value} />
 			<VoteLabel
