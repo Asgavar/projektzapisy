@@ -8,8 +8,7 @@ import { ThesisWorkMode, ApplicationState } from "../app_types";
 import { AppMode } from "./app_mode";
 import { List } from "./theses_list";
 import { Users } from "./users";
-import { ThesisTypeFilter, ThesisVote } from "../protocol_types";
-import { Employee } from "../users";
+import { ThesisTypeFilter } from "../protocol_types";
 import { adjustDomForUngraded } from "../utils";
 
 /** The currently selected thesis */
