@@ -1,6 +1,6 @@
 import * as moment from "moment";
 
-import { ThesisKind, ThesisStatus, UserType, ThesisVote } from "./protocol_types";
+import { ThesisKind, ThesisStatus, UserType, ThesisVote, VoteMap } from "./protocol_types";
 import { Thesis } from "./thesis";
 import { Employee, Student, AppUser } from "./users";
 import { ThesisVoteCounts, ThesisVoteDetails } from "./votes";
@@ -10,11 +10,10 @@ type PersonInJson = {
 	id: number;
 	name: string;
 };
+type StudentInJson = PersonInJson;
+type EmployeeInJson = { username: string } & PersonInJson;
 
-type ThesisVotesInJson = {
-	vote_values: { [_: number]: ThesisVote },
-	old_voters: PersonInJson[],
-};
+type ThesisVotesInJson = VoteMap;
 type ThesisCountsInJson = { accept_cnt: number, reject_cnt: number };
 
 /**
@@ -37,15 +36,15 @@ export type ThesisInJson = {
 };
 
 type CurrentUserInJson = {
-	user: PersonInJson;
+	person: EmployeeInJson | StudentInJson;
 	type: UserType;
 };
 
-export function deserializeEmployee(json: PersonInJson) {
-	return new Employee(json.id, json.name);
+export function deserializeEmployee(json: EmployeeInJson) {
+	return new Employee(json.id, json.name, json.username);
 }
 
-export function deserializeStudent(json: PersonInJson) {
+export function deserializeStudent(json: StudentInJson) {
 	return new Student(json.id, json.name);
 }
 
@@ -74,18 +73,16 @@ function deserializeVotes(
 		return new ThesisVoteCounts(votes.accept_cnt, votes.reject_cnt);
 	}
 	const entries = Object
-		.entries(votes.vote_values)
+		.entries(votes)
 		.map(([idStr, value]) => [Number(idStr), value]) as Array<[number, ThesisVote]>;
-	const oldVoters = votes.old_voters.map(deserializeEmployee);
-	const allVoters = Users.thesesBoard.concat(oldVoters);
-	return new ThesisVoteDetails(new Map(entries), allVoters);
+	return new ThesisVoteDetails(new Map(entries));
 }
 
 export function deserializeCurrentUser(json: CurrentUserInJson) {
-	const deserializer = json.type === UserType.Student
-		? deserializeStudent
-		: deserializeEmployee;
-	return new AppUser(deserializer(json.user), json.type);
+	const person = json.type === UserType.Student
+		? deserializeStudent(json.person)
+		: deserializeEmployee(json.person as EmployeeInJson);
+	return new AppUser(person, json.type);
 }
 
 type BoardMemberIn = number;

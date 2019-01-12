@@ -5,11 +5,7 @@ to objects used in the theses system, that is:
 * fine-grained permissions checks
 * performing modifications/adding new objects
 """
-<<<<<<< HEAD
-from typing import Dict, Any, List, Optional, Callable
-=======
-from typing import Dict, Any, Optional
->>>>>>> theses-pr-6-frontend-app
+from typing import Dict, Any, List, Optional
 
 from rest_framework import serializers, exceptions
 from django.core.exceptions import ObjectDoesNotExist, ImproperlyConfigured
@@ -38,11 +34,14 @@ class ThesesPersonSerializer(serializers.Serializer):
         super().__init__(*args, **kwargs)
 
     def to_representation(self, instance: BaseUser):
-        return {
+        result = {
             "id": instance.pk,
             "name": instance.get_full_name(),
         }
-    
+        if isinstance(instance, Employee):
+            result["username"] = instance.user.username
+        return result
+
     def to_internal_value(self, data):
         if not self.queryset:
             raise ImproperlyConfigured(
@@ -65,12 +64,19 @@ class ThesesPersonSerializer(serializers.Serializer):
         super(serializers.Serializer, self).run_validators(value)
 
 
-def serialize_thesis_votes(thesis: Thesis) -> Dict[int, int]:
-    """Serializes the votes of the given thesis into a dict"""
+def serialize_thesis_votes(thesis: Thesis, is_staff: bool) -> Dict[int, int]:
+    """Serializes the votes into a dict if the user has permission to see them,
+    or just the accept/reject vote counts otherwise
+    """
+    if is_staff:
+        return {
+            vote.voter.pk: vote.value
+            for vote in thesis.votes.all()
+            if vote.value != ThesisVote.none.value
+        }
     return {
-        vote.voter.pk: vote.value
-        for vote in thesis.votes.all()
-        if vote.value != ThesisVote.none.value
+        "accept_cnt": thesis.votes.filter(value=ThesisVote.accepted.value).count(),
+        "reject_cnt": thesis.votes.filter(value=ThesisVote.rejected.value).count(),
     }
 
 
@@ -220,7 +226,10 @@ class ThesisSerializer(serializers.ModelSerializer):
         return instance
 
     def get_votes(self, instance):
-        return serialize_thesis_votes(instance)
+        if not self.context or "is_staff" not in self.context:
+            # should not happen
+            return {}
+        return serialize_thesis_votes(instance, self.context["is_staff"])
 
     class Meta:
         model = Thesis
@@ -238,7 +247,7 @@ class CurrentUserSerializer(serializers.ModelSerializer):
     so it's a separate serializer"""
     def to_representation(self, instance: BaseUser):
         return {
-            "user": ThesesPersonSerializer(instance).data,
+            "person": ThesesPersonSerializer(instance).data,
             "type": get_user_type(instance).value
         }
 

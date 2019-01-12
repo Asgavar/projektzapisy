@@ -1,7 +1,7 @@
 import * as React from "react";
 import styled from "styled-components";
 
-import { ThesisVote } from "../../../../protocol_types";
+import { ThesisVote } from "../../../protocol_types";
 
 type Props = {
 	value: ThesisVote;

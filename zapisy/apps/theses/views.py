@@ -20,6 +20,7 @@ from .models import (
 )
 from . import serializers
 from .drf_permission_classes import ThesisPermissions
+from .permissions import is_thesis_staff
 from .users import (
     wrap_user, get_theses_board, get_user_type,
     ThesisUserType, is_theses_board_member
@@ -98,6 +99,15 @@ class ThesesViewSet(viewsets.ModelViewSet):
             requested_advisor_name, only_mine,
         )
         return sort_queryset(filtered, sort_column, sort_dir)
+
+    def get_serializer_context(self):
+        """When serializing votes for a thesis, we need to know the user type
+        determining it for every thesis would be expensive as it requires
+        a DB hit, so it's a good idea to do it here and pass it to the serializer
+        """
+        result = super().get_serializer_context()
+        result["is_staff"] = is_thesis_staff(wrap_user(self.request.user))
+        return result
 
 
 def generate_base_queryset() -> QuerySet:

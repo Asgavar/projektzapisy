@@ -26,7 +26,7 @@ export const VoteDetails = React.memo(function(props: Props) {
 	const details = props.thesis.getVoteDetails();
 	const votes = Array.from(details.getAllVotes().entries());
 	votes.sort(([e1, _1], [e2, _2]) => (
-		strcmp(e1.displayName, e2.displayName)
+		strcmp(e1.username, e2.username)
 	));
 	const result = compact(votes.map(([voter, vote], i) => {
 		if (!displayAll && vote === ThesisVote.None) {
@@ -40,12 +40,12 @@ export const VoteDetails = React.memo(function(props: Props) {
 			onChange={props.onChange}
 		/>;
 	}));
-	return result.length ? <>result</> : <span>Brak głosów</span>;
+	return result.length ? <>{result}</> : <span>Brak głosów</span>;
 });
 
 /** Determine whether or not to display all votes, including
  * indeterminate ones, for this thesis
  */
 function shouldDisplayAllVotes(thesis: Thesis) {
-	return !canCastVoteForThesis(thesis);
+	return canCastVoteForThesis(thesis);
 }

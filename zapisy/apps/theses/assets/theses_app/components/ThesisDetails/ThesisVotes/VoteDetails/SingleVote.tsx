@@ -2,7 +2,7 @@ import * as React from "react";
 import { ThesisVote } from "../../../../protocol_types";
 import styled from "styled-components";
 import { canCastVoteAsUser } from "../../../../permissions";
-import { VoteIndicator } from "./VoteIndicator";
+import { VoteIndicator } from "../VoteIndicator";
 import { Employee, AppUser } from "../../../../users";
 
 type Props = {
@@ -23,7 +23,7 @@ export class SingleVote extends React.PureComponent<Props> {
 			<VoteIndicator active={allowAction} value={this.props.value} />
 			<VoteLabel
 				style={sameUser ? { fontWeight: "bold" } : {}}
-			>{voter.displayName}</VoteLabel>
+			>{voter.username}</VoteLabel>
 		</>;
 		return allowAction
 			? <VoteContainerActive onClick={this.onClick}>{content}</VoteContainerActive>

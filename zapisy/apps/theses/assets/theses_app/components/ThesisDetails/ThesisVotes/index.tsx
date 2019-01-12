@@ -36,7 +36,7 @@ const Header = styled.div`
 	font-weight: bold;
 	font-size: 16px;
 	color: black;
-	margin-bottom: 15px;
+	margin-bottom: 20px;
 `;
 
 const VotesContainer = styled.div`

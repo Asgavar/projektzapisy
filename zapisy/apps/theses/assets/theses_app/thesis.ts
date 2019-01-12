@@ -2,6 +2,7 @@
  * @file Defines the Thesis class and associated types
  */
 import * as moment from "moment";
+
 import { Employee, Student, Person } from "./users";
 import { ThesisKind, ThesisStatus, ThesisVote } from "./protocol_types";
 import { ThesisVoteCounts, ThesisVoteDetails } from "./votes";
@@ -41,7 +42,7 @@ export class Thesis {
 		this.secondStudent = null;
 		this.addedDate = moment();
 		this.modifiedDate = moment();
-		this.votes = new ThesisVoteDetails(new Map(), []);
+		this.votes = new ThesisVoteDetails(new Map());
 	}
 
 	public toString() {
@@ -75,7 +76,7 @@ export class Thesis {
 			this.isEqual(other),
 			"Thesis::areValuesEqual only makes sense for two theses with the same ID",
 		);
-		return (
+		if (!(
 			this.title === other.title &&
 			this.description === other.description &&
 			this.personValuesEqual(this.advisor, other.advisor) &&
@@ -86,7 +87,14 @@ export class Thesis {
 			this.reserved === other.reserved &&
 			this.status === other.status &&
 			this.modifiedDate.isSame(other.modifiedDate)
-		);
+		)) { return false; }
+		if (
+			this.hasVoteDetails() && other.hasVoteDetails() &&
+			!this.getVoteDetails().isEqual(other.getVoteDetails())
+		) {
+			return false;
+		}
+		return true;
 	}
 
 	private personValuesEqual(p1: Person | null, p2: Person | null): boolean {

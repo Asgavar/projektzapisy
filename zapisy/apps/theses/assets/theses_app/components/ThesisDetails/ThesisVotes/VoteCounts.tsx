@@ -1,6 +1,8 @@
 import * as React from "react";
 
 import { Thesis } from "../../../thesis";
+import { VoteIndicator } from "./VoteIndicator";
+import { ThesisVote } from "../../../protocol_types";
 
 type Props = {
 	thesis: Thesis;
@@ -15,8 +17,8 @@ export const VoteCounts = React.memo(function(props: Props) {
 		return null;
 	}
 	const counts = props.thesis.getVoteCounts();
-	return <ul>
-		<li>Zaakceptowane: {counts.accept}</li>
-		<li>Odrzucone: {counts.reject}</li>
-	</ul>;
+	return <>
+		<p><VoteIndicator active value={ThesisVote.Accepted} /> {counts.accept}</p>
+		<p><VoteIndicator active value={ThesisVote.Rejected} /> {counts.reject}</p>
+	</>;
 });

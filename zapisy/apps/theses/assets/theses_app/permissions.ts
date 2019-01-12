@@ -50,7 +50,7 @@ export function canModifyThesis(thesis: Thesis) {
  * @param thesis The thesis to vote for
  */
 export function canCastVoteForThesis(thesis: Thesis) {
-	return thesis.status !== ThesisStatus.InProgress;
+	return Users.isUserAdmin() || thesis.status !== ThesisStatus.InProgress;
 }
 
 /**
