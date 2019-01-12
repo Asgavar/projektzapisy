@@ -5,6 +5,7 @@ import update from "immutability-helper";
 import * as Mousetrap from "mousetrap";
 import "mousetrap-global-bind";
 import { Moment } from "moment";
+import { cloneDeep } from "lodash";
 
 import { ThesisTopRow } from "./ThesisTopRow";
 import { ThesisMiddleForm } from "./ThesisMiddleForm";
@@ -232,9 +233,8 @@ export class ThesisDetails extends React.PureComponent<Props> {
 	}
 
 	private onVoteChanged = (voter: Employee, newValue: ThesisVote): void => {
-		const newVotes = Object.assign({}, this.props.thesis.votes, {
-			[voter.id]: newValue,
-		});
+		const newVotes = cloneDeep(this.props.thesis.getVoteDetails());
+		newVotes.setVote(voter, newValue);
 		this.updateThesisState({ votes: { $set: newVotes } });
 	}
 }
