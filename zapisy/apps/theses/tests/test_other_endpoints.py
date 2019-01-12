@@ -4,7 +4,7 @@ import json
 from rest_framework import status
 from django.urls import reverse
 
-from apps.users.models import BaseUser
+from apps.users.models import BaseUser, Employee
 from ..users import ThesisUserType
 from .base import ThesesBaseTestCase
 from .utils import make_employee_with_name, make_student_with_name, exactly_one
@@ -34,6 +34,30 @@ class OtherEndpointsTestCase(ThesesBaseTestCase):
         self._test_theses_board_ok_for_user(self.get_random_emp())
         self._test_theses_board_ok_for_user(self.get_random_student())
         self._test_theses_board_ok_for_user(self.get_random_board_member())
+
+    def test_theses_employees_denied_for_not_logged_in(self):
+        """Ensure that unauthenticated users are not permitted to query about the employees"""
+        response = self.client.get(reverse("theses:theses_employees-list"))
+        self.assertEqual(response.status_code, status.HTTP_401_UNAUTHORIZED)
+
+    def _test_theses_employees_ok_for_user(self, user: BaseUser):
+        """Ensure that the "get all employees" endpoint works correctly"""
+        self.login_as(user)
+        response = self.client.get(reverse("theses:theses_employees-list"))
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        data = response.data
+        self.assertIsInstance(data, list)
+        self.assertEqual(Employee.objects.count(), len(data))
+        for recvd_emp in data:
+            emp = Employee.objects.get(pk=recvd_emp["id"])
+            self.assertEqual(emp.user.username, recvd_emp["username"])
+            self.assertEqual(emp.get_full_name(), recvd_emp["name"])
+
+    def test_theses_employees_ok_for_logged_in(self):
+        """Ensure that logged in users of various types can access the employees list"""
+        self._test_theses_employees_ok_for_user(self.get_random_emp())
+        self._test_theses_employees_ok_for_user(self.get_random_student())
+        self._test_theses_employees_ok_for_user(self.get_random_board_member())
 
     def test_current_user_endpoint_denied_for_logged_in(self):
         """Ensure that unauthenticated users cannot access the current user endpoint"""
@@ -119,10 +143,10 @@ class OtherEndpointsTestCase(ThesesBaseTestCase):
     def test_num_ungraded_ok_for_board_member(self):
         """Ensure that the num ungraded endpoint works correctly for board members"""
         board_member = self.get_random_board_member()
-        graded_theses, _ = self.create_theses_for_ungraded_testing(board_member)
+        _, ungraded_theses = self.create_theses_for_ungraded_testing(board_member)
         response = self.get_num_ungraded_response_for_user(board_member)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
-        self.assertEqual(response.data, len(graded_theses))
+        self.assertEqual(response.data, len(ungraded_theses))
 
     def test_num_ungraded_returns_404_for_non_board_member(self):
         """Ensure that if a user that isn't a board member makes a num ungraded request,

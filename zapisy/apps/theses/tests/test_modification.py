@@ -112,7 +112,29 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         modified_thesis = self.get_modified_thesis()
         self.assertEqual(modified_thesis["title"], new_title)
 
+    def _try_modify_archived_as(self, user: BaseUser):
+        self.thesis.status = ThesisStatus.defended.value
+        self.thesis.save()
+        self.login_as(user)
+        return self.update_thesis_with_data(description="123")
+
+    def test_board_member_cannot_modify_archived(self):
+        """Ensure that board members (not admins) are not permitted to edit archived theses"""
+        response = self._try_modify_archived_as(self.get_random_board_member_not_admin())
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_employee_cannot_modify_their_archived(self):
+        """Ensure that employees cannot modify their own theses (at all) if they're archived"""
+        response = self._try_modify_archived_as(self.advisor)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_admin_can_modify_archived(self):
+        """Ensure that admins are permitted to modify archived theses"""
+        response = self._try_modify_archived_as(self.get_admin())
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
     def cast_vote_as(self, voter: Employee, vote: ThesisVote):
+        """Cast a vote for self.thesis of the specified value as the specified user"""
         return self.update_thesis_with_data(votes={voter.pk: vote.value})
 
     def test_student_cannot_vote(self):
@@ -178,12 +200,7 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         """
         num_required = get_num_required_votes()
         self.assertLessEqual(num_required, len(self.board_members))
-        voters = []
-        while len(voters) < num_required:
-            voter = self.get_random_board_member_different_from(voter_to_skip)
-            while voter in voters:
-                voter = self.get_random_board_member_different_from(voter_to_skip)
-            voters.append(voter)
+        voters = self.get_board_members(num_required, voter_to_skip)
         for voter in voters:
             self.login_as(self.get_admin() if as_admin else voter)
             response = self.cast_vote_as(voter, ThesisVote.accepted)
@@ -225,6 +242,8 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         self.assertEqual(modified_thesis["status"], status.value)
 
     def test_enough_votes_dont_accept_in_progress_or_archived(self):
+        """The usual reject/accept logic should not apply to theses that are
+        in progress/archived"""
         self._test_action_does_not_change_status(
             ThesisStatus.in_progress, lambda: self.vote_to_accept_thesis_required_times()
         )
@@ -234,6 +253,7 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         )
 
     def test_single_vote_doesnt_reject_in_progress_or_archived(self):
+        """As above"""
         voter = self.get_random_board_member()
         self._test_action_does_not_change_status(
             ThesisStatus.in_progress, lambda: self.reject_thesis_once(voter)
@@ -243,6 +263,27 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         self._test_action_does_not_change_status(
             ThesisStatus.in_progress, lambda: self.reject_thesis_once(voter)
         )
+
+    def _vote_then_change_title_as_user(self, user: BaseUser):
+        self.vote_to_accept_thesis_required_times()
+        self.reject_thesis_once(self.get_random_board_member())
+        self.login_as(user)
+        self.update_thesis_with_data(title="lol123")
+
+    def test_emp_editing_their_thesis_title_wipes_votes(self):
+        """Votes should be wiped when the advisor of a thesis modifying the title"""
+        self._vote_then_change_title_as_user(self.advisor)
+        self.assertEqual(self.thesis.votes.count(), 0)
+
+    def test_board_member_editing_thesis_title_doesnt_wipe_votes(self):
+        """Votes should not be wiped if it's a board member making the change"""
+        self._vote_then_change_title_as_user(self.get_random_board_member_not_admin())
+        self.assertGreater(self.thesis.votes.count(), 0)
+
+    def test_admin_editing_thesis_title_doesnt_wipe_votes(self):
+        """Votes should not be wiped if it's an admin making the change"""
+        self._vote_then_change_title_as_user(self.get_admin())
+        self.assertGreater(self.thesis.votes.count(), 0)
 
     def ensure_cannot_modify_thesis_duplicate_title_as_user(self, user: BaseUser):
         other_thesis = self.make_thesis()

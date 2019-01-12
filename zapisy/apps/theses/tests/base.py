@@ -106,6 +106,15 @@ class ThesesBaseTestCase(APITestCase):
             student_2=kwargs.get("student_2", cls.get_random_student() if random_bool() else None)
         )
 
+    def get_board_members(self, num: int, to_skip: Employee=None):
+        voters = []
+        while len(voters) < num:
+            voter = self.get_random_board_member_different_from(to_skip)
+            while voter in voters:
+                voter = self.get_random_board_member_different_from(to_skip)
+            voters.append(voter)
+        return voters
+
     def login_as(self, user: BaseUser):
         """Login as the specified user"""
         self.client.login(username=user.user.username, password="test")
@@ -151,6 +160,14 @@ class ThesesBaseTestCase(APITestCase):
         for thesis in ungraded_with_indeterminate:
             votes = [(board_member, ThesisVote.none)]
             thesis.process_new_votes(votes)
+        # Pick a few thesis, set them to one of the unchangeable statues;
+        # they shouldn't count anymore
+        unchangeable_theses = random.sample(ungraded_theses, random.randrange(num_theses // 3))
+        for unchangeable in unchangeable_theses:
+            unchangeable.status = random.choice(STATUSES_UNCHANGEABLE_BY_VOTE).value
+            unchangeable.save()
+        # They shouldn't be counted as ungraded anymore
+        ungraded_theses = list(set(ungraded_theses) - set(unchangeable_theses))
         return graded_theses, ungraded_theses
 
     def run_test_with_privileged_users(
