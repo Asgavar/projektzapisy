@@ -56,4 +56,4 @@ def can_set_advisor(user: BaseUser, advisor: Employee) -> bool:
 
 def can_cast_vote_as_user(caster: Employee, user: Employee) -> bool:
     """Can the specified user cast a vote in the other user's name?"""
-    return get_user_type(caster) == ThesisUserType.admin or caster == user
+    return is_admin(caster) or caster == user
