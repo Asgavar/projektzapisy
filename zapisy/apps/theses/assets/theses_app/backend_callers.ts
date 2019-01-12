@@ -6,6 +6,7 @@ import { get as getCookie } from "js-cookie";
 import * as objectAssignDeep from "object-assign-deep";
 import axios, { AxiosRequestConfig, AxiosResponse } from "axios";
 import * as HttpStatus from "http-status-codes";
+import { compact } from "lodash";
 
 import { SortColumn, SortDirection, ThesesProcessParams } from "./app_types";
 import { ThesisNameConflict } from "./errors";
@@ -13,7 +14,7 @@ import { AppUser, Student, Person, Employee } from "./users";
 import { UserType } from "./protocol_types";
 import {
 	ThesisInJson, deserializeThesis,
-	deserializeCurrentUser, deserializeEmployee,
+	deserializeCurrentUser, deserializeEmployee, deserializeBoardMember,
 } from "./deserialization";
 import { Thesis } from "./thesis";
 import { serializeThesisDiff, serializeNewThesis } from "./serialization";
@@ -27,7 +28,7 @@ export const FAKE_USER = new AppUser(new Student(-1, "Fake user"), UserType.Stud
 
 /**
  * Send a request to the backend including the csrf token
- * supplied by Django's auth system; all requests
+ * supplied by Django's auth system; all nonpure requests
  * should go through this function because otherwise they will be rejected
  * as unauthorized
  * @param url The URL
@@ -114,6 +115,14 @@ export async function getThesesList(
 }
 
 /**
+ * Get all the employees as an array
+ */
+export async function getEmployees(): Promise<Employee[]> {
+	const emps = await getData(`${BASE_API_URL}/theses_employees/`);
+	return emps.map(deserializeEmployee);
+}
+
+/**
  * Fetch the current system user from the backend
  */
 export async function getCurrentUser(): Promise<AppUser> {
@@ -123,9 +132,9 @@ export async function getCurrentUser(): Promise<AppUser> {
 /**
  * Get the theses board as an Employee list
  */
-export async function getThesesBoard() {
+export async function getThesesBoard(): Promise<Employee[]> {
 	const members = await getData(`${BASE_API_URL}/theses_board/`);
-	return members.map(deserializeEmployee);
+	return compact(members.map(deserializeBoardMember));
 }
 
 /**

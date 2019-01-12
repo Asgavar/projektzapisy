@@ -1,15 +1,17 @@
 import { observable, flow } from "mobx";
 import { memoize } from "lodash";
 
-import { getCurrentUser, getThesesBoard, FAKE_USER } from "../backend_callers";
+import { getCurrentUser, getThesesBoard, getEmployees, FAKE_USER } from "../backend_callers";
 import { Employee, AppUser } from "../users";
 import { UserType } from "../protocol_types";
 
-class UsersC {
+class C {
+	@observable public employees: Employee[] = [];
 	@observable public thesesBoard: Employee[] = [];
 	@observable public currentUser: AppUser = FAKE_USER;
 
-	public initialize = flow(function*(this: UsersC) {
+	public initialize = flow(function*(this: C) {
+		this.employees = yield getEmployees();
 		this.currentUser = yield getCurrentUser();
 		this.thesesBoard = yield getThesesBoard();
 	});
@@ -41,6 +43,10 @@ class UsersC {
 	public isUserStudent() {
 		return this.currentUser.type === UserType.Student;
 	}
+
+	public getEmployeeById(id: number) {
+		return this.employees.find(e => e.id === id) || null;
+	}
 }
 
-export const Users = new UsersC();
+export const Users = new C();
