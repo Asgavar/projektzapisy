@@ -6,13 +6,14 @@ import * as React from "react";
 import styled from "styled-components";
 
 import { GenericSelect } from "./GenericSelect";
-import { ThesisTypeFilter, thesisTypeFilterToString } from "../types";
-import { ApplicationState } from "../types/misc";
-import { ChangedStringFilter } from "../theses_store";
+import { ApplicationState } from "../app_types";
+import { ThesisTypeFilter, thesisTypeFilterToString } from "../protocol_types";
+import { StringFilter } from "../app_logic/theses_list";
 
 const typeFilters = [
-	ThesisTypeFilter.AllCurrent,
-	ThesisTypeFilter.All,
+	ThesisTypeFilter.Everything,
+	ThesisTypeFilter.Current,
+	ThesisTypeFilter.Archived,
 	ThesisTypeFilter.Masters,
 	ThesisTypeFilter.Engineers,
 	ThesisTypeFilter.Bachelors,
@@ -47,7 +48,7 @@ type Props = {
 	titleValue: string;
 
 	state: ApplicationState;
-	stringFilterBeingChanged: ChangedStringFilter;
+	stringFilterBeingChanged: StringFilter;
 };
 
 const TextFilterField = styled.input`

@@ -4,12 +4,12 @@ checks used when deserializing a received thesis object and performing actions.
 from apps.users.models import Employee, BaseUser
 
 from .models import Thesis, ThesisStatus
-from .users import ThesisUserType, get_user_type, is_theses_board_member
+from .users import ThesisUserType, get_user_type, is_theses_board_member, is_admin
 
 
 def is_thesis_staff(user: BaseUser) -> bool:
     """Determine whether the user should be considered a "staff member" in the theses system"""
-    return get_user_type(user) == ThesisUserType.admin or is_theses_board_member(user)
+    return is_admin(user) or is_theses_board_member(user)
 
 
 def can_add_thesis(user: BaseUser) -> bool:
@@ -25,15 +25,17 @@ def is_owner_of_thesis(user: BaseUser, thesis: Thesis) -> bool:
 
 def can_modify_thesis(user: BaseUser, thesis: Thesis) -> bool:
     """Is the specified user permitted to make any changes to the specified thesis?"""
+    if thesis.is_archived():
+        return is_admin(user)
     return is_thesis_staff(user) or is_owner_of_thesis(user, thesis)
 
 
 def can_change_title(user: BaseUser, thesis: Thesis) -> bool:
     """Is the specified user permitted to change the title of the specified thesis?"""
-    frozen_statuses = [ThesisStatus.accepted, ThesisStatus.in_progress, ThesisStatus.defended]
+    allowed_statuses = [ThesisStatus.being_evaluated, ThesisStatus.returned_for_corrections]
     return (
         is_thesis_staff(user) or
-        is_owner_of_thesis(user, thesis) and not ThesisStatus(thesis.status) in frozen_statuses
+        is_owner_of_thesis(user, thesis) and ThesisStatus(thesis.status) in allowed_statuses
     )
 
 
@@ -54,4 +56,4 @@ def can_set_advisor(user: BaseUser, advisor: Employee) -> bool:
 
 def can_cast_vote_as_user(caster: Employee, user: Employee) -> bool:
     """Can the specified user cast a vote in the other user's name?"""
-    return get_user_type(caster) == ThesisUserType.admin or caster == user
+    return is_admin(caster) or caster == user

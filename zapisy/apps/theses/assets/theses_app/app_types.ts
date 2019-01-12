@@ -1,4 +1,4 @@
-import { ThesisTypeFilter } from ".";
+import { ThesisTypeFilter } from "./protocol_types";
 
 /**
  * @file Miscellaneous types
@@ -13,10 +13,6 @@ export const enum ApplicationState {
 	Refetching,
 	Saving,
 	Normal,
-}
-
-export function isPerformingBackendOp(state: ApplicationState) {
-	return state !== ApplicationState.Normal;
 }
 
 /**

@@ -1,13 +1,17 @@
 import * as React from "react";
-
-import { Employee, Thesis, ThesisVote, AppUser } from "../../../types";
-import { SingleVote } from "./SingleVote";
 import styled from "styled-components";
+
+import { Thesis } from "../../../thesis";
+import { Employee, AppUser } from "../../../users";
+import { ThesisVote } from "../../../protocol_types";
+import { VoteDetails } from "./VoteDetails";
+import { VoteCounts } from "./VoteCounts";
 
 type Props = {
 	thesis: Thesis,
 	thesesBoard: Employee[],
 	user: AppUser,
+	isStaff: boolean;
 	onChange: (member: Employee, newValue: ThesisVote) => void;
 };
 
@@ -15,16 +19,13 @@ type Props = {
  * Renders the vote value for this thesis for each theses board member
  */
 export const ThesisVotes = React.memo(function(props: Props) {
-	const board = props.thesesBoard;
-	const votes = board.length ? board.map((emp, i) => (
-		<SingleVote
-			key={i}
-			voter={emp}
-			value={props.thesis.getMemberVote(emp)}
+	const votes = props.isStaff
+		? <VoteDetails
+			thesis={props.thesis}
 			user={props.user}
 			onChange={props.onChange}
 		/>
-	)) : <span>Nie zdefiniowano członków komisji</span>;
+		: <VoteCounts thesis={props.thesis}/>;
 	return <VotesContainer>
 		<Header>Głosy</Header>
 		{votes}
@@ -35,7 +36,7 @@ const Header = styled.div`
 	font-weight: bold;
 	font-size: 16px;
 	color: black;
-	margin-bottom: 15px;
+	margin-bottom: 20px;
 `;
 
 const VotesContainer = styled.div`

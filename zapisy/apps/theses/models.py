@@ -4,9 +4,10 @@ from typing import Tuple
 from django.db import models
 from django.db.models.expressions import RawSQL
 
-from apps.users.models import Employee, Student
+from apps.users.models import Employee, Student, BaseUser
 from .validators import validate_num_required_votes
 from .system_settings import get_num_required_votes
+from .users import is_admin
 
 MAX_THESIS_TITLE_LEN = 300
 
@@ -50,14 +51,12 @@ class ThesisVote(Enum):
     none = 1
     rejected = 2
     accepted = 3
-    user_missing = 4  # not sure about this one
 
 
 THESIS_VOTE_CHOICES = (
     (ThesisVote.none.value, "brak głosu"),
     (ThesisVote.rejected.value, "odrzucona"),
     (ThesisVote.accepted.value, "zaakceptowana"),
-    (ThesisVote.user_missing.value, "brak użytkownika"),
 )
 
 
@@ -66,6 +65,7 @@ VotesInfo = Tuple[Employee, ThesisVote]
 
 """If a thesis is in one of those statuses, a vote will not reject/accept it"""
 STATUSES_UNCHANGEABLE_BY_VOTE = (ThesisStatus.in_progress, ThesisStatus.defended)
+STATUS_VALUES_UNCHANGEABLE_BY_VOTE = [s.value for s in STATUSES_UNCHANGEABLE_BY_VOTE]
 
 
 class Thesis(models.Model):
@@ -90,13 +90,17 @@ class Thesis(models.Model):
     added_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
 
+    def on_title_changed_by(self, user: BaseUser):
+        if self.advisor == user and not is_admin(user):
+            ThesisVoteBinding.objects.filter(thesis=self).delete()
+
     def process_new_votes(self, votes: VotesInfo):
         """Whenever one or more votes for a thesis change, this function
         should be called to process & save them
         """
         for voter, vote in votes:
             try:
-                existing_vote = ThesisVoteBinding.objects.get(thesis=self, voter=voter)
+                existing_vote = self.votes.get(voter=voter)
                 existing_vote.value = vote.value
                 existing_vote.save()
             except ThesisVoteBinding.DoesNotExist:
@@ -110,17 +114,20 @@ class Thesis(models.Model):
         """
         if ThesisStatus(self.status) in STATUSES_UNCHANGEABLE_BY_VOTE:
             return
-        approve_votes_cnt = ThesisVoteBinding.objects.filter(
-            thesis=self, value=ThesisVote.accepted.value
-        ).count()
-        reject_votes_cnt = ThesisVoteBinding.objects.filter(
-            thesis=self, value=ThesisVote.rejected.value
-        ).count()
-        if reject_votes_cnt:
+        if self.get_reject_votes_cnt():
             self.status = ThesisStatus.returned_for_corrections.value
-        elif approve_votes_cnt >= get_num_required_votes():
+        elif self.get_approve_votes_cnt() >= get_num_required_votes():
             self.status = ThesisStatus.accepted.value
         self.save()
+
+    def get_approve_votes_cnt(self):
+        return self.votes.filter(value=ThesisVote.accepted.value).count()
+
+    def get_reject_votes_cnt(self):
+        return self.votes.filter(value=ThesisVote.rejected.value).count()
+
+    def is_archived(self):
+        return self.status == ThesisStatus.defended.value
 
     def __str__(self) -> str:
         return self.title
@@ -166,6 +173,7 @@ def filter_ungraded_for_emp(qs, emp: Employee):
     # doing .exclude(votes__value__ne=none, votes__voter=emp) doesn't do what you want,
     # it ands two selects together rather than and two conditions in one select
     return qs \
+        .exclude(status__in=STATUS_VALUES_UNCHANGEABLE_BY_VOTE) \
         .annotate(definite_votes=RawSQL(
             """
             select count(*) from theses_thesisvotebinding where

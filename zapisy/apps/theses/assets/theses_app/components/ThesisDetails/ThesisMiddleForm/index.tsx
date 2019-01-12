@@ -1,15 +1,14 @@
 import * as React from "react";
 
 import styled from "styled-components";
-import {
-	Thesis, ThesisKind, Employee, Student,
-	MAX_THESIS_TITLE_LEN, AppUser,
-} from "../../../types";
 import { PersonType } from "../../../backend_callers";
 import { PersonField } from "./PersonField";
 import { ThesisKindField } from "./ThesisKindField";
 import { AddRemoveIcon, IconType } from "./AddRemoveIcon";
 import { canSetArbitraryAdvisor, canModifyThesis, canChangeTitle } from "../../../permissions";
+import { Thesis, MAX_THESIS_TITLE_LEN } from "../../../thesis";
+import { Employee, Student } from "../../../users";
+import { ThesisKind } from "../../../protocol_types";
 
 const MidFormTable = styled.table`
 	width: 100%;
@@ -30,6 +29,10 @@ const MidFormTable = styled.table`
 	}
 `;
 
+const PersonTableRow = styled.tr`
+	height: 44px;
+`;
+
 const OptionalFieldLabel = React.memo(styled.span`
 	font-style: italic;
 `);
@@ -43,7 +46,6 @@ type Props = {
 	thesis: Thesis;
 	/** Should the title field be highlighted to indicate an error? */
 	titleError: boolean;
-	user: AppUser;
 	onTitleChanged: (nt: string) => void;
 	onKindChanged: (nk: ThesisKind) => void;
 	onAdvisorChanged: (na: Employee | null) => void;
@@ -92,7 +94,7 @@ export class ThesisMiddleForm extends React.PureComponent<Props, State> {
 	}
 
 	public render() {
-		const readOnly = !canModifyThesis(this.props.user, this.props.thesis);
+		const readOnly = !canModifyThesis(this.props.thesis);
 
 		return <div>
 			<MidFormTable>
@@ -118,7 +120,7 @@ export class ThesisMiddleForm extends React.PureComponent<Props, State> {
 				border: "1px solid red"
 			});
 		}
-		const titleReadOnly = readOnly || !canChangeTitle(this.props.user, this.props.thesis);
+		const titleReadOnly = readOnly || !canChangeTitle(this.props.thesis);
 		return <tr>
 			<td>Tytuł</td>
 			<td><textarea
@@ -146,14 +148,15 @@ export class ThesisMiddleForm extends React.PureComponent<Props, State> {
 
 	private renderAdvisors(readOnly: boolean) {
 		return <>
-			<tr>
+			<PersonTableRow>
 				<td>Promotor</td>
 				<td>
 					<PersonField
 						personType={PersonType.Employee}
 						onChange={this.props.onAdvisorChanged}
+						personConstructor={Employee}
 						value={this.props.thesis.advisor}
-						readOnly={readOnly || !canSetArbitraryAdvisor(this.props.user)}
+						readOnly={readOnly || !canSetArbitraryAdvisor()}
 					/>
 					{ readOnly
 						? null
@@ -163,31 +166,33 @@ export class ThesisMiddleForm extends React.PureComponent<Props, State> {
 						/>
 					}
 				</td>
-			</tr>
+			</PersonTableRow>
 			{ this.state.displayAuxAdvisor ? (
-				<tr>
+				<PersonTableRow>
 					<td><OptionalFieldLabel>Promotor wspomagający</OptionalFieldLabel></td>
 					<td>
 						<PersonField
 							personType={PersonType.Employee}
 							onChange={this.props.onAuxAdvisorChanged}
+							personConstructor={Employee}
 							value={this.props.thesis.auxiliaryAdvisor}
 							readOnly={readOnly}
 						/>
 					</td>
-				</tr>
+				</PersonTableRow>
 			) : null }
 		</>;
 	}
 
 	private renderStudents(readOnly: boolean) {
 		return <>
-			<tr>
+			<PersonTableRow>
 				<td>Student</td>
 				<td>
 					<PersonField
 						personType={PersonType.Student}
 						onChange={this.props.onStudentChanged}
+						personConstructor={Student}
 						value={this.props.thesis.student}
 						readOnly={readOnly}
 					/>
@@ -199,19 +204,20 @@ export class ThesisMiddleForm extends React.PureComponent<Props, State> {
 						/>
 					}
 				</td>
-			</tr>
+			</PersonTableRow>
 			{ this.state.displayAuxStudent ? (
-				<tr>
+				<PersonTableRow>
 					<td><OptionalFieldLabel>Student wspomagający</OptionalFieldLabel></td>
 					<td>
 						<PersonField
 							personType={PersonType.Student}
 							onChange={this.props.onSecondStudentChanged}
+							personConstructor={Student}
 							value={this.props.thesis.secondStudent}
 							readOnly={readOnly}
 						/>
 					</td>
-				</tr>
+				</PersonTableRow>
 			) : null }
 		</>;
 	}

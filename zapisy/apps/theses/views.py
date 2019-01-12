@@ -6,7 +6,6 @@ from django.contrib.auth.decorators import login_required
 from django.db.models import Value, When, Case, BooleanField, QuerySet, Q
 from django.db.models.functions import Concat, Lower
 from django.core.exceptions import PermissionDenied
-from django.http import Http404
 from rest_framework import viewsets, permissions
 from rest_framework.response import Response
 from rest_framework.decorators import api_view, permission_classes
@@ -21,6 +20,7 @@ from .models import (
 )
 from . import serializers
 from .drf_permission_classes import ThesisPermissions
+from .permissions import is_thesis_staff
 from .users import (
     wrap_user, get_theses_board, get_user_type,
     ThesisUserType, is_theses_board_member
@@ -40,19 +40,20 @@ class ThesisTypeFilter(Enum):
     Must match values in backend_callers.ts (this is what client code
     will send to us)
     """
-    all_current = 0
-    all = 1
-    masters = 2
-    engineers = 3
-    bachelors = 4
-    bachelors_isim = 5
-    available_masters = 6
-    available_engineers = 7
-    available_bachelors = 8
-    available_bachelors_isim = 9
-    ungraded = 10
+    everything = 0
+    current = 1
+    archived = 2
+    masters = 3
+    engineers = 4
+    bachelors = 5
+    bachelors_isim = 6
+    available_masters = 7
+    available_engineers = 8
+    available_bachelors = 9
+    available_bachelors_isim = 10
+    ungraded = 11
 
-    default = all
+    default = everything
 
 
 class ThesesPagination(LimitOffsetPagination):
@@ -75,7 +76,7 @@ class ThesesViewSet(viewsets.ModelViewSet):
                 if requested_thesis_type_str \
                 else ThesisTypeFilter.default
         except ValueError:
-            raise exceptions.ParseError()
+            raise exceptions.ParseError(f'Unknown filter value {requested_thesis_type_str}')
 
         requested_thesis_title = self.request.query_params.get(
             THESIS_TITLE_FILTER_NAME, ""
@@ -99,6 +100,15 @@ class ThesesViewSet(viewsets.ModelViewSet):
         )
         return sort_queryset(filtered, sort_column, sort_dir)
 
+    def get_serializer_context(self):
+        """When serializing votes for a thesis, we need to know the user type
+        determining it for every thesis would be expensive as it requires
+        a DB hit, so it's a good idea to do it here and pass it to the serializer
+        """
+        result = super().get_serializer_context()
+        result["is_staff"] = is_thesis_staff(wrap_user(self.request.user))
+        return result
+
 
 def generate_base_queryset() -> QuerySet:
     """Return theses queryset with the appropriate fields prefetched (see below)
@@ -114,11 +124,11 @@ def generate_base_queryset() -> QuerySet:
         .prefetch_related("votes") \
         .prefetch_related("votes__voter") \
         .annotate(
-            advisor_name=Concat(
+            _advisor_name=Concat(
                 "advisor__user__first_name", Value(" "), "advisor__user__last_name"
             )
         ) \
-        .annotate(is_archived=Case(
+        .annotate(_is_archived=Case(
             When(status=ThesisStatus.defended.value, then=True),
             default=Value(False),
             output_field=BooleanField()
@@ -151,7 +161,7 @@ def filter_queryset(
     if title:
         result = result.filter(title__icontains=title)
     if advisor_name:
-        result = result.filter(advisor_name__icontains=advisor_name)
+        result = result.filter(_advisor_name__icontains=advisor_name)
     return result
 
 
@@ -162,24 +172,24 @@ def sort_queryset(qs: QuerySet, sort_column: str, sort_dir: str) -> QuerySet:
     """
     db_column = ""
     if sort_column == "advisor":
-        db_column = "advisor_name"
+        db_column = "_advisor_name"
     elif sort_column == "title":
         db_column = "title"
 
-    resulting_ordering = "-added_date"
+    resulting_ordering = "-modified_date"
     if db_column:
         orderer = Lower(db_column)
         resulting_ordering = orderer.desc() if sort_dir == "desc" else orderer.asc()
 
     # We want to first order by archived
-    return qs.order_by("is_archived", resulting_ordering)
+    return qs.order_by("_is_archived", resulting_ordering)
 
 
 def available_thesis_filter(qs: QuerySet) -> QuerySet:
     """Returns only theses that are considered "available" from the specified queryset"""
     return qs \
         .exclude(status=ThesisStatus.in_progress.value) \
-        .exclude(is_archived=True) \
+        .exclude(_is_archived=True) \
         .exclude(reserved=True)
 
 
@@ -194,10 +204,12 @@ def filter_theses_queryset_for_type(
     qs: QuerySet, user: Employee, thesis_type: ThesisTypeFilter,
 ) -> QuerySet:
     """Returns only theses matching the specified type filter from the specified queryset"""
-    if thesis_type == ThesisTypeFilter.all_current:
-        return qs.exclude(is_archived=True)
-    elif thesis_type == ThesisTypeFilter.all:
+    if thesis_type == ThesisTypeFilter.everything:
         return qs
+    elif thesis_type == ThesisTypeFilter.current:
+        return qs.exclude(_is_archived=True)
+    elif thesis_type == ThesisTypeFilter.archived:
+        return qs.filter(_is_archived=True)
     elif thesis_type == ThesisTypeFilter.masters:
         return qs.filter(kind=ThesisKind.masters.value)
     elif thesis_type == ThesisTypeFilter.engineers:
@@ -216,17 +228,15 @@ def filter_theses_queryset_for_type(
         return available_thesis_filter(qs.filter(kind=ThesisKind.isim.value))
     elif thesis_type == ThesisTypeFilter.ungraded:
         return ungraded_theses_filter(qs, user)
-    else:
-        raise exceptions.ParseError()
+    # Should never get here
+    return qs
 
 
 def filter_theses_queryset_for_only_mine(qs: QuerySet, user: BaseUser):
     user_type = get_user_type(user)
     if user_type == ThesisUserType.student:
         return qs.filter(Q(student=user) | Q(student_2=user))
-    elif user_type == ThesisUserType.employee:
-        return qs.filter(Q(advisor=user) | Q(auxiliary_advisor=user))
-    raise Http404()
+    return qs.filter(Q(advisor=user) | Q(auxiliary_advisor=user))
 
 
 class ThesesBoardViewSet(viewsets.ModelViewSet):
@@ -236,6 +246,15 @@ class ThesesBoardViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self) -> QuerySet:
         return get_theses_board()
+
+
+class EmployeesViewSet(viewsets.ModelViewSet):
+    http_method_names = ["get"]
+    permission_classes = (permissions.IsAuthenticated, )
+    serializer_class = serializers.ThesesPersonSerializer
+
+    def get_queryset(self) -> QuerySet:
+        return Employee.objects.select_related("user")
 
 
 @api_view(http_method_names=["get"])
@@ -273,11 +292,11 @@ def build_autocomplete_view_with_queryset(queryset):
             qs = queryset.objects \
                 .select_related("user") \
                 .annotate(
-                    full_name=Concat(
+                    _full_name=Concat(
                         "user__first_name", Value(" "), "user__last_name"
                     )
                 ) \
-                .order_by("full_name")
+                .order_by("_full_name")
             if self.q:
                 qs = qs.filter(full_name__icontains=self.q)
             return qs.all()

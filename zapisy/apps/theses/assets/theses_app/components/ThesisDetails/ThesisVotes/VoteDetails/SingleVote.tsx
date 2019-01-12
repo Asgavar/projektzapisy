@@ -1,13 +1,16 @@
 import * as React from "react";
-import { ThesisVote, Employee, AppUser } from "../../../types";
+import { ThesisVote } from "../../../../protocol_types";
 import styled from "styled-components";
-import { canCastVoteAsUser } from "../../../permissions";
-import { VoteIndicator } from "./VoteIndicator";
+import { canCastVoteAsUser, canChangeThesisVote } from "../../../../permissions";
+import { VoteIndicator } from "../VoteIndicator";
+import { Employee, AppUser } from "../../../../users";
+import { Thesis } from "../../../../thesis";
 
 type Props = {
 	user: AppUser;
 	value: ThesisVote;
 	voter: Employee;
+	thesis: Thesis;
 	onChange: (voter: Employee, v: ThesisVote) => void;
 };
 
@@ -15,14 +18,14 @@ const voteCycle = [ThesisVote.None, ThesisVote.Accepted, ThesisVote.Rejected];
 
 export class SingleVote extends React.PureComponent<Props> {
 	public render() {
-		const { user, voter } = this.props;
-		const allowAction = canCastVoteAsUser(user, voter);
-		const sameUser = user.user.isEqual(voter);
+		const { user, voter, thesis } = this.props;
+		const allowAction = canCastVoteAsUser(voter) && canChangeThesisVote(thesis);
+		const sameUser = user.person.isEqual(voter);
 		const content = <>
 			<VoteIndicator active={allowAction} value={this.props.value} />
 			<VoteLabel
 				style={sameUser ? { fontWeight: "bold" } : {}}
-			>{voter.displayName}</VoteLabel>
+			>{voter.username}</VoteLabel>
 		</>;
 		return allowAction
 			? <VoteContainerActive onClick={this.onClick}>{content}</VoteContainerActive>

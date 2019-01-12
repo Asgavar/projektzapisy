@@ -4,9 +4,9 @@
 
 import * as React from "react";
 
-import { ThesisKind, thesisKindToString } from "../../../types";
 import { GenericSelect } from "../../GenericSelect";
 import { ReadOnlyInput } from "./ReadOnlyInput";
+import { ThesisKind, thesisKindToString } from "../../../protocol_types";
 
 const kindSelectInfos = [
 	ThesisKind.Bachelors,
@@ -25,7 +25,7 @@ export const ThesisKindField = React.memo(function(props: ThesisKindSelectProps)
 	return props.readOnly
 	? <ReadOnlyInput
 		text={thesisKindToString(props.value)}
-		style={{ width: "210px" }}
+		style={{ width: "210px", height: "17px" }}
 	/>
 	: <GenericSelect<ThesisKind>
 		value={props.value}

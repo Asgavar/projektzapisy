@@ -5,16 +5,20 @@ import update from "immutability-helper";
 import * as Mousetrap from "mousetrap";
 import "mousetrap-global-bind";
 import { Moment } from "moment";
+import { cloneDeep } from "lodash";
 
-import { Thesis, ThesisStatus, ThesisKind, Employee, AppUser, ThesisVote } from "../../types";
 import { ThesisTopRow } from "./ThesisTopRow";
 import { ThesisMiddleForm } from "./ThesisMiddleForm";
 import { ThesisVotes } from "./ThesisVotes";
 import "./style.less";
 import { Spinner } from "../Spinner";
 import { getDisabledStyle } from "../../utils";
-import { ThesisWorkMode, ApplicationState, isPerformingBackendOp } from "../../types/misc";
-import { canModifyThesis, canVote } from "../../permissions";
+import { ThesisWorkMode, ApplicationState } from "../../app_types";
+import { canModifyThesis, canChangeThesisVote } from "../../permissions";
+import { Thesis } from "../../thesis";
+import { AppUser, Employee, Student } from "../../users";
+import { ThesisStatus, ThesisKind, ThesisVote } from "../../protocol_types";
+import { AppMode } from "../../app_logic/app_mode";
 
 const SaveButton = React.memo(Button.extend`
 	&:disabled:hover {
@@ -43,10 +47,11 @@ const MainDetailsContainer = styled.div`
 `;
 
 const LeftDetailsContainer = styled.div`
-	flex-basis: 85%;
+	width: 790px;
 `;
 
 const RightDetailsContainer = styled.div`
+	width: 100px;
 	display: flex;
 	flex-direction: column;
 	justify-content: space-between;
@@ -59,8 +64,10 @@ type Props = {
 	appState: ApplicationState;
 	hasUnsavedChanges: boolean;
 	mode: ThesisWorkMode;
-	user: AppUser;
 	hasTitleError: boolean;
+	user: AppUser;
+	isBoardMember: boolean;
+	isStaff: boolean;
 	onThesisModified: (thesis: Thesis) => void;
 	onSaveRequested: () => void;
 	onChangedTitle: () => void;
@@ -90,7 +97,7 @@ export class ThesisDetails extends React.PureComponent<Props> {
 				: null
 			}
 			<MainDetailsContainer
-				style={isPerformingBackendOp(this.props.appState) ? getDisabledStyle() : {}}
+				style={AppMode.isPerformingBackendOp() ? getDisabledStyle() : {}}
 			>
 				<LeftDetailsContainer>{this.renderThesisLeftPanel()}</LeftDetailsContainer>
 				<RightDetailsContainer>{this.renderThesisRightPanel()}</RightDetailsContainer>
@@ -103,7 +110,6 @@ export class ThesisDetails extends React.PureComponent<Props> {
 		return <>
 			<ThesisTopRow
 				mode={this.props.mode}
-				user={this.props.user}
 				thesis={thesis}
 				onReservationChanged={this.onReservationChanged}
 				onDateChanged={this.onDateUpdatedChanged}
@@ -112,7 +118,6 @@ export class ThesisDetails extends React.PureComponent<Props> {
 			<ThesisMiddleForm
 				thesis={thesis}
 				titleError={this.props.hasTitleError}
-				user={this.props.user}
 				onTitleChanged={this.onTitleChanged}
 				onKindChanged={this.onKindChanged}
 				onAdvisorChanged={this.onAdvisorChanged}
@@ -129,6 +134,7 @@ export class ThesisDetails extends React.PureComponent<Props> {
 			<ThesisVotes
 				thesis={this.props.thesis}
 				thesesBoard={this.props.thesesBoard}
+				isStaff={this.props.isStaff}
 				user={this.props.user}
 				onChange={this.onVoteChanged}
 			/>
@@ -137,7 +143,7 @@ export class ThesisDetails extends React.PureComponent<Props> {
 	}
 
 	private renderSaveButton() {
-		const readOnly = !canModifyThesis(this.props.user, this.props.thesis);
+		const readOnly = !canModifyThesis(this.props.thesis);
 		if (readOnly) {
 			return null;
 		}
@@ -166,11 +172,13 @@ export class ThesisDetails extends React.PureComponent<Props> {
 	private onShortcutVoteCast(vote: ThesisVote) {
 		const { props } = this;
 		if (
-			canVote(props.user) &&
+			props.isBoardMember &&
+			canModifyThesis(props.thesis) &&
+			canChangeThesisVote(props.thesis) &&
 			!props.hasUnsavedChanges &&
 			props.mode === ThesisWorkMode.Editing
 		) {
-			this.onVoteChanged(props.user.user, vote);
+			this.onVoteChanged(props.user.person as Employee, vote);
 			props.onSaveRequested();
 		}
 	}
@@ -212,11 +220,11 @@ export class ThesisDetails extends React.PureComponent<Props> {
 		this.updateThesisState({ auxiliaryAdvisor: { $set: newAuxAdvisor } });
 	}
 
-	private onStudentChanged = (newStudent: Employee | null): void => {
+	private onStudentChanged = (newStudent: Student | null): void => {
 		this.updateThesisState({ student: { $set: newStudent } });
 	}
 
-	private onSecondStudentChanged = (newSecondStudent: Employee | null): void => {
+	private onSecondStudentChanged = (newSecondStudent: Student | null): void => {
 		this.updateThesisState({ secondStudent: { $set: newSecondStudent } });
 	}
 
@@ -225,9 +233,8 @@ export class ThesisDetails extends React.PureComponent<Props> {
 	}
 
 	private onVoteChanged = (voter: Employee, newValue: ThesisVote): void => {
-		const newVotes = Object.assign({}, this.props.thesis.votes, {
-			[voter.id]: newValue,
-		});
+		const newVotes = cloneDeep(this.props.thesis.getVoteDetails());
+		newVotes.setVote(voter, newValue);
 		this.updateThesisState({ votes: { $set: newVotes } });
 	}
 }
