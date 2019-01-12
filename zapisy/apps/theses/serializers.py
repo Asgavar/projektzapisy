@@ -83,20 +83,20 @@ def serialize_thesis_votes(thesis: Thesis, is_staff: bool) -> Dict[int, int]:
 def convert_votes(votes) -> VotesInfo:
     """Validate & convert the votes dict for a thesis"""
     if not isinstance(votes, dict):
-        raise serializers.ValidationError("\"votes\" must be a dict")
+        raise exceptions.ParseError("\"votes\" must be a dict")
     result = []
     for key, value in votes.items():
         try:
             vote = ThesisVote(value)
         except ValueError:
-            raise serializers.ValidationError(f'invalid thesis vote value {value}')
+            raise exceptions.ParseError(f'invalid thesis vote value {value}')
         try:
             voter_id = int(key)
             voter = Employee.objects.get(pk=voter_id)
         except (ValueError, Employee.DoesNotExist):
-            raise serializers.ValidationError(f'bad voter id {key}')
+            raise exceptions.ParseError(f'bad voter id {key}')
         if not is_theses_board_member(voter):
-            raise serializers.ValidationError(f'voter {voter} is not a member of the theses board')
+            raise exceptions.ParseError(f'voter {voter} is not a member of the theses board')
         result.append((voter, vote))
     return result
 
