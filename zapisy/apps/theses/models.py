@@ -4,9 +4,10 @@ from typing import Tuple
 from django.db import models
 from django.db.models.expressions import RawSQL
 
-from apps.users.models import Employee, Student
+from apps.users.models import Employee, Student, BaseUser
 from .validators import validate_num_required_votes
 from .system_settings import get_num_required_votes
+from .users import is_admin
 
 MAX_THESIS_TITLE_LEN = 300
 
@@ -88,6 +89,10 @@ class Thesis(models.Model):
     )
     added_date = models.DateTimeField(auto_now_add=True)
     modified_date = models.DateTimeField(auto_now=True)
+
+    def on_title_changed_by(self, user: BaseUser):
+        if self.advisor == user and not is_admin(user):
+            ThesisVoteBinding.objects.filter(thesis=self).delete()
 
     def process_new_votes(self, votes: VotesInfo):
         """Whenever one or more votes for a thesis change, this function

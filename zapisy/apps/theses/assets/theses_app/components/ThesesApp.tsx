@@ -259,8 +259,34 @@ class ThesesAppInternal extends React.Component<Props, State> {
 		ThesisEditing.resetModifiedThesis();
 	}
 
+	private confirmWipeVote() {
+		if (!ThesisEditing.shouldShowWipeVotesWarning()) {
+			return Promise.resolve(true);
+		}
+		return new Promise((resolve) => {
+			const msg = "Zmiana tytułu spowoduje wykasowanie wszystkich głosów. Czy kontynuować?";
+			confirmAlert({
+				title: "Uwaga",
+				message: msg,
+				buttons: [
+					{
+						label: "Tak, zmień tytuł",
+						onClick: () => resolve(true),
+					},
+					{
+						label: "Nie, wróć",
+						onClick: () => resolve(false),
+					}
+				],
+			});
+		});
+	}
+
 	private onSave = async () => {
 		try {
+			if (!await this.confirmWipeVote()) {
+				return;
+			}
 			const oldWorkMode = AppMode.workMode;
 			await ThesisEditing.save();
 			(this.props as any).alert.success(messageForWorkMode(oldWorkMode));

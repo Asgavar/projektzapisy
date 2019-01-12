@@ -8,7 +8,7 @@ import { ThesisWorkMode, ApplicationState } from "../app_types";
 import { AppMode } from "./app_mode";
 import { List } from "./theses_list";
 import { Users } from "./users";
-import { ThesisTypeFilter } from "../protocol_types";
+import { ThesisTypeFilter, ThesisStatus } from "../protocol_types";
 import { adjustDomForUngraded } from "../utils";
 
 /** The currently selected thesis */
@@ -91,6 +91,24 @@ class C {
 	public resetModifiedThesis() {
 		console.assert(this.thesis != null);
 		this.thesis = compositeThesisForThesis(this.thesis!.original);
+	}
+
+	/**
+	 * Determine whether to confirm modifying a thesis because
+	 * the votes will be wiped
+	 */
+	public shouldShowWipeVotesWarning() {
+		const { thesis } = this;
+		if (!thesis) {
+			return false;
+		}
+		return (
+			!Users.isUserAdmin() &&
+			thesis.original.advisor &&
+			thesis.original.advisor.isEqual(Users.currentUser.person) &&
+			thesis.original.title.trim() !== thesis.modified.title.trim() &&
+			thesis.original.status !== ThesisStatus.ReturnedForCorrections
+		);
 	}
 
 	private preSaveAsserts() {

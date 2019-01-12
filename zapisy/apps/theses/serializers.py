@@ -209,6 +209,7 @@ class ThesisSerializer(serializers.ModelSerializer):
         if "votes" in validated_data:
             check_votes_permissions(user, validated_data["votes"])
 
+        old_title = instance.title
         instance.title = validated_data.get("title", instance.title)
         instance.kind = validated_data.get("kind", instance.kind)
         instance.reserved = validated_data.get("reserved", instance.reserved)
@@ -223,6 +224,8 @@ class ThesisSerializer(serializers.ModelSerializer):
         instance.save()
         if "votes" in validated_data:
             instance.process_new_votes(validated_data["votes"])
+        if instance.title != old_title:
+            instance.on_title_changed_by(user)
         return instance
 
     def get_votes(self, instance):
