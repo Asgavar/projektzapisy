@@ -50,7 +50,7 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         new_desc = "Another description"
         new_student = self.get_random_student()
         response = self.update_thesis_with_data(
-            title=new_title, description=new_desc, student={"id": new_student.pk}
+            title=new_title, description=new_desc, student=new_student.pk
         )
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         modified_thesis = self.get_modified_thesis()
@@ -61,7 +61,6 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
     FROZEN_STATUSES = [
         ThesisStatus.accepted,
         ThesisStatus.in_progress,
-        ThesisStatus.defended,
     ]
 
     def _try_modify_frozen_with_data(self, **kwargs):
@@ -86,7 +85,7 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         """Ensure that modifying things other than title is permitted"""
         self.login_as(self.advisor)
         new_2nd_student = self.get_random_student()
-        responses = self._try_modify_frozen_with_data(student_2={"id": new_2nd_student.pk})
+        responses = self._try_modify_frozen_with_data(student_2=new_2nd_student.pk)
         for response in responses:
             self.assertEqual(response.status_code, status.HTTP_200_OK)
         modified_thesis = self.get_modified_thesis()
@@ -171,7 +170,9 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
     def test_cannot_cast_invalid_vote(self):
         self.run_test_with_board_members(self.ensure_user_cannot_cast_invalid_vote)
 
-    def vote_to_accept_thesis_required_times(self, voter_to_skip: Employee = None):
+    def vote_to_accept_thesis_required_times(
+        self, voter_to_skip: Employee = None, as_admin: bool = False
+    ):
         """Cast enough approving votes to accept the current thesis, not using
         the specified voter (if specified)
         """
@@ -184,7 +185,7 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
                 voter = self.get_random_board_member_different_from(voter_to_skip)
             voters.append(voter)
         for voter in voters:
-            self.login_as(voter)
+            self.login_as(self.get_admin() if as_admin else voter)
             response = self.cast_vote_as(voter, ThesisVote.accepted)
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -227,8 +228,9 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         self._test_action_does_not_change_status(
             ThesisStatus.in_progress, lambda: self.vote_to_accept_thesis_required_times()
         )
+        # Only admins can modify archived theses
         self._test_action_does_not_change_status(
-            ThesisStatus.defended, lambda: self.vote_to_accept_thesis_required_times()
+            ThesisStatus.defended, lambda: self.vote_to_accept_thesis_required_times(None, True)
         )
 
     def test_single_vote_doesnt_reject_in_progress_or_archived(self):
@@ -236,8 +238,10 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         self._test_action_does_not_change_status(
             ThesisStatus.in_progress, lambda: self.reject_thesis_once(voter)
         )
+        # Only admins can modify archived theses
+        voter = self.get_admin()
         self._test_action_does_not_change_status(
-            ThesisStatus.defended, lambda: self.reject_thesis_once(voter)
+            ThesisStatus.in_progress, lambda: self.reject_thesis_once(voter)
         )
 
     def ensure_cannot_modify_thesis_duplicate_title_as_user(self, user: BaseUser):

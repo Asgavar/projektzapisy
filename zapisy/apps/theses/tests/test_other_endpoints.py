@@ -27,7 +27,7 @@ class OtherEndpointsTestCase(ThesesBaseTestCase):
         self.assertIsInstance(data, list)
         self.assertEqual(len(self.board_members), len(data))
         for member in self.board_members:
-            self.assertTrue(exactly_one(recvd_member["id"] == member.pk for recvd_member in data))
+            self.assertTrue(exactly_one(recvd_member == member.pk for recvd_member in data))
 
     def test_theses_board_ok_for_logged_in(self):
         """Ensure that logged in users of various types can access the theses board"""
@@ -46,8 +46,8 @@ class OtherEndpointsTestCase(ThesesBaseTestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         data = response.data
         self.assertEqual(data["type"], expected_type.value)
-        self.assertEqual(data["user"]["id"], user.pk)
-        self.assertEqual(data["user"]["display_name"], user.get_full_name())
+        self.assertEqual(data["person"]["id"], user.pk)
+        self.assertEqual(data["person"]["name"], user.get_full_name())
 
     def test_current_user_endpoint_ok_for_logged_in(self):
         """Ensure the current user endpoint returns correct data for each possible

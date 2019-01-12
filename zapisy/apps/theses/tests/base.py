@@ -8,12 +8,12 @@ from django.contrib.auth.models import Group
 
 from apps.users.models import Employee, Student, BaseUser
 from apps.users.tests.factories import EmployeeFactory, StudentFactory
-from ..models import Thesis, ThesisVote
+from ..models import Thesis, ThesisVote, ThesisStatus, STATUSES_UNCHANGEABLE_BY_VOTE
 from ..users import THESIS_BOARD_GROUP_NAME
 
 from .utils import (
     random_title, random_bool,
-    random_kind, random_status, random_reserved,
+    random_kind, random_current_status, random_reserved,
     random_description, random_definite_vote,
 )
 
@@ -99,7 +99,7 @@ class ThesesBaseTestCase(APITestCase):
                 "auxiliary_advisor", cls.get_random_emp() if random_bool() else None
             ),
             kind=kwargs.get("kind", random_kind()).value,
-            status=kwargs.get("status", random_status()).value,
+            status=kwargs.get("status", random_current_status()).value,
             reserved=kwargs.get("reserved", random_reserved()),
             description=kwargs.get("description", random_description()),
             student=kwargs.get("student", cls.get_random_student()),
@@ -141,6 +141,10 @@ class ThesesBaseTestCase(APITestCase):
         for graded in graded_theses:
             votes = [(board_member, random_definite_vote())]
             graded.process_new_votes(votes)
+        vote_changeable = list(set(ThesisStatus) - set(STATUSES_UNCHANGEABLE_BY_VOTE))
+        for ungraded in ungraded_theses:
+            ungraded.status = random.choice(vote_changeable).value
+            ungraded.save()
         # Also cast "indeterminate" votes for some "ungraded" theses,
         # they should still count as ungraded with those vote values
         ungraded_with_indeterminate = random.sample(ungraded_theses, random.randrange(num_theses))

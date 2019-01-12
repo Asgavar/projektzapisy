@@ -1,5 +1,7 @@
 import random
 
+from apps.users.models import Employee
+
 from ..models import Thesis, ThesisStatus, ThesisKind
 from ..views import ThesisTypeFilter
 from .base import ThesesBaseTestCase, PAGE_SIZE
@@ -50,7 +52,8 @@ class ThesesFiltersAndSortingTestCase(ThesesBaseTestCase):
         theses = self.get_theses_with_data({"advisor": matching_emp.get_full_name()})
         self.assertEqual(len(theses), num_matching)
         for thesis in theses:
-            self.assertTrue(matching_emp.get_full_name() in thesis["advisor"]["display_name"])
+            thesis_advisor = Employee.objects.get(pk=thesis["advisor"])
+            self.assertTrue(thesis_advisor == matching_emp)
 
     def test_current_type_filter(self):
         """Test that current, i.e. not yet defended theses are being filtered correctly"""
@@ -64,7 +67,7 @@ class ThesesFiltersAndSortingTestCase(ThesesBaseTestCase):
         ]
         Thesis.objects.bulk_create(normal + defended)
         self.login_for_perms()
-        theses = self.get_theses_with_data({"type": ThesisTypeFilter.all_current.value})
+        theses = self.get_theses_with_data({"type": ThesisTypeFilter.current.value})
         self.assertEqual(len(theses), num_normal)
         for thesis in theses:
             self.assertNotEqual(thesis["status"], ThesisStatus.defended.value)
@@ -152,6 +155,6 @@ class ThesesFiltersAndSortingTestCase(ThesesBaseTestCase):
         self.login_for_perms()
         theses = self.get_theses_with_data({"column": "advisor", "dir": "asc"})
         self.assertEqual(len(theses), len(all_theses))
-        all_adv_names = current_adv_names + archived_adv_names
         for i in range(len(all_theses)):
-            self.assertEqual(theses[i]["advisor"]["display_name"], all_adv_names[i])
+            thesis_advisor = Employee.objects.get(pk=theses[i]["advisor"])
+            self.assertEqual(thesis_advisor, all_theses[i].advisor)

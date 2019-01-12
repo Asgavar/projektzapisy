@@ -16,7 +16,7 @@ class ThesesAdditionTestCase(ThesesBaseTestCase):
         advisor = kwargs.pop("advisor", adder)
         base_data = {
             "title": random_title(),
-            "advisor": {"id": advisor.pk},
+            "advisor": advisor.pk,
             "kind": random_kind().value,
             "reserved": random_reserved(),
             "status": ThesisStatus.being_evaluated.value
