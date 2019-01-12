@@ -10,7 +10,7 @@ import { ApplicationState } from "../app_types";
 import { ThesisTypeFilter, thesisTypeFilterToString } from "../protocol_types";
 import { StringFilter } from "../app_logic/theses_list";
 
-const typeFilterInfos = [
+const typeFilters = [
 	ThesisTypeFilter.Everything,
 	ThesisTypeFilter.Current,
 	ThesisTypeFilter.Archived,
@@ -29,7 +29,7 @@ const filtersWithUngraded = [
 		val: ThesisTypeFilter.Ungraded,
 		displayName: thesisTypeFilterToString(ThesisTypeFilter.Ungraded),
 	},
-	...typeFilterInfos,
+	...typeFilters,
 ];
 
 type Props = {
@@ -112,7 +112,7 @@ export class ListFilters extends React.PureComponent<Props> {
 				value={this.props.typeValue}
 				onChange={this.handleTypeChange}
 				optionInfo={
-					this.props.displayUngraded ? filtersWithUngraded : typeFilterInfos
+					this.props.displayUngraded ? filtersWithUngraded : typeFilters
 				}
 				label={"Rodzaj"}
 				labelCss={labelStyle}
