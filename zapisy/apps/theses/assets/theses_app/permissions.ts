@@ -18,7 +18,10 @@ export function canAddThesis() {
  * @param user The user to cast a vote as
  */
 export function canCastVoteAsUser(user: Employee) {
-	return Users.isUserAdmin() || Users.currentUser.person.isEqual(user);
+	return (
+		Users.isUserAdmin() ||
+		Users.isUserMemberOfBoard() && Users.currentUser.person.isEqual(user)
+	);
 }
 
 /**
@@ -45,12 +48,15 @@ export function canModifyThesis(thesis: Thesis) {
 // The functions below will only be used if the one above returns true,
 // so they don't need to repeat their checks
 
+const STATUSES_UNCHANGEABLE_BY_VOTE = [ThesisStatus.InProgress, ThesisStatus.Defended];
 /**
- * Determine whether the current app user can cast a vote for the specified thesis
+ * Determine whether the current app user can change votes for the specified thesis
+ * This only accounts for the thesis status, to check if a user
+ * can vote as some other user, use `canCastVoteAsUser`
  * @param thesis The thesis to vote for
  */
-export function canCastVoteForThesis(thesis: Thesis) {
-	return Users.isUserAdmin() || thesis.status !== ThesisStatus.InProgress;
+export function canChangeThesisVote(thesis: Thesis) {
+	return Users.isUserAdmin() || !STATUSES_UNCHANGEABLE_BY_VOTE.includes(thesis.status);
 }
 
 /**

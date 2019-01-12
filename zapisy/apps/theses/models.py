@@ -64,6 +64,7 @@ VotesInfo = Tuple[Employee, ThesisVote]
 
 """If a thesis is in one of those statuses, a vote will not reject/accept it"""
 STATUSES_UNCHANGEABLE_BY_VOTE = (ThesisStatus.in_progress, ThesisStatus.defended)
+STATUS_VALUES_UNCHANGEABLE_BY_VOTE = (s.value for s in STATUSES_UNCHANGEABLE_BY_VOTE)
 
 
 class Thesis(models.Model):
@@ -167,6 +168,7 @@ def filter_ungraded_for_emp(qs, emp: Employee):
     # doing .exclude(votes__value__ne=none, votes__voter=emp) doesn't do what you want,
     # it ands two selects together rather than and two conditions in one select
     return qs \
+        .exclude(status__in=STATUS_VALUES_UNCHANGEABLE_BY_VOTE) \
         .annotate(definite_votes=RawSQL(
             """
             select count(*) from theses_thesisvotebinding where

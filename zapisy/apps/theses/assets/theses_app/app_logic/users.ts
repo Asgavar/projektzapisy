@@ -1,5 +1,4 @@
 import { observable, flow } from "mobx";
-import { memoize } from "lodash";
 
 import { getCurrentUser, getThesesBoard, getEmployees, FAKE_USER } from "../backend_callers";
 import { Employee, AppUser } from "../users";
@@ -19,9 +18,9 @@ class C {
 	/** Determine whether the current user a member of the theses board */
 	// We can memoize the result - this won't change during
 	// the app's lifetime, and calculating it does involve list search
-	public isUserMemberOfBoard = memoize(() => {
+	public isUserMemberOfBoard = () => {
 		return !!this.thesesBoard.find(this.currentUser.person.isEqual);
-	});
+	}
 
 	/** Determine whether the current app user an admin */
 	public isUserAdmin() {

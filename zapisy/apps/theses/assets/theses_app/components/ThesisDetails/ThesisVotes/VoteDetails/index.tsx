@@ -5,7 +5,7 @@ import { SingleVote } from "./SingleVote";
 import { Thesis } from "../../../../thesis";
 import { Employee, AppUser } from "../../../../users";
 import { ThesisVote } from "../../../../protocol_types";
-import { canCastVoteForThesis } from "../../../../permissions";
+import { canChangeThesisVote } from "../../../../permissions";
 import { strcmp } from "common/utils";
 
 type Props = {
@@ -37,6 +37,7 @@ export const VoteDetails = React.memo(function(props: Props) {
 			voter={voter}
 			value={vote}
 			user={props.user}
+			thesis={props.thesis}
 			onChange={props.onChange}
 		/>;
 	}));
@@ -47,5 +48,5 @@ export const VoteDetails = React.memo(function(props: Props) {
  * indeterminate ones, for this thesis
  */
 function shouldDisplayAllVotes(thesis: Thesis) {
-	return canCastVoteForThesis(thesis);
+	return canChangeThesisVote(thesis);
 }
