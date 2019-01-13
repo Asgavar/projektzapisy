@@ -23,7 +23,7 @@ from .drf_permission_classes import ThesisPermissions
 from .permissions import is_thesis_staff
 from .users import (
     wrap_user, get_theses_board, get_user_type,
-    ThesisUserType, is_theses_board_member
+    get_theses_user_full_name, is_theses_board_member, ThesisUserType
 )
 
 """Names of processing parameters in query strings"""
@@ -303,9 +303,7 @@ def build_autocomplete_view_with_queryset(queryset):
 
         def get_result_label(self, result):
             """Define how to stringify results; for Employees we want their full name with title"""
-            if isinstance(result, Employee):
-                return result.get_full_name_with_academic_title()
-            return result.get_full_name()
+            return get_theses_user_full_name(result)
     return ac
 
 
