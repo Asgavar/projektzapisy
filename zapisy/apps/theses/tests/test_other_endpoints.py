@@ -5,7 +5,7 @@ from rest_framework import status
 from django.urls import reverse
 
 from apps.users.models import BaseUser, Employee
-from ..users import ThesisUserType
+from ..users import ThesisUserType, get_theses_user_full_name
 from .base import ThesesBaseTestCase
 from .utils import make_employee_with_name, make_student_with_name, exactly_one
 
@@ -51,7 +51,7 @@ class OtherEndpointsTestCase(ThesesBaseTestCase):
         for recvd_emp in data:
             emp = Employee.objects.get(pk=recvd_emp["id"])
             self.assertEqual(emp.user.username, recvd_emp["username"])
-            self.assertEqual(emp.get_full_name(), recvd_emp["name"])
+            self.assertEqual(get_theses_user_full_name(emp), recvd_emp["name"])
 
     def test_theses_employees_ok_for_logged_in(self):
         """Ensure that logged in users of various types can access the employees list"""
@@ -102,7 +102,7 @@ class OtherEndpointsTestCase(ThesesBaseTestCase):
         for matching_user in matching_users:
             self.assertTrue(exactly_one(
                 int(recvd_user["id"]) == matching_user.pk and
-                recvd_user["text"] == matching_user.get_full_name()
+                recvd_user["text"] == get_theses_user_full_name(matching_user)
                 for recvd_user in results)
             )
 
