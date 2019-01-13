@@ -10,11 +10,16 @@ a {
   float: left;
 }
 
-#top_menu_container {
-  width: 100%;
+#top_menu_inner {
+  min-width: 940px;
+  display: inline-block;
+  width: auto;
+}
+
+#top_menu_outer {
   display: flex;
-  justify-content: space-around;
-  flex-direction: row;
+  justify-content: center;
+  align-items: center;
 }
 
 #logo_container {
@@ -285,6 +290,7 @@ table.table-info-big th {
   float: right;
   height: 21px;
   padding: 5px 10px 5px 10px;
+  margin-left: 50px;
 }
 
 .user-panel a, .user-panel a:hover {
