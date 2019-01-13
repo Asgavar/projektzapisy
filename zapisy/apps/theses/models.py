@@ -92,7 +92,7 @@ class Thesis(models.Model):
 
     def on_title_changed_by(self, user: BaseUser):
         if self.advisor == user and not is_admin(user):
-            ThesisVoteBinding.objects.filter(thesis=self).delete()
+            self.votes.all().delete()
 
     def process_new_votes(self, votes: VotesInfo):
         """Whenever one or more votes for a thesis change, this function
