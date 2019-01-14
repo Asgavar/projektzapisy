@@ -13,50 +13,50 @@ MAX_THESIS_TITLE_LEN = 300
 
 
 class ThesisKind(Enum):
-    masters = 0
-    engineers = 1
-    bachelors = 2
-    bachelors_engineers = 3
-    isim = 4
+    MASTERS = 0
+    ENGINEERS = 1
+    BACHELORS = 2
+    BACHELORS_ENGINEERS = 3
+    ISIM = 4
 
 
 THESIS_KIND_CHOICES = (
-    (ThesisKind.masters.value, "mgr"),
-    (ThesisKind.engineers.value, "inż"),
-    (ThesisKind.bachelors.value, "lic"),
-    (ThesisKind.bachelors_engineers.value, "lic+inż"),
-    (ThesisKind.isim.value, "isim"),
+    (ThesisKind.MASTERS.value, "mgr"),
+    (ThesisKind.ENGINEERS.value, "inż"),
+    (ThesisKind.BACHELORS.value, "lic"),
+    (ThesisKind.BACHELORS_ENGINEERS.value, "lic+inż"),
+    (ThesisKind.ISIM.value, "isim"),
 )
 
 
 class ThesisStatus(Enum):
-    being_evaluated = 1
-    returned_for_corrections = 2
-    accepted = 3
-    in_progress = 4
-    defended = 5
-    default = being_evaluated
+    BEING_EVALUATED = 1
+    RETURNED_FOR_CORRECTIONS = 2
+    ACCEPTED = 3
+    IN_PROGRESS = 4
+    DEFENDED = 5
+    DEFAULT = BEING_EVALUATED
 
 
 THESIS_STATUS_CHOICES = (
-    (ThesisStatus.being_evaluated.value, "poddana pod głosowanie"),
-    (ThesisStatus.returned_for_corrections.value, "zwrócona do poprawek"),
-    (ThesisStatus.accepted.value, "zaakceptowana"),
-    (ThesisStatus.in_progress.value, "w realizacji"),
-    (ThesisStatus.defended.value, "obroniona"),
+    (ThesisStatus.BEING_EVALUATED.value, "poddana pod głosowanie"),
+    (ThesisStatus.RETURNED_FOR_CORRECTIONS.value, "zwrócona do poprawek"),
+    (ThesisStatus.ACCEPTED.value, "zaakceptowana"),
+    (ThesisStatus.IN_PROGRESS.value, "w realizacji"),
+    (ThesisStatus.DEFENDED.value, "obroniona"),
 )
 
 
 class ThesisVote(Enum):
-    none = 1
-    rejected = 2
-    accepted = 3
+    NONE = 1
+    REJECTED = 2
+    ACCEPTED = 3
 
 
 THESIS_VOTE_CHOICES = (
-    (ThesisVote.none.value, "brak głosu"),
-    (ThesisVote.rejected.value, "odrzucona"),
-    (ThesisVote.accepted.value, "zaakceptowana"),
+    (ThesisVote.NONE.value, "brak głosu"),
+    (ThesisVote.REJECTED.value, "odrzucona"),
+    (ThesisVote.ACCEPTED.value, "zaakceptowana"),
 )
 
 
@@ -64,7 +64,7 @@ VotesInfo = Tuple[Employee, ThesisVote]
 
 
 """If a thesis is in one of those statuses, a vote will not reject/accept it"""
-STATUSES_UNCHANGEABLE_BY_VOTE = (ThesisStatus.in_progress, ThesisStatus.defended)
+STATUSES_UNCHANGEABLE_BY_VOTE = (ThesisStatus.IN_PROGRESS, ThesisStatus.DEFENDED)
 STATUS_VALUES_UNCHANGEABLE_BY_VOTE = [s.value for s in STATUSES_UNCHANGEABLE_BY_VOTE]
 
 
@@ -115,19 +115,19 @@ class Thesis(models.Model):
         if ThesisStatus(self.status) in STATUSES_UNCHANGEABLE_BY_VOTE:
             return
         if self.get_reject_votes_cnt():
-            self.status = ThesisStatus.returned_for_corrections.value
+            self.status = ThesisStatus.RETURNED_FOR_CORRECTIONS.value
         elif self.get_approve_votes_cnt() >= get_num_required_votes():
-            self.status = ThesisStatus.accepted.value
+            self.status = ThesisStatus.ACCEPTED.value
         self.save()
 
     def get_approve_votes_cnt(self):
-        return self.votes.filter(value=ThesisVote.accepted.value).count()
+        return self.votes.filter(value=ThesisVote.ACCEPTED.value).count()
 
     def get_reject_votes_cnt(self):
-        return self.votes.filter(value=ThesisVote.rejected.value).count()
+        return self.votes.filter(value=ThesisVote.REJECTED.value).count()
 
     def is_archived(self):
-        return self.status == ThesisStatus.defended.value
+        return self.status == ThesisStatus.DEFENDED.value
 
     def __str__(self) -> str:
         return self.title
@@ -179,7 +179,7 @@ def filter_ungraded_for_emp(qs, emp: Employee):
             select count(*) from theses_thesisvotebinding where
             thesis_id=theses_thesis.id and voter_id=%s and value<>%s
             """,
-            (emp.pk, ThesisVote.none.value)
+            (emp.pk, ThesisVote.NONE.value)
         )) \
         .filter(definite_votes=0)
 
