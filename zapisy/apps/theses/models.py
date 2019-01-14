@@ -94,7 +94,7 @@ class Thesis(models.Model):
         if self.advisor == user and not is_admin(user):
             self.votes.all().delete()
 
-    def process_new_votes(self, votes: VotesInfo):
+    def process_new_votes(self, votes: VotesInfo, should_update_status: bool):
         """Whenever one or more votes for a thesis change, this function
         should be called to process & save them
         """
@@ -105,7 +105,8 @@ class Thesis(models.Model):
                 existing_vote.save()
             except ThesisVoteBinding.DoesNotExist:
                 ThesisVoteBinding.objects.create(thesis=self, voter=voter, value=vote.value)
-        self.check_for_vote_status_change()
+        if should_update_status:
+            self.check_for_vote_status_change()
 
     def check_for_vote_status_change(self):
         """If we have enough approving votes, accept this thesis - unless there's a rejecting

@@ -6,12 +6,14 @@ import { Employee, AppUser } from "../../../users";
 import { ThesisVote } from "../../../protocol_types";
 import { VoteDetails } from "./VoteDetails";
 import { VoteCounts } from "./VoteCounts";
+import { ThesisWorkMode } from "../../../app_types";
 
 type Props = {
 	thesis: Thesis,
 	thesesBoard: Employee[],
 	user: AppUser,
 	isStaff: boolean;
+	workMode: ThesisWorkMode;
 	onChange: (member: Employee, newValue: ThesisVote) => void;
 };
 
@@ -19,6 +21,9 @@ type Props = {
  * Renders the vote value for this thesis for each theses board member
  */
 export const ThesisVotes = React.memo(function(props: Props) {
+	if (props.workMode === ThesisWorkMode.Adding && !props.isStaff) {
+		return <VotesContainer/>;
+	}
 	const votes = props.isStaff
 		? <VoteDetails
 			thesis={props.thesis}
