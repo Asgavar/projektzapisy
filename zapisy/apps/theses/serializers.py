@@ -72,7 +72,7 @@ def serialize_thesis_votes(thesis: Thesis, is_staff: bool) -> Dict[int, int]:
         return {
             vote.voter.pk: vote.value
             for vote in thesis.votes.all()
-            if vote.value != ThesisVote.none.value
+            if vote.value != ThesisVote.NONE.value
         }
     return {
         "accept_cnt": thesis.get_approve_votes_cnt(),

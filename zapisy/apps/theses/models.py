@@ -64,7 +64,7 @@ VotesInfo = Tuple[Employee, ThesisVote]
 
 
 """If a thesis is in one of those statuses, a vote will not reject/accept it"""
-STATUSES_UNCHANGEABLE_BY_VOTE = (ThesisStatus.in_progress, ThesisStatus.defended)
+STATUSES_UNCHANGEABLE_BY_VOTE = (ThesisStatus.IN_PROGRESS, ThesisStatus.DEFENDED)
 STATUS_VALUES_UNCHANGEABLE_BY_VOTE = [s.value for s in STATUSES_UNCHANGEABLE_BY_VOTE]
 
 
@@ -115,16 +115,16 @@ class Thesis(models.Model):
         if ThesisStatus(self.status) in STATUSES_UNCHANGEABLE_BY_VOTE:
             return
         if self.get_reject_votes_cnt():
-            self.status = ThesisStatus.returned_for_corrections.value
+            self.status = ThesisStatus.RETURNED_FOR_CORRECTIONS.value
         elif self.get_approve_votes_cnt() >= get_num_required_votes():
-            self.status = ThesisStatus.accepted.value
+            self.status = ThesisStatus.ACCEPTED.value
         self.save()
 
     def get_approve_votes_cnt(self):
-        return self.votes.filter(value=ThesisVote.accepted.value).count()
+        return self.votes.filter(value=ThesisVote.ACCEPTED.value).count()
 
     def get_reject_votes_cnt(self):
-        return self.votes.filter(value=ThesisVote.rejected.value).count()
+        return self.votes.filter(value=ThesisVote.REJECTED.value).count()
 
     def is_archived(self):
         return self.status == ThesisStatus.DEFENDED.value
@@ -179,7 +179,7 @@ def filter_ungraded_for_emp(qs, emp: Employee):
             select count(*) from theses_thesisvotebinding where
             thesis_id=theses_thesis.id and voter_id=%s and value<>%s
             """,
-            (emp.pk, ThesisVote.none.value)
+            (emp.pk, ThesisVote.NONE.value)
         )) \
         .filter(definite_votes=0)
 

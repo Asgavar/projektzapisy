@@ -223,7 +223,7 @@ def filter_theses_queryset_for_type(
         return available_thesis_filter(qs.filter(kind=ThesisKind.BACHELORS.value))
     elif thesis_type == ThesisTypeFilter.AVAILABLE_BACHELORS_ISIM:
         return available_thesis_filter(qs.filter(kind=ThesisKind.ISIM.value))
-    elif thesis_type == ThesisTypeFilter.ungraded:
+    elif thesis_type == ThesisTypeFilter.UNGRADED:
         return ungraded_theses_filter(qs, user)
     # Should never get here
     return qs
