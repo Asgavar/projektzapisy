@@ -19,7 +19,7 @@ class ThesesAdditionTestCase(ThesesBaseTestCase):
             "advisor": advisor.pk,
             "kind": random_kind().value,
             "reserved": random_reserved(),
-            "status": ThesisStatus.being_evaluated.value
+            "status": ThesisStatus.BEING_EVALUATED.value
         }
         base_data.update(kwargs)
         return self.client.post(reverse("theses:theses-list"), base_data, format="json")
@@ -49,7 +49,7 @@ class ThesesAdditionTestCase(ThesesBaseTestCase):
     # ...or with status set to anything other than being evaluated
     def test_employee_cannot_add_thesis_with_other_status(self):
         emp = self.get_random_emp()
-        response = self.add_thesis(emp, status=ThesisStatus.accepted.value)
+        response = self.add_thesis(emp, status=ThesisStatus.ACCEPTED.value)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     # But board members can
@@ -61,7 +61,7 @@ class ThesesAdditionTestCase(ThesesBaseTestCase):
 
     def test_board_member_can_add_thesis_with_other_status(self):
         emp = self.get_random_board_member()
-        response = self.add_thesis(emp, status=ThesisStatus.accepted.value)
+        response = self.add_thesis(emp, status=ThesisStatus.ACCEPTED.value)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
 
     # Theses with empty titles are not permitted

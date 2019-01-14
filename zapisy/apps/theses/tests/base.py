@@ -158,7 +158,7 @@ class ThesesBaseTestCase(APITestCase):
         # they should still count as ungraded with those vote values
         ungraded_with_indeterminate = random.sample(ungraded_theses, random.randrange(num_theses))
         for thesis in ungraded_with_indeterminate:
-            votes = [(board_member, ThesisVote.none)]
+            votes = [(board_member, ThesisVote.NONE)]
             thesis.process_new_votes(votes)
         # Pick a few thesis, set them to one of the unchangeable statues;
         # they shouldn't count anymore

@@ -11,7 +11,7 @@ class ThesesSerializationTestCase(ThesesBaseTestCase):
     """Basic tests to ensure thesis serialization works correctly"""
     def setUp(self):
         self.advisor = self.get_random_emp()
-        self.thesis = self.make_thesis(advisor=self.advisor, status=ThesisStatus.being_evaluated)
+        self.thesis = self.make_thesis(advisor=self.advisor, status=ThesisStatus.BEING_EVALUATED)
         self.thesis.save()
 
     def get_serialized_thesis(self):

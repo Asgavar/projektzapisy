@@ -63,14 +63,14 @@ class ThesesFiltersAndSortingTestCase(ThesesBaseTestCase):
             self.make_thesis(status=random_current_status()) for i in range(num_normal)
         ]
         defended = [
-            self.make_thesis(status=ThesisStatus.defended) for i in range(num_defended)
+            self.make_thesis(status=ThesisStatus.DEFENDED) for i in range(num_defended)
         ]
         Thesis.objects.bulk_create(normal + defended)
         self.login_for_perms()
-        theses = self.get_theses_with_data({"type": ThesisTypeFilter.current.value})
+        theses = self.get_theses_with_data({"type": ThesisTypeFilter.CURRENT.value})
         self.assertEqual(len(theses), num_normal)
         for thesis in theses:
-            self.assertNotEqual(thesis["status"], ThesisStatus.defended.value)
+            self.assertNotEqual(thesis["status"], ThesisStatus.DEFENDED.value)
 
     def test_available_filter(self):
         """Test that the "available of type" filter works correctly"""
@@ -79,36 +79,36 @@ class ThesesFiltersAndSortingTestCase(ThesesBaseTestCase):
         num_other = random.randint(1, PAGE_SIZE // 3)
         matching_avail = [
             self.make_thesis(
-                kind=ThesisKind.bachelors,
+                kind=ThesisKind.BACHELORS,
                 status=random_available_status(),
                 reserved=False
             ) for i in range(num_matching_avail)
         ]
         matching_unavail = [
             self.make_thesis(
-                kind=ThesisKind.bachelors,
-                status=random_status() if i % 2 else ThesisStatus.in_progress,
+                kind=ThesisKind.BACHELORS,
+                status=random_status() if i % 2 else ThesisStatus.IN_PROGRESS,
                 reserved=bool(i % 2)
             ) for i in range(num_matching_unavail)
         ]
         other = [
-            self.make_thesis(kind=ThesisKind.isim) for i in range(num_other)
+            self.make_thesis(kind=ThesisKind.ISIM) for i in range(num_other)
         ]
         Thesis.objects.bulk_create(matching_avail + matching_unavail + other)
         self.login_for_perms()
-        theses = self.get_theses_with_data({"type": ThesisTypeFilter.available_bachelors.value})
+        theses = self.get_theses_with_data({"type": ThesisTypeFilter.AVAILABLE_BACHELORS.value})
         self.assertEqual(len(theses), num_matching_avail)
         for thesis in theses:
-            self.assertEqual(thesis["kind"], ThesisKind.bachelors.value)
-            self.assertNotEqual(thesis["status"], ThesisStatus.in_progress.value)
-            self.assertNotEqual(thesis["status"], ThesisStatus.defended.value)
+            self.assertEqual(thesis["kind"], ThesisKind.BACHELORS.value)
+            self.assertNotEqual(thesis["status"], ThesisStatus.IN_PROGRESS.value)
+            self.assertNotEqual(thesis["status"], ThesisStatus.DEFENDED.value)
             self.assertFalse(thesis["reserved"])
 
     def test_ungraded_filter(self):
         board_member = self.get_random_board_member()
         _, ungraded_theses = self.create_theses_for_ungraded_testing(board_member)
         self.login_as(board_member)
-        theses = self.get_theses_with_data({"type": ThesisTypeFilter.ungraded.value})
+        theses = self.get_theses_with_data({"type": ThesisTypeFilter.UNGRADED.value})
         self.assertEqual(len(ungraded_theses), len(theses))
         for graded in ungraded_theses:
             self.assertTrue(exactly_one(recv_thesis["id"] == graded.pk for recv_thesis in theses))
@@ -122,7 +122,7 @@ class ThesesFiltersAndSortingTestCase(ThesesBaseTestCase):
             for cur_title in current_titles
         ]
         archiveds = [
-            self.make_thesis(title=arch_title, status=ThesisStatus.defended)
+            self.make_thesis(title=arch_title, status=ThesisStatus.DEFENDED)
             for arch_title in archived_titles
         ]
         all_theses = currents + archiveds
@@ -147,7 +147,7 @@ class ThesesFiltersAndSortingTestCase(ThesesBaseTestCase):
         archiveds = [
             self.make_thesis(
                 advisor=make_employee_with_name(arch_adv_name),
-                status=ThesisStatus.defended
+                status=ThesisStatus.DEFENDED
             ) for arch_adv_name in archived_adv_names
         ]
         all_theses = currents + archiveds

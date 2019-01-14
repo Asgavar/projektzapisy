@@ -35,7 +35,7 @@ def random_status():
 
 def random_current_status():
     """Return a random "current", i.e. not defended status"""
-    return random.choice([status for status in ThesisStatus if status != ThesisStatus.defended])
+    return random.choice([status for status in ThesisStatus if status != ThesisStatus.DEFENDED])
 
 
 def random_available_status():
@@ -43,9 +43,9 @@ def random_available_status():
     for students
     """
     return random.choice([
-        ThesisStatus.accepted,
-        ThesisStatus.being_evaluated,
-        ThesisStatus.returned_for_corrections
+        ThesisStatus.ACCEPTED,
+        ThesisStatus.BEING_EVALUATED,
+        ThesisStatus.RETURNED_FOR_CORRECTIONS
     ])
 
 
@@ -68,8 +68,8 @@ def random_vote():
 def random_definite_vote():
     """Return a random thesis vote other than none"""
     return random.choice([
-        ThesisVote.accepted,
-        ThesisVote.rejected,
+        ThesisVote.ACCEPTED,
+        ThesisVote.REJECTED,
     ])
 
 

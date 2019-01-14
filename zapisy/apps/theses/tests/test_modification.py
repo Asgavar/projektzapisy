@@ -17,7 +17,7 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
     """
     def setUp(self):
         self.advisor = self.get_random_emp()
-        self.thesis = self.make_thesis(advisor=self.advisor, status=ThesisStatus.being_evaluated)
+        self.thesis = self.make_thesis(advisor=self.advisor, status=ThesisStatus.BEING_EVALUATED)
         self.thesis.save()
 
     def update_thesis_with_data(self, **kwargs):
@@ -58,10 +58,10 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         self.assertEqual(modified_thesis["description"], new_desc)
         self.assertEqual(modified_thesis["student"]["id"], new_student.pk)
 
-    FROZEN_STATUSES = [
-        ThesisStatus.accepted,
-        ThesisStatus.in_progress,
-    ]
+    FROZEN_STATUSES = (
+        ThesisStatus.ACCEPTED,
+        ThesisStatus.IN_PROGRESS,
+    )
 
     def _try_modify_frozen_with_data(self, **kwargs):
         result = []
@@ -113,7 +113,7 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         self.assertEqual(modified_thesis["title"], new_title)
 
     def _try_modify_archived_as(self, user: BaseUser):
-        self.thesis.status = ThesisStatus.defended.value
+        self.thesis.status = ThesisStatus.DEFENDED.value
         self.thesis.save()
         self.login_as(user)
         return self.update_thesis_with_data(description="123")
@@ -203,26 +203,26 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         voters = self.get_board_members(num_required, voter_to_skip)
         for voter in voters:
             self.login_as(self.get_admin() if as_admin else voter)
-            response = self.cast_vote_as(voter, ThesisVote.accepted)
+            response = self.cast_vote_as(voter, ThesisVote.ACCEPTED)
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_enough_votes_accept_thesis(self):
         """Test that when enough board members vote "approve" on a thesis, it gets accepted"""
         self.vote_to_accept_thesis_required_times()
         modified_thesis = self.get_modified_thesis()
-        self.assertEqual(modified_thesis["status"], ThesisStatus.accepted.value)
+        self.assertEqual(modified_thesis["status"], ThesisStatus.ACCEPTED.value)
 
     def reject_thesis_once(self, voter: Employee):
         """Cast a rejecting vote for the current thesis as the given voter"""
         self.login_as(voter)
-        response = self.cast_vote_as(voter, ThesisVote.rejected)
+        response = self.cast_vote_as(voter, ThesisVote.REJECTED)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_single_rejection_rejects_thesis(self):
         """Ensure that a single rejection is enough to reject a thesis"""
         self.reject_thesis_once(self.get_random_board_member())
         modified_thesis = self.get_modified_thesis()
-        self.assertEqual(modified_thesis["status"], ThesisStatus.returned_for_corrections.value)
+        self.assertEqual(modified_thesis["status"], ThesisStatus.RETURNED_FOR_CORRECTIONS.value)
 
     def test_enough_votes_dont_accept_after_rejection(self):
         """Ensure that if a thesis was rejected, it will not be accepted again even if
@@ -232,7 +232,7 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         self.reject_thesis_once(rejecter)
         self.vote_to_accept_thesis_required_times(rejecter)
         modified_thesis = self.get_modified_thesis()
-        self.assertEqual(modified_thesis["status"], ThesisStatus.returned_for_corrections.value)
+        self.assertEqual(modified_thesis["status"], ThesisStatus.RETURNED_FOR_CORRECTIONS.value)
 
     def _test_action_does_not_change_status(self, status: ThesisStatus, action: Callable[[], None]):
         self.thesis.status = status.value
@@ -245,23 +245,23 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         """The usual reject/accept logic should not apply to theses that are
         in progress/archived"""
         self._test_action_does_not_change_status(
-            ThesisStatus.in_progress, lambda: self.vote_to_accept_thesis_required_times()
+            ThesisStatus.IN_PROGRESS, lambda: self.vote_to_accept_thesis_required_times()
         )
         # Only admins can modify archived theses
         self._test_action_does_not_change_status(
-            ThesisStatus.defended, lambda: self.vote_to_accept_thesis_required_times(None, True)
+            ThesisStatus.DEFENDED, lambda: self.vote_to_accept_thesis_required_times(None, True)
         )
 
     def test_single_vote_doesnt_reject_in_progress_or_archived(self):
         """As above"""
         voter = self.get_random_board_member()
         self._test_action_does_not_change_status(
-            ThesisStatus.in_progress, lambda: self.reject_thesis_once(voter)
+            ThesisStatus.IN_PROGRESS, lambda: self.reject_thesis_once(voter)
         )
         # Only admins can modify archived theses
         voter = self.get_admin()
         self._test_action_does_not_change_status(
-            ThesisStatus.in_progress, lambda: self.reject_thesis_once(voter)
+            ThesisStatus.IN_PROGRESS, lambda: self.reject_thesis_once(voter)
         )
 
     def _vote_then_change_title_as_user(self, user: BaseUser):

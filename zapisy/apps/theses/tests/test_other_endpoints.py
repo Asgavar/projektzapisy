@@ -77,9 +77,9 @@ class OtherEndpointsTestCase(ThesesBaseTestCase):
         """Ensure the current user endpoint returns correct data for each possible
         type of user
         """
-        self._test_current_user_for_user(self.get_admin(), ThesisUserType.admin)
-        self._test_current_user_for_user(self.get_random_emp(), ThesisUserType.employee)
-        self._test_current_user_for_user(self.get_random_student(), ThesisUserType.student)
+        self._test_current_user_for_user(self.get_admin(), ThesisUserType.ADMIN)
+        self._test_current_user_for_user(self.get_random_emp(), ThesisUserType.EMPLOYEE)
+        self._test_current_user_for_user(self.get_random_student(), ThesisUserType.STUDENT)
 
     def test_autocomplete_denied_for_not_logged_in(self):
         """Ensure users that are not logged in cannot access the student/emp
