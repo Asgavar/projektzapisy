@@ -13,18 +13,18 @@
             <thead>
             <tr>
                 {# Translators: nagłówek tabeli #}
-                <th scope="col">{% trans "Prowadzący" %}</th>
-                <th scope="col">{% trans "Termin zajęć" %}</th>
-                <th scope="col" title="Maksymalna liczba osób, które mogą zapisać się na przedmiot" class="number">{% trans "Limit" %}</th>
-                <th scope="col" title="Liczba aktualnie zapisanych osób" class="number termEnrolledHeader">{% trans "Zapisani" %}</th>
-                <th scope="col" title="Liczba osób oczekujących na zapis" class="number termQueuedHeader">{% trans "Kolejka" %}</th>
+                <th class="align-middle" scope="col">{% trans "Prowadzący" %}</th>
+                <th class="align-middle" scope="col">{% trans "Termin zajęć" %}</th>
+                <th class="align-middle" scope="col" title="Maksymalna liczba osób, które mogą zapisać się na przedmiot" class="number">{% trans "Limit" %}</th>
+                <th class="align-middle" cope="col" title="Liczba aktualnie zapisanych osób" class="number termEnrolledHeader">{% trans "Zapisani" %}</th>
+                <th class="align-middle" scope="col" title="Liczba osób oczekujących na zapis" class="number termQueuedHeader">{% trans "Kolejka" %}</th>
                 <th ></th>
             </tr>
             </thead>
             <tbody>
             {% for group in tutorial.list %}
                 <tr {% if group.is_enrolled %} class="signed" {% endif %} >
-                    <td>
+                    <td class="align-middle" >
                         {% if group.teacher %}
                             <a href="{% url 'employee-profile' group.teacher.user.id %}" class="person">
                                 {{ group.teacher.user.get_full_name }}
@@ -36,15 +36,15 @@
                             <br/><span class="small">{{ group.extra }}</span>
                         {% endif %}
                     </td>
-                    <td class="term">
+                    <td class="term align-middle">
                         {% for term in group.term.all %}
                             <span>{{ term }}</span>
                         {% endfor %}
                     </td>
-                    <td class="number termLimit">{{ group.limit }}</td>
-                    <td class="number termEnrolledCount">{{ group.num_enrolled }}</td>
-                    <td class="number termQueuedCount">{{ group.num_enqueued }}</td>
-                    <td class="controls">
+                    <td class="number termLimit align-middle">{{ group.limit }}</td>
+                    <td class="number termEnrolledCount align-middle">{{ group.num_enrolled }}</td>
+                    <td class="number termQueuedCount align-middle">{{ group.num_enqueued }}</td>
+                    <td class="controls text-center align-middle">
                         {% if group.can_enqueue and not group.is_enrolled and not group.is_enqueued %}
                             <form action="{% url 'records-enqueue' %}" method="post" class="setEnrolled">{% csrf_token %}
                                 <div>
