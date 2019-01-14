@@ -149,7 +149,7 @@ class ThesesBaseTestCase(APITestCase):
             thesis.save()
         for graded in graded_theses:
             votes = [(board_member, random_definite_vote())]
-            graded.process_new_votes(votes)
+            graded.process_new_votes(votes, True)
         vote_changeable = list(set(ThesisStatus) - set(STATUSES_UNCHANGEABLE_BY_VOTE))
         for ungraded in ungraded_theses:
             ungraded.status = random.choice(vote_changeable).value
@@ -159,7 +159,7 @@ class ThesesBaseTestCase(APITestCase):
         ungraded_with_indeterminate = random.sample(ungraded_theses, random.randrange(num_theses))
         for thesis in ungraded_with_indeterminate:
             votes = [(board_member, ThesisVote.NONE)]
-            thesis.process_new_votes(votes)
+            thesis.process_new_votes(votes, True)
         # Pick a few thesis, set them to one of the unchangeable statues;
         # they shouldn't count anymore
         unchangeable_theses = random.sample(ungraded_theses, random.randrange(num_theses // 3))
