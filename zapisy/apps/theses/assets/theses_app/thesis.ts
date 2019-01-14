@@ -42,7 +42,8 @@ export class Thesis {
 		this.secondStudent = null;
 		this.addedDate = moment();
 		this.modifiedDate = moment();
-		this.votes = new ThesisVoteDetails(new Map());
+		const entries = Users.thesesBoard.map(e => [e.id, ThesisVote.None]);
+		this.votes = new ThesisVoteDetails(new Map(entries as Array<[number, ThesisVote]>));
 	}
 
 	public toString() {

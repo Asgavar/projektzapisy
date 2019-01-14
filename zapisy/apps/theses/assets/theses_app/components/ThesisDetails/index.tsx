@@ -136,6 +136,7 @@ export class ThesisDetails extends React.PureComponent<Props> {
 				thesesBoard={this.props.thesesBoard}
 				isStaff={this.props.isStaff}
 				user={this.props.user}
+				workMode={this.props.mode}
 				onChange={this.onVoteChanged}
 			/>
 			{this.renderSaveButton()}

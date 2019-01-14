@@ -54,6 +54,16 @@ export function serializeNewThesis(thesis: Thesis): ThesisAddOutSerialized {
 	if (thesis.secondStudent) {
 		result.student_2 = toPersonDispatch(thesis.secondStudent);
 	}
+	if (thesis.hasVoteDetails()) {
+		const details = thesis.getVoteDetails();
+		const votes = details.getAllVotes();
+		result.votes = {};
+		for (const [voter, vote] of votes) {
+			if (vote !== ThesisVote.None) {
+				result.votes[voter.id] = vote;
+			}
+		}
+	}
 	return result;
 }
 

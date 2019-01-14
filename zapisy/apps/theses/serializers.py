@@ -193,7 +193,7 @@ class ThesisSerializer(serializers.ModelSerializer):
             student_2=validated_data.get("student_2"),
         )
         if "votes" in validated_data:
-            new_instance.process_new_votes(validated_data["votes"])
+            new_instance.process_new_votes(validated_data["votes"], False)
         return new_instance
 
     def update(self, instance: Thesis, validated_data: GenericDict):
@@ -223,7 +223,7 @@ class ThesisSerializer(serializers.ModelSerializer):
         instance.student_2 = validated_data.get("student_2", instance.student_2)
         instance.save()
         if "votes" in validated_data:
-            instance.process_new_votes(validated_data["votes"])
+            instance.process_new_votes(validated_data["votes"], "status" not in validated_data)
         if instance.title != old_title:
             instance.on_title_changed_by(user)
         return instance
