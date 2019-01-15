@@ -38,9 +38,14 @@ class ThesesSerializationTestCase(ThesesBaseTestCase):
 
     def _get_thesis_with_votes(self, user: BaseUser):
         board_members = self.get_board_members(random.randint(2, 5))
-        votes = tuple((member, random_definite_vote()) for member in board_members)
+        temp_board_member = self.get_random_emp()
+        # Also add a vote by a previous board member to check that too
+        self.board_group.user_set.add(temp_board_member.user)
+        votes = [(member, random_definite_vote()) for member in board_members]
+        votes.append((temp_board_member, random_definite_vote()))
+        self.board_group.user_set.remove(temp_board_member.user)
         for voter, vote in votes:
-            self.thesis.process_new_votes(((voter, vote), ), voter, True)
+            self.set_thesis_vote_locally(self.thesis, voter, vote)
         self.login_as(user)
         thesis = self.get_serialized_thesis()
         return votes, thesis["votes"]

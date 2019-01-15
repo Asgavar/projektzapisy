@@ -148,8 +148,7 @@ class ThesesBaseTestCase(APITestCase):
             # to reference
             thesis.save()
         for graded in graded_theses:
-            votes = ((board_member, random_definite_vote()), )
-            graded.process_new_votes(votes, board_member, True)
+            self.set_thesis_vote_locally(graded, board_member, random_definite_vote())
         vote_changeable = list(set(ThesisStatus) - set(STATUSES_UNCHANGEABLE_BY_VOTE))
         for ungraded in ungraded_theses:
             ungraded.status = random.choice(vote_changeable).value
@@ -158,8 +157,7 @@ class ThesesBaseTestCase(APITestCase):
         # they should still count as ungraded with those vote values
         ungraded_with_indeterminate = random.sample(ungraded_theses, random.randrange(num_theses))
         for thesis in ungraded_with_indeterminate:
-            votes = ((board_member, ThesisVote.NONE), )
-            thesis.process_new_votes(votes, board_member, True)
+            self.set_thesis_vote_locally(thesis, board_member, ThesisVote.NONE)
         # Pick a few thesis, set them to one of the unchangeable statues;
         # they shouldn't count anymore
         unchangeable_theses = random.sample(ungraded_theses, random.randrange(num_theses // 3))
@@ -169,6 +167,12 @@ class ThesesBaseTestCase(APITestCase):
         # They shouldn't be counted as ungraded anymore
         ungraded_theses = list(set(ungraded_theses) - set(unchangeable_theses))
         return graded_theses, ungraded_theses
+
+    def set_thesis_vote_locally(self, thesis: Thesis, voter: Employee, vote: ThesisVote):
+        """Set the specified vote value for the specified employee locally,
+        not through the API
+        """
+        thesis.process_new_votes(((voter, vote), ), voter, True)
 
     def run_test_with_privileged_users(
         self, test_func: Callable[[Employee], None],

@@ -285,6 +285,25 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         self._vote_then_change_title_as_user(self.get_admin())
         self.assertGreater(self.thesis.votes.count(), 0)
 
+    def _vote_as_temp_board_member(self):
+        temp_board_member = self.get_random_emp()
+        self.board_group.user_set.add(temp_board_member.user)
+        self.set_thesis_vote_locally(self.thesis, temp_board_member, ThesisVote.ACCEPTED)
+        self.board_group.user_set.remove(temp_board_member.user)
+        return temp_board_member
+
+    def test_admin_can_modify_previous_board_member(self):
+        temp_board_member = self._vote_as_temp_board_member()
+        self.login_as(self.get_admin())
+        response = self.cast_vote_as(temp_board_member, ThesisVote.REJECTED)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_previous_board_member_cannot_modify_their_vote(self):
+        temp_board_member = self._vote_as_temp_board_member()
+        self.login_as(temp_board_member)
+        response = self.cast_vote_as(temp_board_member, ThesisVote.REJECTED)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
     def ensure_cannot_modify_thesis_duplicate_title_as_user(self, user: BaseUser):
         other_thesis = self.make_thesis()
         other_thesis.save()
