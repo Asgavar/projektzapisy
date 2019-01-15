@@ -123,6 +123,13 @@ export class Thesis {
 		return this.votes instanceof ThesisVoteDetails;
 	}
 
+	public hasAnyVotes() {
+		if (this.hasVoteDetails()) {
+			return this.getVoteDetails().hasDefiniteVote();
+		}
+		return this.getVoteCounts().hasAnyVotes();
+	}
+
 	public isUngraded(): boolean {
 		if (!this.hasVoteDetails() || !Users.isUserMemberOfBoard()) {
 			return false;
