@@ -53,6 +53,15 @@ export class ThesisVoteDetails {
 		return new Map(votePairs);
 	}
 
+	/**
+	 * Determine if there is a definite vote (i.e. not none)
+	 */
+	public hasDefiniteVote(): boolean {
+		return !!Array.from(this.votes.entries()).find(
+			([_, vote]) => vote !== ThesisVote.None
+		);
+	}
+
 	public isEqual(other: ThesisVoteDetails) {
 		return isEqual(this.votes, other.votes);
 	}
@@ -60,4 +69,8 @@ export class ThesisVoteDetails {
 
 export class ThesisVoteCounts {
 	public constructor(public accept: number, public reject: number) { }
+
+	public hasAnyVotes() {
+		return this.accept > 0 || this.reject > 0;
+	}
 }
