@@ -37,10 +37,15 @@ class C {
 	 * @param thesis The thesis to select; must be in the local theses list
 	 */
 	@action
-	public selectThesis(thesis: Thesis) {
-		console.assert(List.indexOfThesis(thesis) !== -1, "Tried to select a nonexistent thesis");
-		AppMode.workMode = ThesisWorkMode.Editing;
+	public selectThesis(thesis: Thesis | null) {
+		if (thesis) {
+			console.assert(
+				List.indexOfThesis(thesis) !== -1,
+				"Tried to select a nonexistent thesis"
+			);
+		}
 		this.thesis = compositeThesisForThesis(thesis);
+		AppMode.workMode = thesis ? ThesisWorkMode.Editing : ThesisWorkMode.Viewing;
 	}
 
 	/** The position of the currently selected thesis in the list */
@@ -182,12 +187,7 @@ class C {
 			yield List.reloadTheses();
 
 			const toSelect = thesisToSelectAfterAction(thesis.modified, id);
-			// no matter what the work mode was, if we have a thesis we end up in the edit view
-			if (toSelect) {
-				this.selectThesis(toSelect);
-			} else {
-				AppMode.workMode = ThesisWorkMode.Viewing;
-			}
+			this.selectThesis(toSelect);
 			adjustDomForUngraded(numUngraded);
 		} finally {
 			AppMode.applicationState = ApplicationState.Normal;
