@@ -293,6 +293,10 @@ class ThesesAppInternal extends React.Component<Props, State> {
 			}
 			const oldWorkMode = AppMode.workMode;
 			await ThesisEditing.save();
+			// Saving does reload the list
+			if (this.tableInstance) {
+				this.tableInstance.onListReloaded();
+			}
 			(this.props as any).alert.success(messageForWorkMode(oldWorkMode));
 		} catch (err) {
 			this.handleSaveError(err);
