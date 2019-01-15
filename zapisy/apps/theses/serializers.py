@@ -80,7 +80,16 @@ def serialize_thesis_votes(thesis: Thesis, is_staff: bool) -> Dict[int, int]:
     }
 
 
-def convert_votes(votes) -> VotesInfo:
+def can_vote_be_set_for(voter: Employee, thesis: Optional[Thesis]):
+    return (
+        is_theses_board_member(voter) or
+        # Changing the value of an existing vote is always legal (assuming correct permissions)
+        # even if the user is no longer a member of the theses board
+        thesis and thesis.votes.filter(voter=voter).count()
+    )
+
+
+def convert_votes(votes, thesis: Optional[Thesis]) -> VotesInfo:
     """Validate & convert the votes dict for a thesis"""
     if not isinstance(votes, dict):
         raise exceptions.ParseError("\"votes\" must be a dict")
@@ -95,8 +104,8 @@ def convert_votes(votes) -> VotesInfo:
             voter = Employee.objects.get(pk=voter_id)
         except (ValueError, Employee.DoesNotExist):
             raise exceptions.ParseError(f'bad voter id {key}')
-        if not is_theses_board_member(voter):
-            raise exceptions.ParseError(f'voter {voter} is not a member of the theses board')
+        if not can_vote_be_set_for(voter, thesis):
+            raise exceptions.ParseError(f'cannot set vote for {voter}')
         result.append((voter, vote))
     return result
 
@@ -151,7 +160,7 @@ class ThesisSerializer(serializers.ModelSerializer):
     def to_internal_value(self, data):
         result = super().to_internal_value(data)
         if "votes" in data:
-            result["votes"] = convert_votes(data["votes"])
+            result["votes"] = convert_votes(data["votes"], self.instance)
         return result
 
     # We need to define this field here manually to disable DRF's unique validator which
@@ -193,7 +202,7 @@ class ThesisSerializer(serializers.ModelSerializer):
             student_2=validated_data.get("student_2"),
         )
         if "votes" in validated_data:
-            new_instance.process_new_votes(validated_data["votes"], False)
+            new_instance.process_new_votes(validated_data["votes"], user, True)
         return new_instance
 
     def update(self, instance: Thesis, validated_data: GenericDict):
@@ -223,7 +232,9 @@ class ThesisSerializer(serializers.ModelSerializer):
         instance.student_2 = validated_data.get("student_2", instance.student_2)
         instance.save()
         if "votes" in validated_data:
-            instance.process_new_votes(validated_data["votes"], "status" not in validated_data)
+            instance.process_new_votes(
+                validated_data["votes"], user, "status" not in validated_data
+            )
         if instance.title != old_title:
             instance.on_title_changed_by(user)
         return instance

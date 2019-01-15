@@ -94,18 +94,33 @@ class Thesis(models.Model):
         if self.advisor == user and not is_admin(user):
             self.votes.all().delete()
 
-    def process_new_votes(self, votes: VotesInfo, should_update_status: bool):
+    def process_new_votes(
+        self, votes: VotesInfo, changing_user: Employee, should_update_status: True
+    ):
         """Whenever one or more votes for a thesis change, this function
         should be called to process & save them
+
+        Arguments:
+
+        changing_user -- The user who's causing the change of votes;
+        if they're not changing their own vote, thesis status will not be updated
+        (based on the assumption that they're simply adjusting the votes of some
+        other voters and don't actually want it to count)
+
+        should_update_status -- Whether the status should be updated based on vote
+        counts (only if the condition above holds)
         """
+        had_vote_as_self = False
         for voter, vote in votes:
             try:
+                if voter == changing_user:
+                    had_vote_as_self = True
                 existing_vote = self.votes.get(voter=voter)
                 existing_vote.value = vote.value
                 existing_vote.save()
             except ThesisVoteBinding.DoesNotExist:
                 ThesisVoteBinding.objects.create(thesis=self, voter=voter, value=vote.value)
-        if should_update_status:
+        if had_vote_as_self and should_update_status:
             self.check_for_vote_status_change()
 
     def check_for_vote_status_change(self):
@@ -173,16 +188,15 @@ def filter_ungraded_for_emp(qs, emp: Employee):
     # Uses custom SQL - I couldn't get querysets to do what I wanted them to;
     # doing .exclude(votes__value__ne=none, votes__voter=emp) doesn't do what you want,
     # it ands two selects together rather than and two conditions in one select
-    return qs \
-        .exclude(status__in=STATUS_VALUES_UNCHANGEABLE_BY_VOTE) \
-        .annotate(definite_votes=RawSQL(
-            """
-            select count(*) from theses_thesisvotebinding where
-            thesis_id=theses_thesis.id and voter_id=%s and value<>%s
-            """,
-            (emp.pk, ThesisVote.NONE.value)
-        )) \
-        .filter(definite_votes=0)
+    return qs.exclude(
+        status__in=STATUS_VALUES_UNCHANGEABLE_BY_VOTE
+    ).annotate(definite_votes=RawSQL(
+        """
+        select count(*) from theses_thesisvotebinding where
+        thesis_id=theses_thesis.id and voter_id=%s and value<>%s
+        """,
+        (emp.pk, ThesisVote.NONE.value)
+    )).filter(definite_votes=0)
 
 
 def get_num_ungraded_for_emp(emp: Employee) -> int:

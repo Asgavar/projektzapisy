@@ -184,10 +184,9 @@ def sort_queryset(qs: QuerySet, sort_column: str, sort_dir: str) -> QuerySet:
 
 def available_thesis_filter(qs: QuerySet) -> QuerySet:
     """Returns only theses that are considered "available" from the specified queryset"""
-    return qs \
-        .exclude(status=ThesisStatus.IN_PROGRESS.value) \
-        .exclude(_is_archived=True) \
-        .exclude(reserved=True)
+    return qs.exclude(
+        status=ThesisStatus.IN_PROGRESS.value
+    ).exclude(_is_archived=True).exclude(reserved=True)
 
 
 def ungraded_theses_filter(queryset, user: Employee):
@@ -286,14 +285,13 @@ def build_autocomplete_view_with_queryset(queryset):
         def get_queryset(self):
             if not self.request.user.is_authenticated:
                 raise PermissionDenied()
-            qs = queryset.objects \
-                .select_related("user") \
-                .annotate(
-                    _full_name=Concat(
-                        "user__first_name", Value(" "), "user__last_name"
-                    )
-                ) \
-                .order_by("_full_name")
+            qs = queryset.objects.select_related(
+                "user"
+            ).annotate(
+                _full_name=Concat(
+                    "user__first_name", Value(" "), "user__last_name"
+                )
+            ).order_by("_full_name")
             if self.q:
                 qs = qs.filter(_full_name__icontains=self.q)
             return qs.all()
