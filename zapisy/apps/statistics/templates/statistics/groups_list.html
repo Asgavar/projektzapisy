@@ -1,24 +1,22 @@
 {% extends "statistics/base.html" %}
 
-
 {% block groups_active %} class="active"{% endblock %}
 
-
 {% block content %}
-
+<div class="table-responsive">
     {% regroup groups by course as courses_list %}
 
-    <table>
-        <thead>
+    <table class="table table-striped">
+        <thead class="text-muted">
             <tr>
-                <th><h4>Prowadzący</h4></th>
-                <th><h4>Typ</h4></th>
-                <th><h4>Miejsca</h4></th>
-                <th><h4>ISIM</h4></th>
-                <th><h4>Zapisani</h4></th>
-                <th><h4>ISIM</h4></th>
-                <th><h4>Kolejka</h4></th>
-                <th><h4>Przypięci</h4></th>
+                <th scope="col"><h4>Prowadzący</h4></th>
+                <th scope="col"><h4>Typ</h4></th>
+                <th scope="col"><h4>Miejsca</h4></th>
+                <th scope="col"><h4>ISIM</h4></th>
+                <th scope="col"><h4>Zapisani</h4></th>
+                <th scope="col"><h4>ISIM</h4></th>
+                <th scope="col"><h4>Kolejka</h4></th>
+                <th scope="col"><h4>Przypięci</h4></th>
 
             </tr>
         </thead>
@@ -42,4 +40,5 @@
             {% endfor %}
         </tbody>
     </table>
+</div>
 {% endblock %}

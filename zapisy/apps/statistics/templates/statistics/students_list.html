@@ -3,16 +3,17 @@
 {% block students_active %} class="active"{% endblock %}
 
 {% block content %}
-    <table>
-        <thead>
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead class="text-muted">
             <tr>
-                <th>Imię</th>
-                <th>Nazwisko</th>
-                <th>Ostatnio</th>
-                <th>Index</th>
-                <th>ECTS</th>
-                <th>Punkty w semestrze</th>
-                <th>T0</th>
+                <th scope="col">Imię</th>
+                <th scope="col">Nazwisko</th>
+                <th scope="col">Ostatnio</th>
+                <th scope="col">Index</th>
+                <th scope="col">ECTS</th>
+                <th scope="col">Punkty w semestrze</th>
+                <th scope="col">T0</th>
             </tr>
         </thead>
         <tbody>
@@ -29,4 +30,5 @@
             {% endfor %}
         </tbody>
     </table>
+</div>
 {% endblock %}
