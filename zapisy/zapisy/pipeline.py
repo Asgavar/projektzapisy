@@ -12,7 +12,6 @@ PIPELINE_CSS = {
     },
     'ticketssave': {
         'source_filenames': (
-            'css/bootstrap-1.2.0.css',
             'css/main.css',
             'css/fereol.css',
             'css/grade/tickets_save.css'
@@ -24,7 +23,6 @@ PIPELINE_CSS = {
     },
     'connectionchoice': {
         'source_filenames': (
-            'css/bootstrap-1.2.0.css',
             'css/main.css',
             'css/fereol.css',
             'css/grade/connections_choice.css',
@@ -37,7 +35,6 @@ PIPELINE_CSS = {
     },
     'gradebase': {
         'source_filenames': (
-            'css/bootstrap-1.2.0.css',
             'css/main.css',
             'css/fereol.css',
             'css/common/mainPage.css',
@@ -53,7 +50,6 @@ PIPELINE_CSS = {
     },
     'gradepollshow': {
         'source_filenames': (
-            'css/bootstrap-1.2.0.css',
             'css/main.css',
             'css/fereol.css',
             'css/grade/declaration.css'
@@ -98,7 +94,6 @@ PIPELINE_CSS = {
     },
     'schedule': {
         'source_filenames': (
-            'css/bootstrap-1.2.0.css',
             'css/main.css',
             'css/fereol.css',
             'css/common/schedule.css',
@@ -112,7 +107,6 @@ PIPELINE_CSS = {
     },
     'prototype': {
         'source_filenames': (
-            'css/bootstrap-1.2.0.css',
             'css/main.css',
             'css/fereol.css',
             'css/common/schedule.css',
@@ -126,7 +120,6 @@ PIPELINE_CSS = {
     },
     'mainpage': {
         'source_filenames': (
-            'css/bootstrap-1.2.0.css',
             'css/main.css',
             'css/fereol.css',
             'css/common/mainPage.css',
