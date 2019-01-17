@@ -3,9 +3,9 @@
 <div id="enr-coursesList-top-bar" class="col main-top-bar">
     <div class="row" id="filterTable">
 
-        <div class="col-md-4 border-right">
+        <div class="col-md-4">
             <label for="filter-phrase">{% trans "Filtrowanie" %}</label>
-            <div class="input-group main-filter-input">
+            <div class="form-group input-group main-filter-input">
             <input class="form-control text filter-phrase" id="filter-phrase" type="text" aria-describedby="button-addon1"/>
             <div class="input-group-append">
                 <button class="btn reset filter-phrase-reset btn-outline-secondary" type="button" id="button-addon1">x</button>
@@ -13,30 +13,27 @@
             </div>
 
             <div id="tagsEffectsFilters" style="display: none">
-                <hr class="filterListDivider">
                 <br>
                 <legend><span>{% trans "Efekty kształcenia" %}</span></legend>
-                <div>
+                <div class="form-group">
                     <label style="font-size: 11px"><input id="effectsSearchEnabled" type="checkbox" onclick="onEffectsFilterToggled();">&nbsp;Włącz filtrowanie po efektach kształcenia</label>
-                    <select disabled="disabled" id="enr-courseFilter-effects" class="courseListMultipleSelect" multiple>
+                    <select disabled="disabled" id="enr-courseFilter-effects" class="form-control courseListMultipleSelect" multiple>
                         {% for effect in effects %}
                             <option value="{{ effect.id }}">{{ effect.group_name }}</option>
                         {% endfor %}
                     </select>
                 </div>
                 
-                <hr class="filterListDivider">
                 <br>
                 <legend><span>{% trans "Tagi" %}</span></legend>
-                <div>
+                <div class="form-group">
                     <label style="font-size: 11px"><input id="tagsSearchEnabled" type="checkbox" onclick="onTagsFilterToggled();">&nbsp;Włącz filtrowanie po tagach</label>
-                    <select disabled="disabled" id="enr-courseFilter-tags" class="courseListMultipleSelect" multiple>
+                    <select disabled="disabled" id="enr-courseFilter-tags" class="form-control courseListMultipleSelect" multiple>
                         {% for tag in tags %}
                             <option value="{{ tag.id }}">{{ tag.full_name }}</option>
                         {% endfor %}
                     </select>
                 </div>
-                <hr class="filterListDivider">
                 <p class="tagsEffectsFilterHint">
                     {% trans "Możesz zaznaczyć wiele tagów/efektów naraz. Wyświetlone zostaną wówczas wszystkie przedmioty, które zaliczają co najmniej jeden z wybranych tagów/efektów (alternatywa logiczna)." %}
                 </p>
@@ -48,8 +45,8 @@
             </div>
         </div>
 
-        <div class="col-md-4 border-right">
-            <div class="course-type-filter">
+        <div class="col-md-4 ">
+            <div class=" form-group course-type-filter">
                 <label for="filterList">{% trans "Rodzaj przedmiotu" %}</label>
                 <ol class="filterList" id="typeFilterList">
                     {% for type in types_list %}
@@ -79,7 +76,7 @@
                 {% if custom_filters != None %}
                     {% include custom_filters %}
                 {% endif %}
-                <ol class="filterList">
+                <ol class="form-group filterList">
                     {% comment %}
                     {% if user.student %}
                         <li class="checkbox">
