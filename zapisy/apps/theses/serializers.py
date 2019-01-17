@@ -183,7 +183,8 @@ class ThesisSerializer(serializers.ModelSerializer):
         # First check that the user is permitted to set these values
         request = self.context["request"]
         user = wrap_user(request.user)
-        check_advisor_permissions(user, validated_data["advisor"])
+        if "advisor" in validated_data:
+            check_advisor_permissions(user, validated_data["advisor"])
         status = validated_data["status"]
         if not can_set_status(user, ThesisStatus(status)):
             raise exceptions.PermissionDenied(f'This type of user cannot set status to {status}')
