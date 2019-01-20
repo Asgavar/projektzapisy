@@ -114,13 +114,12 @@
     })
 
 </script>
-
 {% endblock %}
 
-{% block main-navigation %}
-    <li><a href="/">Strona Główna</a></li>
-    <li><a href="{% url 'grade-main' %}">Ocena zajęć</a></li>
-    <li>Wyniki oceny</li>
+{% block bread %}
+<li class="breadcrumb-item"><a href="/">Strona główna</a></li>
+<li class="breadcrumb-item"><a href="/grade">Ocena zajęć</a></li>
+<li class="breadcrumb-item active" aria-current="page">Wyniki oceny</li>
 {% endblock %}
 
 
