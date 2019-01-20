@@ -13,9 +13,17 @@
 
 {% block system_menu %}
 <ul class="nav nav-tabs">
-        <li class="nav-item" {% block vote_active %}{% endblock %}><a class="nav-link" href="{% url 'statistics:vote' %}">Głosowanie</a></li> 
-        <li class="nav-item" {% block swaps_active %}{% endblock %}><a class="nav-link" href="{% url 'statistics:swap' %}">Swapy</a></li>
-        <li class="nav-item" {% block students_active %}{% endblock %}><a class="nav-link" href="{% url 'statistics:students' %}">Studenci</a></li>
-        <li class="nav-item" {% block groups_active %}{% endblock %}><a class="nav-link" href="{% url 'statistics:groups' %}">Grupy</a></li>
+        <li class="nav-item" {% block vote_active %}{% endblock %}>
+                <a class="nav-link" href="{% url 'statistics:vote' %}">Głosowanie</a>
+        </li>
+        <li class="nav-item" {% block swaps_active %}{% endblock %}>
+                <a class="nav-link" href="{% url 'statistics:swap' %}">Swapy</a>
+        </li>
+        <li class="nav-item" {% block students_active %}{% endblock %}>
+                <a class="nav-link" href="{% url 'statistics:students' %}">Studenci</a>
+        </li>
+        <li class="nav-item" {% block groups_active %}{% endblock %}>
+                <a class="nav-link" href="{% url 'statistics:groups' %}">Grupy</a>
+        </li>
 </ul>
 {% endblock %}

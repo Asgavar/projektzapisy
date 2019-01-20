@@ -27,17 +27,16 @@ def students(request):
     AND courses_studentpointsview.student_id = users_student.id 
     AND records_record.student_id = courses_studentpointsview.student_id 
     AND records_record.status = '1'
-    GROUP BY courses_course.id, courses_studentpointsview.value) as foo"
-    """
+    GROUP BY courses_course.id, courses_studentpointsview.value) as foo.order_by('t0_min')"""
 
-   # students = Student.objects.get_list_full_info().extra(select={'semester_points': query}).order_by('t0_min')
+    #students = Student.objects.get_list_full_info().extra(select={'semester_points': query})
     return TemplateResponse(request, 'statistics/students_list.html', locals())
 
 
 @permission_required('courses.view_stats')
 def groups(request):
     semester = Semester.objects.get_next()
-    #groups = Group.statistics.in_semester(semester) #TODO
+    # groups = Group.statistics.in_semester(semester) #TODO
     return TemplateResponse(request, 'statistics/groups_list.html', locals())
 
 
