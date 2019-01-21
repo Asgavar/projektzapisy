@@ -40,7 +40,7 @@ type ContainerProps = { cssColor: string };
 const Container = styled.span`
 	width: 20px;
 	display: inline-block;
-	color: ${(props: ContainerProps) => props.cssColor}
+	color: ${(props: ContainerProps) => props.cssColor};
 `;
 
 const DisabledContainer = styled(Container)`
