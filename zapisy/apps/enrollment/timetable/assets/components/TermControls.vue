@@ -22,7 +22,10 @@ const TermControlsProps = Vue.extend({
 export default class TermControlsComponent extends TermControlsProps {
   controlsVisible: boolean = false;
 
-  group: Group = this.term.group;
+  get group(): Group {
+    return  this.term.group;
+  }
+  
   // Determines if a new enrollment record can be created into the group.
   get canEnqueue(): boolean {
     if (this.term.group.isEnrolled) return false;

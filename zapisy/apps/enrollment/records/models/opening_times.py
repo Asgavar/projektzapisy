@@ -6,13 +6,12 @@ will have their own opening time. Some groups will also provide a time advantage
 for a selected group of students (ex. ISIM students).
 """
 from datetime import datetime, timedelta
-from typing import List, Dict
+from typing import List, Dict, Optional
 
 from django.db import models, transaction
 
-from apps.enrollment.courses.models.semester import Semester
-from apps.enrollment.courses.models.group import Group
-from apps.users.models import Student
+from apps.enrollment.courses.models import Course, Group, Semester
+from apps.users.models import Program, Student
 from apps.grade.ticket_create.models.student_graded import StudentGraded
 from apps.offer.vote.models.single_vote import SingleVote
 
@@ -96,14 +95,30 @@ class T0Times(models.Model):
             cls.objects.bulk_create(created)
 
 
+class ProgramGroupRestrictions(models.Model):
+    """Closes a group for the entire studies program.
+
+    This feature could potentially be implemented using GroupOpeningTimes but
+    having a simpler rule for that is neater. The rules saved in this model are
+    going to be used in methods of the GroupOpeningTimes class.
+    """
+    group = models.ForeignKey(Group, on_delete=models.CASCADE)
+    program = models.ForeignKey(Program, on_delete=models.CASCADE)
+
+    class Meta:
+        unique_together = ("group", "program")
+        indexes = [
+            models.Index(fields=["group", "program"])
+        ]
+
+
 class GroupOpeningTimes(models.Model):
     """Stores student opening times for groups.
 
     The primary reason for a student to have this time specified is, that he
     voted for the course and gets a bonus (for all groups in that course).
-    Moreover we will use that to give special preferences to ISIM students and
-    to split groups into subgroups with different opening times during
-    freshmen enrollment.
+    Moreover we will use that to split groups into subgroups with different
+    opening times during freshmen enrollment.
     """
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     group = models.ForeignKey(Group, on_delete=models.CASCADE)
@@ -123,6 +138,12 @@ class GroupOpeningTimes(models.Model):
         there is none, the group might have its own opening and closing times.
         Finally, we look at the student's T0.
         """
+        try:
+            _ = ProgramGroupRestrictions.objects.get(program_id=student.program_id, group=group)
+            return False
+        except ProgramGroupRestrictions.DoesNotExist:
+            pass
+
         try:
             record = cls.objects.get(student=student, group=group)
             return record.time <= time <= group.course.semester.records_closing
@@ -151,11 +172,18 @@ class GroupOpeningTimes(models.Model):
 
         for k in groups:
             groups[k].opening_time_for_student = None
+            groups[k].restricted_for_student = False
         for rec in cls.objects.filter(student=student, group__in=groups):
             groups[rec.group_id].opening_time_for_student = rec.time
+        for rec in ProgramGroupRestrictions.objects.filter(
+                program_id=student.program_id, group__in=groups):
+            groups[rec.group_id].restricted_for_student = True
 
         ret: Dict[int, bool] = {}
         for k, group in groups.items():
+            if group.restricted_for_student:
+                ret[k] = False
+                continue
             if group.opening_time_for_student is not None:
                 ret[k] = (
                     group.opening_time_for_student <= time <= group.course.semester.records_closing
@@ -169,6 +197,17 @@ class GroupOpeningTimes(models.Model):
                 continue
             ret[k] = True
         return ret
+
+    @classmethod
+    def is_enrollment_open(cls, course: Course, time: datetime):
+        """Decides if enrollment is open for this course in general.
+
+        Usually enrollment is for all courses at the beginning of the semester,
+        but some courses may have a different enrollment period.
+        """
+        if course.records_start is not None and course.records_end is not None:
+            return course.records_start <= time <= course.records_end
+        return not course.semester.is_closed(time)
 
     @classmethod
     def populate_opening_times(cls, semester: Semester):

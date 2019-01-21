@@ -1,9 +1,6 @@
 import logging
-from functools import reduce
-import json
 import datetime
-import operator
-import unidecode
+import json
 import re
 from typing import Any, Optional
 
@@ -18,25 +15,24 @@ from django.shortcuts import render, redirect, Http404
 from django.urls import reverse
 from django.http import HttpResponse, HttpResponseRedirect, HttpRequest
 
-from django.template.response import TemplateResponse
 from django.utils.translation import check_for_language, LANGUAGE_SESSION_KEY
 from django.conf import settings
 
 from vobject import iCalendar
+import unidecode
 
-from apps.grade.ticket_create.models.student_graded import StudentGraded
-from apps.offer.vote.models.single_vote import SingleVote
-from apps.enrollment.courses.exceptions import MoreThanOneCurrentSemesterException
-from apps.users.utils import prepare_ajax_students_list, prepare_ajax_employee_list
-from apps.users.models import Employee, Student, BaseUser, PersonalDataConsent
-from apps.enrollment.courses.models import Semester, Group, StudentPointsView
-from apps.enrollment.records.models import Record, RecordStatus, GroupOpeningTimes
+from apps.enrollment.courses.models import Group, Semester, StudentPointsView
+from apps.enrollment.records.models import Record, RecordStatus, GroupOpeningTimes, T0Times
 from apps.enrollment.timetable.views import build_group_list
 from apps.enrollment.utils import mailto
-from apps.users.forms import EmailChangeForm, ConsultationsChangeForm, EmailToAllStudentsForm
-from apps.users.exceptions import InvalidUserException
+from apps.users.decorators import external_contractor_forbidden
+from apps.grade.ticket_create.models.student_graded import StudentGraded
 from apps.notifications.forms import NotificationFormset
 from apps.notifications.models import NotificationPreferences
+from apps.users.utils import prepare_ajax_students_list, prepare_ajax_employee_list
+from apps.users.models import Employee, Student, BaseUser, PersonalDataConsent
+from apps.users.forms import EmailChangeForm, ConsultationsChangeForm, EmailToAllStudentsForm
+from apps.users.exceptions import InvalidUserException
 from libs.ajax_messages import AjaxSuccessMessage
 from mailer.models import Message
 
@@ -50,6 +46,7 @@ BREAK_DURATION = datetime.timedelta(minutes=15)
 
 
 @login_required
+@external_contractor_forbidden
 def student_profile(request: HttpRequest, user_id: int) -> HttpResponse:
     """student profile"""
     try:
@@ -245,12 +242,17 @@ def my_profile(request):
             group: Group = got.group
             group.opening_time = got.time
             groups_times.append(group)
+        t0_time_obj = T0Times.objects.filter(student_id=student.pk, semester_id=semester.pk)
+        try:
+            t0_time = t0_time_obj.get().time
+        except T0Times.DoesNotExist:
+            t0_time = None
         grade_info = StudentGraded.objects.filter(
-            student=student
-        ).select_related('semester').order_by('-semester__records_opening')
+            student=student).select_related('semester').order_by('-semester__records_opening')
         semesters_participated_in_grade = [x.semester for x in grade_info]
         current_semester_ects = StudentPointsView.student_points_in_semester(student, semester)
         data.update({
+            't0_time': t0_time,
             'groups_times': groups_times,
             'semesters_participated_in_grade': semesters_participated_in_grade,
             'current_semester_ects': current_semester_ects,
@@ -294,6 +296,7 @@ def consultations_list(request: HttpRequest, begin: str='A') -> HttpResponse:
 
 
 @login_required
+@external_contractor_forbidden
 def students_list(request: HttpRequest, begin: str='All', query: Optional[str]=None) -> HttpResponse:
     students = Student.get_list(begin, not BaseUser.is_employee(request.user))
 
