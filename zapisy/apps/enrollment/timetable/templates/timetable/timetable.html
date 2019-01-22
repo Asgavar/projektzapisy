@@ -21,9 +21,10 @@
     <script id="timetable-data" type="application/json">{{ groups_json|safe }}</script>
     {% render_bundle 'timetable-timetable-component' %}
     
-    <div class="row">
+    <div class="container">
     {% if user.student %}
     <h3>{% trans "Zajęcia, na które jesteś zapisany" %}</h3>
+    <div class="table-responsive">
 	<table id="enr-schedule-listByCourse" class="table table-striped">
 		<thead>
 			<tr>
@@ -84,7 +85,8 @@
             </tr>
             {% endfor %}
 		</tbody>
-	</table>
+    </table>
+    </div>  
     {% endif %}
     </div>
 {% endblock %}
