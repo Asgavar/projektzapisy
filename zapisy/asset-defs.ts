@@ -14,5 +14,8 @@ export default {
 			"common/_variables.scss",
 			"common/index.scss"
 		],
+		"fullcalendar": [
+			"common/fullcalendar.ts"
+		],
 	},
 };
