@@ -9,10 +9,11 @@ unsuccessful enrollment.
 
 import logging
 from datetime import datetime
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 from choicesenum import ChoicesEnum
 from django.db import DatabaseError, models, transaction
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 from apps.enrollment.courses.models import Group, StudentPointsView, Semester
 from apps.enrollment.records.models.opening_times import GroupOpeningTimes
@@ -39,11 +40,15 @@ class Record(models.Model):
     group = models.ForeignKey(Group, verbose_name='grupa', on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
     status = models.CharField(max_length=1, choices=RecordStatus.choices())
+    priority = models.IntegerField(
+        verbose_name='priorytet',
+        default=5,
+        validators=[MinValueValidator(1), MaxValueValidator(10)])
     created = models.DateTimeField(auto_now_add=True)
     modified = models.DateTimeField(auto_now=True)
 
     @staticmethod
-    def can_enqueue(student: Student, group: Group, time: datetime = None) -> bool:
+    def can_enqueue(student: Optional[Student], group: Group, time: datetime = None) -> bool:
         """Checks if the student can join the queue of the group.
 
         Will return False if student is None. The function will not check if the
@@ -58,7 +63,7 @@ class Record(models.Model):
         return True
 
     @staticmethod
-    def can_enqueue_groups(student: Student, groups: List[Group],
+    def can_enqueue_groups(student: Optional[Student], groups: List[Group],
                            time: datetime = None) -> Dict[int, bool]:
         """Checks if the student can join the queues of respective course groups.
 
@@ -79,7 +84,7 @@ class Record(models.Model):
         return GroupOpeningTimes.are_groups_open_for_student(student, groups, time)
 
     @classmethod
-    def can_enroll(cls, student: Student, group: Group, time: datetime = None) -> bool:
+    def can_enroll(cls, student: Optional[Student], group: Group, time: datetime = None) -> bool:
         """Checks if the student can join the queue of the group.
 
         At the point the function is purely cosmetic. Some conditions may be
@@ -103,7 +108,7 @@ class Record(models.Model):
         return True
 
     @staticmethod
-    def can_dequeue(student: Student, group: Group, time: datetime = None) -> bool:
+    def can_dequeue(student: Optional[Student], group: Group, time: datetime = None) -> bool:
         """Checks if the student can leave the group or its queue.
 
         This function will return False if student is None. It will not check
@@ -121,7 +126,7 @@ class Record(models.Model):
         return True
 
     @staticmethod
-    def can_dequeue_groups(student: Student, groups: List[Group],
+    def can_dequeue_groups(student: Optional[Student], groups: List[Group],
                            time: datetime = None) -> Dict[int, bool]:
         """Checks which of the groups the student can leave (or leave their queues).
 
@@ -162,7 +167,7 @@ class Record(models.Model):
         return records.exists()
 
     @classmethod
-    def is_recorded_in_groups(cls, student: Student,
+    def is_recorded_in_groups(cls, student: Optional[Student],
                               groups: List[int]) -> Dict[int, Dict[str, bool]]:
         """Checks, in which groups the student is already enrolled or enqueued.
 
@@ -179,6 +184,7 @@ class Record(models.Model):
         for record in records:
             if record.status == RecordStatus.QUEUED:
                 ret_dict[record.group_id]['enqueued'] = True
+                ret_dict[record.group_id]['priority'] = record.priority
             elif record.status == RecordStatus.ENROLLED:
                 ret_dict[record.group_id]['enrolled'] = True
         return ret_dict
@@ -285,6 +291,16 @@ class Record(models.Model):
         return removed_groups
 
     @classmethod
+    def set_queue_priority(cls, student: Student, group: Group, priority: int) -> bool:
+        """If the student is in a queue for the group, sets the queue priority.
+
+        Returns true if the priority is changed.
+        """
+        num = cls.objects.filter(
+            student=student, group=group, status=RecordStatus.QUEUED).update(priority=priority)
+        return num == 1
+
+    @classmethod
     def pull_record_into_group(cls, group_id: int) -> bool:
         """Checks if there are vacancies in the group and pulls the first
         student from the queue if possible.
@@ -296,10 +312,13 @@ class Record(models.Model):
         that the group limit is not going to change while it is executing.
 
         The function will return False if the group is already full, or the
-        queue is empty. True value will mean, that it should be run again on
-        that group.
+        queue is empty or the enrollment is closed for the semester. True value
+        will mean, that it should be run again on that group. The function may
+        throw DatabaseError if transaction fails.
         """
-        group = Group.objects.get(id=group_id)
+        group = Group.objects.select_related('course', 'course__semester').get(id=group_id)
+        if not GroupOpeningTimes.is_enrollment_open(group.course, datetime.now()):
+            return False
         # If there is a corresponding lecture group, we should first pull
         # records into that group in order to avoid dropping the record, when a
         # student enqueues into the groups at the same time, and this group is
@@ -307,33 +326,48 @@ class Record(models.Model):
         if group.type != Group.GROUP_TYPE_LECTURE:
             lecture_group = Group.get_lecture_group(group.course_id)
             if lecture_group is not None:
-                while cls.pull_record_into_group(lecture_group.id):
-                    pass
+                cls.fill_group(lecture_group.pk)
 
         # Groups that will need to be pulled into afterwards.
         trigger_groups = []
-        try:
-            with transaction.atomic():
-                # We obtain a lock on the records in this group.
-                records = cls.objects.filter(group_id=group_id).exclude(
-                    status=RecordStatus.REMOVED).select_for_update()
-                num_enrolled = records.filter(status=RecordStatus.ENROLLED).count()
-                if num_enrolled >= group.limit:
-                    return False
-                try:
-                    first_in_line = records.filter(status=RecordStatus.QUEUED).earliest('created')
-                    trigger_groups = first_in_line.enroll_or_remove(group)
-                except cls.DoesNotExist:
-                    return False
-        except DatabaseError:
-            # Transaction failure probably means that Postgres decided to
-            # terminate the transaction in order to eliminate a deadlock. We
-            # will want to retry then.
-            return True
+
+        with transaction.atomic():
+            # We obtain a lock on the records in this group.
+            records = cls.objects.filter(group_id=group_id).exclude(
+                status=RecordStatus.REMOVED).select_for_update()
+            num_enrolled = records.filter(status=RecordStatus.ENROLLED).count()
+            if num_enrolled >= group.limit:
+                return False
+            try:
+                first_in_line = records.filter(status=RecordStatus.QUEUED).earliest('created')
+                trigger_groups = first_in_line.enroll_or_remove(group)
+            except cls.DoesNotExist:
+                return False
         # The tasks should be triggered outside of the transaction
         for trigger_group_id in trigger_groups:
             GROUP_CHANGE_SIGNAL.send(None, group_id=trigger_group_id)
         return True
+
+    @classmethod
+    def fill_group(cls, group_id: int):
+        """Pulls records from the queue into the group as long as possible.
+
+        This function may raise a DatabaseError when too many transaction errors
+        occur.
+        """
+        num_transaction_errors = 0
+        still_free = True
+        while still_free:
+            try:
+                still_free = cls.pull_record_into_group(group_id)
+            except DatabaseError:
+                # Transaction failure probably means that Postgres decided to
+                # terminate the transaction in order to eliminate a deadlock. We
+                # will want to retry then. It would not however be responsible
+                # to retry too many times and obscure some real error.
+                num_transaction_errors += 1
+                if num_transaction_errors == 3:
+                    raise
 
     def enroll_or_remove(self, group: Group) -> List[int]:
         """This function takes a single QUEUED record and tries to change its
@@ -347,7 +381,7 @@ class Record(models.Model):
         enrolled in the lecture group, enrolling would exceed his ECTS limit).
 
         The return value is a list of group ids that need to be triggered
-        (pulled from).
+        (pulled from). The function may raise a DatabaseError.
         """
         with transaction.atomic():
             records = Record.objects.filter(student_id=self.student_id).exclude(
@@ -361,17 +395,25 @@ class Record(models.Model):
                         self.status = RecordStatus.REMOVED
                         self.save()
                         return []
+
             # Check if he can be enrolled at all.
             if not self.can_enroll(self.student, group):
                 self.status = RecordStatus.REMOVED
                 self.save()
                 return []
-            # Remove him from all other groups (and their queues) of the same
-            # type. These groups need to be afterwards pulled into (triggered).
+            # Remove him from all parallel groups (and queues of lower
+            # priority). These groups need to be afterwards pulled into
+            # (triggered).
             other_groups_query = records.filter(
-                group__course__id=group.course_id, group__type=group.type).exclude(id=self.pk)
-            # The list must be computed now, after the update it would be empty.
-            other_groups_query_list = list(other_groups_query.values_list('group_id', flat=True))
+                group__course__id=group.course_id,
+                group__type=group.type).exclude(id=self.pk).filter(
+                    models.Q(priority__lt=self.priority) | models.Q(status=RecordStatus.ENROLLED))
+            # The list of groups to trigger must be computed now, after the
+            # update it would be empty. Note that this list should have at most
+            # one element.
+            other_groups_query_list = list(
+                other_groups_query.filter(status=RecordStatus.ENROLLED).values_list(
+                    'group_id', flat=True))
             other_groups_query.update(status=RecordStatus.REMOVED)
             self.status = RecordStatus.ENROLLED
             self.save()

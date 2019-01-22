@@ -177,6 +177,15 @@ PIPELINE_CSS = {
             'media': 'screen,projection',
         },
     },
+    'old': {
+        'source_filenames': (
+            'css/bootstrap-1.2.0.css',
+        ),
+        'output_filename': 'css/old.min.css',
+        'extra_context': {
+            'media': 'screen,projection',
+        },
+    },
 }
 
 PIPELINE_JS = {
@@ -328,6 +337,7 @@ PIPELINE_JS = {
             'js/jquery/jquery-tmpl/jquery.tmpl.min.js',
             'js/components/sidebar.js',
             'js/common/listFilter.js',
+            'js/enrollment/users/templates/employee.js',
             'js/enrollment/users/employees-list.js',
         ),
         'output_filename': 'js/employeelist.min.js',
@@ -343,6 +353,7 @@ PIPELINE_JS = {
             'js/jquery/jquery-tmpl/jquery.tmpl.min.js',
             'js/components/sidebar.js',
             'js/common/listFilter.js',
+            'js/enrollment/users/templates/student.js',
             'js/enrollment/users/students-list.js',
         ),
         'output_filename': 'js/studentlist.min.js',

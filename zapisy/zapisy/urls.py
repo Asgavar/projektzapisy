@@ -47,3 +47,7 @@ urlpatterns = [
     url(r'^accounts/logout$', views.logout, name='cas_ng_logout'),
     url(r'^accounts/callback$', views.callback, name='cas_ng_proxy_callback'),
 ]
+
+urlpatterns += [
+    path('django-rq/', include('django_rq.urls')),
+]

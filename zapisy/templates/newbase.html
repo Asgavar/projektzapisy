@@ -38,6 +38,8 @@
 
     <script type="text/javascript" src="{% static "vendor.js" %}"></script>
     {% render_bundle "main" %}
+    {% render_bundle "polyfill" %}
+    {% render_bundle "vendors" %}
     {% block rendered_bundles %}
     {% endblock %}
     {% block styles %}

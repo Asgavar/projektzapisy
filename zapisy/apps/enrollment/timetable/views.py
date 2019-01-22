@@ -3,18 +3,18 @@ import json
 from typing import List
 
 from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models import Count, Q
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import Http404, HttpResponse, render
 from django.urls import reverse
 from django.views.decorators.http import require_POST
 
-from apps.cache_utils import cache_result_for
-from apps.enrollment.courses.models import Course, Group, Semester
+from apps.enrollment.courses.models import Course, Group, Semester, StudentPointsView
 from apps.enrollment.courses.templatetags.course_types import \
     decode_class_type_singular
 from apps.enrollment.records.models import Record, RecordStatus
-from apps.enrollment.timetable.models import Pin
+from apps.enrollment.timetable.models import Pin, HiddenGroups
 from apps.users.decorators import student_required
 
 
@@ -55,6 +55,7 @@ def build_group_list(groups: List[Group]):
             'can_enqueue': getattr(group, 'can_enqueue', None),
             'can_dequeue': getattr(group, 'can_dequeue', None),
             'action_url': reverse('prototype-action', args=(group.pk, )),
+            'is_hidden': getattr(group, 'is_hidden', None),
         })
         group_dicts.append(group_dict)
     return group_dicts
@@ -88,7 +89,15 @@ def my_timetable(request):
     groups = [r.group for r in records]
     group_dicts = build_group_list(groups)
 
+    points_for_courseentities = StudentPointsView.points_for_entities(
+        student, [g.course.entity_id for g in groups])
+
+    for group in groups:
+        group.course.points = points_for_courseentities[group.course.entity_id]
+
     data = {
+        'groups': groups,
+        'sum_points': sum(points_for_courseentities.values()),
         'groups_json': json.dumps(group_dicts, cls=DjangoJSONEncoder),
     }
     return render(request, 'timetable/timetable.html', data)
@@ -123,6 +132,11 @@ def my_prototype(request):
     for pin in pinned:
         group = all_groups_by_id.get(pin.pk)
         group.is_pinned = True
+
+    hidden_groups = HiddenGroups.hidden_groups_for_student(student, all_groups_by_id.keys())
+    for group_id in hidden_groups:
+        group = all_groups_by_id.get(group_id)
+        group.is_hidden = True
 
     all_groups = all_groups_by_id.values()
     for group in all_groups:
@@ -200,8 +214,43 @@ def prototype_get_course(request, course_id):
     ).prefetch_related('term', 'term__classrooms')
     can_enqueue_dict = Record.can_enqueue_groups(student, groups)
     can_dequeue_dict = Record.can_dequeue_groups(student, groups)
+    hidden_groups = HiddenGroups.hidden_groups_for_student(student, groups)
+    hidden_groups_set = set(hidden_groups)
     for group in groups:
         group.can_enqueue = can_enqueue_dict.get(group.pk)
         group.can_dequeue = can_dequeue_dict.get(group.pk)
+        group.is_hidden = group.pk in hidden_groups_set
+    group_dicts = build_group_list(groups)
+    return JsonResponse(group_dicts, safe=False)
+
+
+@student_required
+@require_POST
+def prototype_update_groups(request):
+    """Retrieves the updated group annotations.
+
+    The list of groups ids to update will be sent in JSON body of the request.
+    """
+    student = request.user.student
+    # Axios sends POST data in json rather than _Form-Encoded_.
+    ids: List[int] = json.loads(request.body.decode('utf-8'))
+    num_enrolled = Count('record', filter=Q(record__status=RecordStatus.ENROLLED))
+    is_enrolled = Count(
+        'record',
+        filter=(Q(record__status=RecordStatus.ENROLLED) & Q(record__student_id=student.pk)))
+    is_enqueued = Count(
+        'record',
+        filter=(Q(record__status=RecordStatus.QUEUED) & Q(record__student_id=student.pk)))
+    groups = Group.objects.filter(pk__in=ids).annotate(num_enrolled=num_enrolled).annotate(
+        is_enrolled=is_enrolled).annotate(is_enqueued=is_enqueued).select_related(
+            'course', 'course__entity', 'teacher', 'course__semester',
+            'teacher__user').prefetch_related('term', 'term__classrooms')
+    can_enqueue_dict = Record.can_enqueue_groups(student, groups)
+    can_dequeue_dict = Record.can_dequeue_groups(student, groups)
+    for group in groups:
+        group.can_enqueue = can_enqueue_dict.get(group.pk)
+        group.can_dequeue = can_dequeue_dict.get(group.pk)
+        group.is_enqueued = bool(group.is_enqueued)
+        group.is_enrolled = bool(group.is_enrolled)
     group_dicts = build_group_list(groups)
     return JsonResponse(group_dicts, safe=False)

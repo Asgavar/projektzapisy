@@ -22,7 +22,7 @@
     <li {% block enrollment_menu_employees %}{% endblock %} class="nav-item">
         <a class="nav-link" href="{% url 'employees-list' %}">{% trans "Pracownicy" %}</a>
     </li>
-    {% if user.student or user.employee or user.is_staff %}
+    {% if is_employee and not is_external_contractor or is_student or user.is_staff %}
         <li {% block enrollment_menu_students %}{% endblock %} class="nav-item">
             <a class="nav-link" href="{% url 'students-list' %}">{% trans "Studenci" %}</a>
         </li>

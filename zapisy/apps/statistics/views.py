@@ -14,18 +14,18 @@ def main(request):
 
 @permission_required('courses.view_stats')
 def students(request):
-    query = """SELECT SUM(value) 
+    query = """SELECT SUM(value)
     FROM (SELECT courses_studentpointsview.value as value
-    FROM courses_course 
-    LEFT JOIN courses_group 
+    FROM courses_course
+    LEFT JOIN courses_group
     ON (courses_group.course_id = courses_course.id)
-    INNER JOIN records_record 
+    INNER JOIN records_record
     ON (records_record.group_id = courses_group.id)
-    LEFT JOIN courses_studentpointsview 
+    LEFT JOIN courses_studentpointsview
     ON (courses_studentpointsview.entity_id = courses_course.entity_id)
-    WHERE courses_course.semester_id=333 
-    AND courses_studentpointsview.student_id = users_student.id 
-    AND records_record.student_id = courses_studentpointsview.student_id 
+    WHERE courses_course.semester_id=333
+    AND courses_studentpointsview.student_id = users_student.id
+    AND records_record.student_id = courses_studentpointsview.student_id
     AND records_record.status = '1'
     GROUP BY courses_course.id, courses_studentpointsview.value) as foo.order_by('t0_min')"""
 
@@ -52,8 +52,8 @@ def swap(request):
     courses = Course.objects.filter(semester=semester).select_related('entity')
 
     types = [('2', 'ćwiczenia'), ('3', 'pracownia'),
-             ('5', 'ćwiczenio-pracownia'),
-             ('6', 'seminarium'), ('10', 'projekt')]
+             ('5', 'ćwiczenio-pracownia'), ('6', 'seminarium'),
+             ('10', 'projekt')]
 
     for course in courses:
         course.groups_items = []
@@ -61,7 +61,7 @@ def swap(request):
         for type in types:
             groups = Group.objects.filter(
                 course=course, type=type[0]).select_related(
-                'course', 'course__entity', 'teacher')
+                    'course', 'course__entity', 'teacher')
             queues = {}
             students = {}
             lists = {}
@@ -71,7 +71,8 @@ def swap(request):
                 lists[g.id] = []
                 queues[g.id] = []
                 for r in Record.objects.filter(group=g).exclude(
-                        status=RecordStatus.REMOVED).select_related('student', 'student__user'):
+                        status=RecordStatus.REMOVED).select_related(
+                            'student', 'student__user'):
                     if r.status == RecordStatus.ENROLLED:
                         lists[g.id].append(r.student)
                         students[r.student_id] = g
@@ -84,7 +85,10 @@ def swap(request):
                 for s in queue:
                     if s.id in students:
                         for sp in lists[group.id]:
-                            if students[sp.id] == group and sp.id not in used and sp in queues[students[s.id].id]:
+                            if students[
+                                    sp.
+                                    id] == group and sp.id not in used and sp in queues[
+                                        students[s.id].id]:
                                 used.append(sp.id)
                                 group.swaps.append({
                                     'student_in_queue': s,
