@@ -177,6 +177,15 @@ PIPELINE_CSS = {
             'media': 'screen,projection',
         },
     },
+    'old': {
+        'source_filenames': (
+            'css/bootstrap-1.2.0.css',
+        ),
+        'output_filename': 'css/old.min.css',
+        'extra_context': {
+            'media': 'screen,projection',
+        },
+    },
 }
 
 PIPELINE_JS = {

@@ -60,6 +60,7 @@
     </style>
     {% block styles %}
         {% compressed_css 'main' %}
+        {% compressed_css 'old' %}
     {% endblock %}
     <script type="text/javascript">
             const user_is_student = {% if request.user.student %}true{% else %}false{% endif %};
@@ -215,7 +216,7 @@
         <div class="container">
             <div class="logo">
                 <a href="/">
-                    <img src="{% static 'images/logotyp.jpg'%}" alt="Uniwersytet Wrocławski">
+                    <img src="{% static 'images/logo_UWr.svg' %}" alt="Uniwersytet Wrocławski">
                 </a>
             </div>
         </div>
