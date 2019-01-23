@@ -191,8 +191,18 @@ class FullCalendarView(BaseListView):
         if 'start' not in self.request.GET or 'end' not in self.request.GET:
             raise Http404
 
-        start = datetime.datetime.strptime(self.request.GET.get('start'), "%Y-%m-%d")
-        end = datetime.datetime.strptime(self.request.GET.get('end'), "%Y-%m-%d")
+        start = self.request.GET.get('start')
+        if 'T' in start:
+            start = datetime.datetime.strptime(start, "%Y-%m-%dT%H:%M:%S")
+        else:
+            start = datetime.datetime.strptime(start, "%Y-%m-%d")
+
+        end = self.request.GET.get('end')
+        if 'T' in end:
+            end = datetime.datetime.strptime(end, "%Y-%m-%dT%H:%M:%S")
+        else:
+            end = datetime.datetime.strptime(end, "%Y-%m-%d")
+
         # 3.7
         # start = datetime.datetime.fromisoformat(self.request.GET.get('start'))
         # end = datetime.datetime.fromisoformat(self.request.GET.get('end'))

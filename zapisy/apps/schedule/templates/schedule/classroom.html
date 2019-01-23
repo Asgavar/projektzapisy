@@ -8,8 +8,8 @@
 {% endblock %}
 
 {% block js %}{{ block.super }}
-    <script>
-calendar = {
+    <script id="calendar-data" type="application/json">
+[{
     selector:'#calendar',
     settings:{
         header:{
@@ -58,7 +58,7 @@ calendar = {
 
         events: '{% url 'events:classroom_ajax' room.slug %}'
     }
-};
+}]
     </script>
     {% render_bundle "fullcalendar" %}
 {% endblock %}

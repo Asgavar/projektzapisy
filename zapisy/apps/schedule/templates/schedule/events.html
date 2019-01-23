@@ -11,8 +11,8 @@
 {% block scedule_events %} class="active"{% endblock %}
 
 {% block js %}{{ block.super }}
-    <script>
-calendar = {
+    <script id="calendar-data" type="application/json">
+[{
     selector:'#calendar',
     settings:{
         header:{
@@ -60,7 +60,7 @@ calendar = {
 
         events: '{% url 'events:events_ajax' %}',
     }    
-};
+}]
     </script>
     {% render_bundle "fullcalendar" %}
 {% endblock %}
