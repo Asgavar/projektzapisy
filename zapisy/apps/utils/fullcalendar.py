@@ -105,27 +105,27 @@ class FullCalendarAdapter(object):
         will be used if it is defined. If all else fails, FullCalendar will try to guess.
         If either the start or end value has a "T" as part of the ISO8601 date string,
         allDay will become false. Otherwise, it will be true. Don't include quotes around
-        your true/false. This value is a boolean, not a string! 
+        your true/false. This value is a boolean, not a string!
         """
         return False
 
     def get_start(self, item):
         """
-        The date/time an event begins. Required. 
+        The date/time an event begins. Required.
 
         A Moment-ish input, like an ISO8601 string. Throughout the API this will become
-        a real Moment object. 
+        a real Moment object.
         """
         return datetime.datetime.combine(item.day, item.start).isoformat()
 
     def get_end(self, item):
         """
-        The exclusive date/time an event ends. Optional. 
+        The exclusive date/time an event ends. Optional.
 
         A Moment-ish input, like an ISO8601 string. Throughout the API this will become
         a real Moment object. It is the moment immediately after the event has ended.
         For example, if the last full day of an event is Thursday, the exclusive end
-        of the event will be 00:00:00 on Friday! 
+        of the event will be 00:00:00 on Friday!
         """
         return datetime.datetime.combine(item.day, item.end).isoformat()
 
