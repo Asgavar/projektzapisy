@@ -84,19 +84,12 @@ def check_advisor_permissions(user: BaseUser, advisor: Employee):
 
 
 class ThesisSerializer(serializers.ModelSerializer):
-    advisor = serializers.PrimaryKeyRelatedField(
-        allow_null=True, required=False, queryset=Employee.objects.all()
-    )
-    auxiliary_advisor = serializers.PrimaryKeyRelatedField(
-        allow_null=True, required=False, queryset=Employee.objects.all()
-    )
     student = ThesesPersonSerializer(
         allow_null=True, required=False, queryset=Student.objects.all()
     )
     student_2 = ThesesPersonSerializer(
         allow_null=True, required=False, queryset=Student.objects.all()
     )
-    reserved_until = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S%z")
     modified_date = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S%z", required=False)
 
     # We need to define this field here manually to disable DRF's unique validator which
@@ -173,6 +166,20 @@ class ThesisSerializer(serializers.ModelSerializer):
             "kind", "reserved_until", "description", "status",
             "student", "student_2", "modified_date",
         )
+        extra_kwargs = {
+            "reserved_until": {
+                "required": False,
+                "allow_null": True
+            },
+            "advisor": {
+                "required": False,
+                "allow_null": True
+            },
+            "auxiliary_advisor": {
+                "required": False,
+                "allow_null": True
+            }
+        }
 
 
 class CurrentUserSerializer(serializers.ModelSerializer):
