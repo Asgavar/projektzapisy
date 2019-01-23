@@ -10,53 +10,53 @@
 {% block js %}{{ block.super }}
     <script id="calendar-data" type="application/json">
 [{
-    selector:'#calendar',
-    settings:{
-        header:{
-            left:'prev,next today',
-            center:'title',
-            right:'month,agendaWeek,agendaDay'
+    "selector":"#calendar",
+    "settings":{
+        "header":{
+            "left":"prev,next today",
+            "center":"title",
+            "right":"month,agendaWeek,agendaDay"
         },
 
-        themeSystem:'bootstrap4',
-        allDayDefault:false,
-        buttonText:{
-            prev: '<',
-            next: '>',
-            today:'dziś',
-            month:'miesiąc',
-            week:'tydzień',
-            day:'dzień',
+        "themeSystem":"bootstrap4",
+        "allDayDefault":false,
+        "buttonText":{
+            "prev": "<",
+            "next": ">",
+            "today":"dziś",
+            "month":"miesiąc",
+            "week":"tydzień",
+            "day":"dzień"
         },
 
-        locale:'pl',
-        height: 'auto',
+        "locale":"pl",
+        "height":"auto",
 
-        defaultView: 'agendaWeek',
-        views:{
-            month:{
-                titleFormat:'MMMM YYYY',
-                columnFormat:'ddd',
-                timeFormat:'HH(:mm)',
+        "defaultView": "agendaWeek",
+        "views":{
+            "month":{
+                "titleFormat":"MMMM YYYY",
+                "columnFormat":"ddd",
+                "timeFormat":"HH(:mm)"
             },
-            week:{
-                titleFormat:"DD MMM YYYY",
-                columnFormat:'ddd DD.MM',
-                timeFormat:'HH:mm',
+            "week":{
+                "titleFormat":"DD MMM YYYY",
+                "columnFormat":"ddd DD.MM",
+                "timeFormat":"HH:mm"
             },
-            day:{
-                titleFormat:'dddd, d MMM, YYYY',
-                columnFormat:'dddd DD.MM',
-                timeFormat:'HH:mm',
-            },
+            "day":{
+                "titleFormat":"dddd, d MMM, YYYY",
+                "columnFormat":"dddd DD.MM",
+                "timeFormat":"HH:mm"
+            }
         },
 
-        minTime:"08:00:00",
-        maxTime:"22:00:00",
-        slotLabelFormat:"HH(:mm)",
-        allDaySlot:false,
+        "minTime":"08:00:00",
+        "maxTime":"22:00:00",
+        "slotLabelFormat":"HH(:mm)",
+        "allDaySlot":false,
 
-        events: '{% url 'events:classroom_ajax' room.slug %}'
+        "events": "{% url "events:classroom_ajax" room.slug %}"
     }
 }]
     </script>
