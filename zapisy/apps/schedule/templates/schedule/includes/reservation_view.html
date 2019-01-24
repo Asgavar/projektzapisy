@@ -25,12 +25,9 @@
         {% if event.description %}
             <tr>
                 <th class="text-light bg-info">Opis</th>
-                <td colspan="3">
-                    <p class="collapse multi-collapse{{ event.id }} show">{{ event.description|truncatewords:15 }}</p>
-                    {% if event.description|wordcount > 15 %}
-                        <p class="collapse multi-collapse{{ event.id }}">{{ event.description }}</p>
-                        <a class="right" data-toggle="collapse" data-target=".multi-collapse{{ event.id }}">więcej</a>
-                    {% endif %}
+                <td colspan="3" class="description">
+                    <p class="collapse multi-collapse{{ event.id }}">{{ event.description }}</p>
+                    <button class="collapsed btn btn-info right" data-toggle="collapse" data-target=".multi-collapse{{ event.id }}"></button>
                 </td>
             </tr>
         {% endif %}

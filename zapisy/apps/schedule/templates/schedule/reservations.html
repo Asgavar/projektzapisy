@@ -1,6 +1,39 @@
 {% extends "schedule/base.html" %}
 {% load bootstrap_pagination %}
 
+{% block styles %}
+    {{ block.super }}
+<style>
+.description {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.description p {
+    min-height: 42px !important;
+}
+.description p.collapse:not(.show) {
+    height: 42px !important;
+    overflow: hidden;
+  
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;  
+}
+
+.description button.collapsing {
+    min-height: 42px !important;
+}
+
+.description button.collapsed:after  {
+    content: 'Więcej';
+}
+
+.description button:not(.collapsed):after {
+    content: 'Mniej';
+}
+</style>
+{% endblock %}
+
 {% block bread %}
     <li class="breadcrumb-item"><a href="{% url 'main-page' %}">Strona główna</a></li>
     <li class="breadcrumb-item"><a href="{% url 'events:classrooms' %}">Sale</a></li>
@@ -12,10 +45,7 @@
         <h2>{{ title }}</h2>
 
         {% for event in qs %}
-            <div>
             {% include "schedule/includes/reservation_view.html" with event=event title=title %}
-                
-            </div>
         {% empty %}
             Brak wyników dla zapytania
         {% endfor %}
