@@ -144,6 +144,7 @@ def conflicts(request):
 @login_required
 def history(request):
     events = EventFilter(request.GET, queryset=Event.get_for_user(request.user))
+    qs = Paginator(events.qs, 10).get_page(request.GET.get('page', 1))
     title = 'Moje rezerwacje'
     return TemplateResponse(request, 'schedule/history.html', locals())
 
