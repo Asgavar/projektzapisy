@@ -12,7 +12,7 @@ from django.contrib.admin.widgets import FilteredSelectMultiple
 from django.forms.models import inlineformset_factory
 
 
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, date
 
 
 class TermForm(forms.ModelForm):
@@ -119,13 +119,18 @@ class ReportForm(forms.Form):
 
 
 class ConflictsForm(forms.Form):
+    today = date.today().isoformat()
     beg_date = forms.DateField(
+        label='Od:',
         widget=forms.TextInput(
             attrs={
-                'placeholder': 'yyyy-mm-dd',
-                'class': 'datepicker'}))
+                'type': 'date',
+                'class': 'form-control',
+                'value': today}))
     end_date = forms.DateField(
+        label='Do:',
         widget=forms.TextInput(
             attrs={
-                'placeholder': 'yyyy-mm-dd',
-                'class': 'datepicker'}))
+                'type': 'date',
+                'class': 'form-control',
+                'value': today}))
