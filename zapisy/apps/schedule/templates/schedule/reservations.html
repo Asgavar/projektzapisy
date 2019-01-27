@@ -1,5 +1,6 @@
 {% extends "schedule/base.html" %}
 {% load bootstrap_pagination %}
+{% load crispy_forms_tags %}
 
 {% block styles %}
     {{ block.super }}
@@ -58,20 +59,12 @@
 
 {% block sidebar %}
     <div class="container" id="main-sidebar">
-        <form action="" class="form-stacked">
-            <fieldset>
-              <legend>Filtr</legend>
-              {% for field in events.form %}
-                <div class="clearfix">
-                    {{ field.label_tag }}
-                <div class="input">
-                    {{ field }}
-                </div>
-              </div><!-- /clearfix -->
-                {% endfor %}
-
-            </fieldset>
-            <input type="submit" value="Filtruj" class="btn btn-success">
+        <form>
+            <legend>Filtr</legend>
+            {{ events.form|crispy }}
+            <div class="d-flex justify-content-center">
+                <input type="submit" value="Filtruj" class="btn btn-success">
+            </div>
         </form>
     </div>
 {% endblock %}
