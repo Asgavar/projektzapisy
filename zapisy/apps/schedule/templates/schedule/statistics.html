@@ -1,44 +1,37 @@
 {% extends 'schedule/base.html' %}
 
-
 {% block bread %}
     <li class="breadcrumb-item"><a href="{% url 'main-page' %}">Strona główna</a></li>
     <li class="breadcrumb-item"><a href="{% url 'events:classrooms' %}">Sale</a></li>
     <li class="breadcrumb-item active" aria-current="page">Statystyki</li>
 {% endblock %}
-
-
-{% block schedule_statistic %} class="active"{% endblock %}
-
-{% block content-width %}16{% endblock %}
  
 {% block content %}
-    <div class="row">
-        <div class="span15">
-            <h2>Statystyki</h2>
-        </div>
-
-    </div>
-    <div class="row">
-        <div class="span16">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Przedmiot</th>
-                            <th>Prowadzący</th>
-                            <th>Posiada egzamin?</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                    {% for exam in exams %}
-                        <tr>
-                            <td><a href="{{ exam.get_absolute_url }}">{{ exam.name }}</a></td>
-                            <td>{% for teacher in exam.teachers.all %}<a href="">{{ teacher }}</a>, {% endfor %}</td>
-                            <td><span {% if exam.has_exam_reservation %}style="color:green;">Tak{% else %}style="color:red;">Nie{% endif %}</span></td>
-                        </tr>
-                    {% endfor %}
-                    </tbody>
-                </table>
-        </div>
-    </div>
+<div class="container">
+    <h2>Statystyki</h2>
+    <table class="table table-hover">
+        <thead class="text-light bg-info">
+            <tr>
+                <th>Przedmiot</th>
+                <th>Prowadzący</th>
+                <th>Posiada egzamin?</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for exam in exams %}
+            <tr>
+                <td>
+                    <a href="{{ exam.get_absolute_url }}">{{ exam.name }}</a>
+                </td>
+                <td>
+                    {% for teacher in exam.teachers.all %}<a href="">{{ teacher }}</a>, {% endfor %}
+                </td>
+                <td>
+                    <span {% if exam.has_exam_reservation %}style="color:green;">Tak{% else %}style="color:red;">Nie{% endif %}</span>
+                </td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
 {% endblock %}
