@@ -105,16 +105,21 @@ class DecisionForm(forms.ModelForm):
 
 
 class ReportForm(forms.Form):
+    today = date.today().isoformat()
     beg_date = forms.DateField(
+        label='Od:',
         widget=forms.TextInput(
             attrs={
-                'placeholder': 'yyyy-mm-dd',
-                'class': 'datepicker'}))
+                'type': 'date',
+                'class': 'form-control',
+                'value': today}))
     end_date = forms.DateField(
+        label='Do:',
         widget=forms.TextInput(
             attrs={
-                'placeholder': 'yyyy-mm-dd',
-                'class': 'datepicker'}))
+                'type': 'date',
+                'class': 'form-control',
+                'value': today}))
     rooms = forms.MultipleChoiceField(widget=FilteredSelectMultiple("sale", is_stacked=False))
 
 

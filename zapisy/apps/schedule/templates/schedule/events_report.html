@@ -1,81 +1,67 @@
 {% extends 'schedule/base.html' %}
 {% load static %}
-
 {% load compressed %}
 
 {% block bread %}
-    <a href="/">Strona główna</a> &raquo;
-    <a href="{% url 'events:classrooms' %}">Sale</a> &raquo;
-{% endblock %}
-
-{% block styles %}
-    {{ block.super }}
-
-    <link href="{% static "css/jquery-ui-1.8.14.custom.css" %}" rel="stylesheet" type="text/css"
-          media="screen,projection"/>
-    <link href="{% static "js/timepicker/jquery.ui.timepicker.css" %}" rel="stylesheet" type="text/css"
-          media="screen,projection"/>
+    <li class="breadcrumb-item"><a href="{% url 'main-page' %}">Strona główna</a></li>
+    <li class="breadcrumb-item"><a href="{% url 'events:classrooms' %}">Sale</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Raport</li>
 {% endblock %}
 
 {% block js %}{{ block.super }}
     <link rel="stylesheet" type="text/css" href="/static/admin/css/forms.css" />
-    <script type="text/javascript">window.__admin_media_prefix__ = "/static/admin/";</script>
-    <script type="text/javascript" src="/fereol_admin/jsi18n/"></script>
+    <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
     {% compressed_js 'proposal_edit' %}
-    <style>label { width: 50px;}</style>
-    <script type="text/javascript" src="{% static "js/timepicker/jquery.ui.timepicker.js" %}"></script>
-    <script type="text/javascript" src="{% static "js/timepicker/i18n/jquery.ui.timepicker-pl.js" %}"></script>
-    <script type="text/javascript" src="{% static "js/jquery/jquery.smooth-scroll.js" %}"></script>
     <script type="text/javascript">
-
-    var LoadPickers = function () {
-        $(".datepicker").datepicker({dateFormat: 'yy-mm-dd'});
-      }
-    window.onload = LoadPickers;
+        window.addEventListener('load', function(e) {
+            $(".selector-available > h2").addClass("text-light bg-info text-center")[0].innerHTML = "Sale";
+            $(".selector-chosen > h2").addClass("text-light bg-info text-center")[0].innerHTML = "Wybrane";
+            $("#id_rooms_from").addClass("form-control").attr('size', 15);
+            $("#id_rooms_to").addClass("form-control").attr('size', 15);
+            $("#id_rooms_filter").insertAfter(".selector");
+            $("#id_rooms_input").addClass("form-control");
+            $("#id_rooms_add_all_link").text("Wybierz wszystkie");
+            $("#id_rooms_remove_all_link").text("Usuń wszystkie");
+            $(".selector").addClass("d-flex justify-content-center").removeClass("selector");
+            $(".selector-available").addClass("form-group flex-fill p-2 text-center").removeClass("selector-available");
+            $(".selector-chooser").addClass("form-group p-2 list-unstyled align-self-center").removeClass("selector-chooser");
+            $(".selector-chosen").addClass("form-group flex-fill p-2 text-center").removeClass("selector-chosen");
+        });
     </script>
 {% endblock %}
 
-
-{% block events_report %} class="active"{% endblock %}
-
-{% block content-width %}16{% endblock %}
-
 {% block content %}
-    <div class="row">
-        <div class="span15">
-            <h2>Raport</h2>
-        </div>
-    </div>
-    <div class="row">
-        <div class="span16">
-          <form action="{% url 'events:events_report' %}" method="post">
+    <div class="container mb-3"> 
+        <h2>Raport</h2>
 
-          <table>
-          {% csrf_token %}
-          {{ form.non_field_errors }}
-          {% for hidden in form.hidden_fields %}
-              {{ hidden }}
-          {% endfor %}
-          <tr>
-            <td><label for="{{ form.rooms.id_for_label }}">Sale:</label></td>
-            <td>
-              {{ form.rooms }}
-            </td>
-            <td>{{ form.rooms.errors }}</td>
-          </tr>
-          <tr>
-            <td><label for="{{ form.beg_date.id_for_label }}">Początek zapytania:</label></td>
-            <td>{{ form.beg_date }}</td>
-            <td>{{ form.beg_date.errors }}</td>
-          </tr>
-          <tr>
-            <td><label for="{{ form.end_date.id_for_label }}">Koniec zapytania:</label></td>
-            <td>{{ form.end_date }}</td>
-            <td>{{ form.beg_date.errors }}</td>
-          </tr>
-        </table>
-          <input class="btn" type="submit" value="Generuj raport" />
-          </form>
-        </div>
+        <form action="{% url 'events:events_report' %}" method="post">
+
+            {% csrf_token %}
+            {{ form.non_field_errors }}
+            {% for hidden in form.hidden_fields %}
+                {{ hidden }}
+            {% endfor %}
+
+            <div class="d-flex justify-content-center">
+                <div class="p-2 flex-fill">
+                {{ form.rooms }}
+                {{ form.rooms.errors }}
+                </div>
+            </div>
+
+            <div class="input-group mb-3">
+                <div class="input-group-prepend">
+                    <label class="input-group-text">{{ form.beg_date.label }}</label>
+                </div>
+                {{ form.beg_date }}
+                <div class="input-group-prepend input-group-append">
+                    <label class="input-group-text">{{ form.end_date.label }}</label>
+                </div>
+                {{ form.end_date }}
+                <div class="input-group-append">
+                    <input type="submit" value="Generuj raport" class="btn btn-success">
+                </div>
+            </div>
+        </form>
     </div>
 {% endblock %}
