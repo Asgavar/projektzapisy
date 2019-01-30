@@ -77,27 +77,27 @@ $(document).ready(() => {
         }
 
         let namePrefix = 'term_set-'+ counter +'-';
-        let template =$('.termstable-template'); 
+        let template = $('.termstable-template'); 
         let tr = template.clone(true).removeClass("termstable-template d-none");
         let value;
         
         value = $('#term').val();
-        tr.find('.termstable-template-term > strong').text(value);
+        tr.find('.termstable-template-term > strong').append(value);
         tr.find('.termstable-template-term > input')
             .attr('name', namePrefix + 'day').val(value);
 
         value = $('#begin').val();
-        tr.children('.termstable-template-begin').text(value);
+        tr.children('.termstable-template-begin').append(value);
         tr.find('.termstable-template-begin > input')
             .attr('name', namePrefix + 'start').val(value);
 
         value = $('#end').val();
-        tr.children('.termstable-template-end').text(value);
+        tr.children('.termstable-template-end').append(value);
         tr.find('.termstable-template-end > input')
             .attr('name', namePrefix + 'end').val(value);
 
         value = $('#location').val();
-        tr.children('.termstable-template-location').text(value);
+        tr.children('.termstable-template-location').append(value);
         tr.find('.termstable-template-location > .termstable-template-place')
             .attr('name', namePrefix + 'place').val(value);
         tr.find('.termstable-template-location > .termstable-template-room')
@@ -158,9 +158,9 @@ $(document).ready(() => {
     });
 
     // ustaw ignorowanie konfliktów
-    $('#ignore_all_conflicts').change(() => {
-        let checked = $(this).prop('checked');
-        $('.ignore_conflicts > input').prop('checked', checked);
+    $('#ignore_all_conflicts').change((event) => {
+        let checked = event.target.checked;
+        $('input[name$="-ignore_conflicts"]').val(+checked);
     });
 
     // ustaw zewnętrzną lokalizację
