@@ -474,3 +474,21 @@ img#consent-icon {
 	margin-top: -15px;
 }
 
+/*** STICKY FOOTER ***/
+.content-container
+{
+	min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.inner-content-container
+{
+	flex: 1 0 auto;
+}
+
+.sticky-footer
+{
+	padding-top: 30px;
+}
+/*** STICKY FOOTER - koniec ***/
