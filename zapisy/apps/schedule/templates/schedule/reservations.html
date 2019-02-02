@@ -2,36 +2,35 @@
 {% load bootstrap_pagination %}
 {% load crispy_forms_tags %}
 
+{% block schedule_manage %} class="active"{% endblock %}
+
 {% block styles %}
     {{ block.super }}
 <style>
-.description {
-  font-size: 14px;
-  line-height: 1.5;
-}
-.description p {
-    min-height: 42px !important;
-}
-.description p.collapse:not(.show) {
-    height: 42px !important;
-    overflow: hidden;
-  
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;  
-}
-
-.description button.collapsing {
-    min-height: 42px !important;
-}
-
-.description button.collapsed:after  {
-    content: 'Więcej';
-}
-
-.description button:not(.collapsed):after {
-    content: 'Mniej';
-}
+    .description {
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    .description p {
+        min-height: 42px !important;
+    }
+    .description p.collapse:not(.show) {
+        height: 42px !important;
+        overflow: hidden;
+      
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;  
+    }
+    .description button.collapsing {
+        min-height: 42px !important;
+    }
+    .description button.collapsed:after  {
+        content: 'Więcej';
+    }
+    .description button:not(.collapsed):after {
+        content: 'Mniej';
+    }
 </style>
 {% endblock %}
 
@@ -42,29 +41,25 @@
 {% endblock %}
 
 {% block content %}
-    <div class="container">
-        <h2>{{ title }}</h2>
+    <h2>{{ title }}</h2>
 
-        {% for event in qs %}
-            {% include "schedule/includes/reservation_view.html" with event=event title=title %}
-        {% empty %}
-            Brak wyników dla zapytania
-        {% endfor %}
+    {% for event in qs %}
+        {% include "schedule/includes/reservation_view.html" with event=event title=title %}
+    {% empty %}
+        Brak wyników dla zapytania
+    {% endfor %}
 
-        <div class="d-flex justify-content-center">
-            {% bootstrap_paginate qs range=10 show_first_last="true" %}
-        </div>
+    <div class="d-flex justify-content-center">
+        {% bootstrap_paginate qs range=10 show_first_last="true" %}
     </div>
 {% endblock %}
 
 {% block sidebar %}
-    <div class="container" id="main-sidebar">
-        <form>
-            <legend>Filtr</legend>
-            {{ events.form|crispy }}
-            <div class="d-flex justify-content-center">
-                <input type="submit" value="Filtruj" class="btn btn-success">
-            </div>
-        </form>
-    </div>
+    <form>
+        <legend>Filtr</legend>
+        {{ events.form|crispy }}
+        <div class="d-flex justify-content-center">
+            <input type="submit" value="Filtruj" class="btn btn-success">
+        </div>
+    </form>
 {% endblock %}

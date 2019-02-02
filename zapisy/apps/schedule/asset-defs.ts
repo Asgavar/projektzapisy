@@ -3,6 +3,9 @@ export default {
       "reservation": [
          "reservation.js",
       ],
+      "classroom-chooser": [
+         "classroomchooser.js",
+      ],
    },
    rawfiles: [
    ],

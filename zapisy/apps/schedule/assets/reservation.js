@@ -1,8 +1,6 @@
 import "./reservation.css";
 
 import "jquery";
-import "jquery-timepicker/jquery.timepicker.css";
-import "jquery-timepicker/jquery.timepicker.js";
 const $ = jQuery;
 
 // przejdz do danego elementu
@@ -45,20 +43,6 @@ var validateAddTermForm = function() {
 
 
 $(document).ready(() => {
-
-    // utwórz input do wybierania czasu
-    $('.timepicker').timepicker({
-        change: () => {$('#timepicker-change').change();}, // przerysuj canvas
-        timeFormat: 'HH:mm',
-        interval: 30,
-        minTime: '8:00',
-        maxTime: '21:00',
-        defaultTime: '8:00',
-        startTime: '8:00',
-        dynamic: false,
-        dropdown: true,
-        scrollbar: true,
-    });
 
     // dodawanie terminu do listy
     $('#addtermform').submit((event) => {
@@ -133,8 +117,8 @@ $(document).ready(() => {
         let room = tr.find('input[name$="-room"]').val();
         $('#addterm').text('Zmień termin');
         $('#term').val(tr.find('input[name$="-day"]').val()).change();
-        $('#begin').val(tr.find('input[name$="-start"]').val().slice(0,-3));
-        $('#end').val(tr.find('input[name$="-end"]').val().slice(0,-3));
+        $('#begin').val(tr.find('input[name$="-start"]').val());
+        $('#end').val(tr.find('input[name$="-end"]').val());
         $('#location').val(tr.find('input[name$="-place"]').val());
 
         $('#hiddenroom').val(room);

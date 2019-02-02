@@ -2,6 +2,8 @@
 {% load render_bundle from webpack_loader %}
 {% load static %}
 
+{% block schedule_reservation %} class="active"{% endblock %}
+
 {% block bread %}
     <li class="breadcrumb-item"><a href="{% url 'main-page' %}">Strona główna</a></li>
     <li class="breadcrumb-item"><a href="{% url 'events:classrooms' %}">Sale</a></li>
@@ -9,839 +11,289 @@
 {% endblock %}
 
 {% block js %}{{ block.super }}
-    {% render_bundle "schedule-reservation" %}
-    
-    <script type="text/javascript" src="{% static "js/jquery/jquery.smooth-scroll.js" %}"></script>
-    <script type="text/javascript">
-
-    /*! modernizr 3.6.0 (Custom Build) | MIT *
-    * https://modernizr.com/download/?-inputtypes-setclasses-shiv !*/
-    !function(e,t,n){function a(e,t){return typeof e===t}function r(){var e,t,n,r,o,i,c;for(var u in l)if(l.hasOwnProperty(u)){if(e=[],t=l[u],t.name&&(e.push(t.name.toLowerCase()),t.options&&t.options.aliases&&t.options.aliases.length))for(n=0;n<t.options.aliases.length;n++)e.push(t.options.aliases[n].toLowerCase());for(r=a(t.fn,"function")?t.fn():t.fn,o=0;o<e.length;o++)i=e[o],c=i.split("."),1===c.length?Modernizr[c[0]]=r:(!Modernizr[c[0]]||Modernizr[c[0]]instanceof Boolean||(Modernizr[c[0]]=new Boolean(Modernizr[c[0]])),Modernizr[c[0]][c[1]]=r),s.push((r?"":"no-")+c.join("-"))}}function o(e){var t=u.className,n=Modernizr._config.classPrefix||"";if(f&&(t=t.baseVal),Modernizr._config.enableJSClass){var a=new RegExp("(^|\\s)"+n+"no-js(\\s|$)");t=t.replace(a,"$1"+n+"js$2")}Modernizr._config.enableClasses&&(t+=" "+n+e.join(" "+n),f?u.className.baseVal=t:u.className=t)}function i(){return"function"!=typeof t.createElement?t.createElement(arguments[0]):f?t.createElementNS.call(t,"http://www.w3.org/2000/svg",arguments[0]):t.createElement.apply(t,arguments)}var s=[],l=[],c={_version:"3.6.0",_config:{classPrefix:"",enableClasses:!0,enableJSClass:!0,usePrefixes:!0},_q:[],on:function(e,t){var n=this;setTimeout(function(){t(n[e])},0)},addTest:function(e,t,n){l.push({name:e,fn:t,options:n})},addAsyncTest:function(e){l.push({name:null,fn:e})}},Modernizr=function(){};Modernizr.prototype=c,Modernizr=new Modernizr;var u=t.documentElement,f="svg"===u.nodeName.toLowerCase();f||!function(e,t){function n(e,t){var n=e.createElement("p"),a=e.getElementsByTagName("head")[0]||e.documentElement;return n.innerHTML="x<style>"+t+"</style>",a.insertBefore(n.lastChild,a.firstChild)}function a(){var e=E.elements;return"string"==typeof e?e.split(" "):e}function r(e,t){var n=E.elements;"string"!=typeof n&&(n=n.join(" ")),"string"!=typeof e&&(e=e.join(" ")),E.elements=n+" "+e,c(t)}function o(e){var t=y[e[g]];return t||(t={},v++,e[g]=v,y[v]=t),t}function i(e,n,a){if(n||(n=t),f)return n.createElement(e);a||(a=o(n));var r;return r=a.cache[e]?a.cache[e].cloneNode():h.test(e)?(a.cache[e]=a.createElem(e)).cloneNode():a.createElem(e),!r.canHaveChildren||p.test(e)||r.tagUrn?r:a.frag.appendChild(r)}function s(e,n){if(e||(e=t),f)return e.createDocumentFragment();n=n||o(e);for(var r=n.frag.cloneNode(),i=0,s=a(),l=s.length;l>i;i++)r.createElement(s[i]);return r}function l(e,t){t.cache||(t.cache={},t.createElem=e.createElement,t.createFrag=e.createDocumentFragment,t.frag=t.createFrag()),e.createElement=function(n){return E.shivMethods?i(n,e,t):t.createElem(n)},e.createDocumentFragment=Function("h,f","return function(){var n=f.cloneNode(),c=n.createElement;h.shivMethods&&("+a().join().replace(/[\w\-:]+/g,function(e){return t.createElem(e),t.frag.createElement(e),'c("'+e+'")'})+");return n}")(E,t.frag)}function c(e){e||(e=t);var a=o(e);return!E.shivCSS||u||a.hasCSS||(a.hasCSS=!!n(e,"article,aside,dialog,figcaption,figure,footer,header,hgroup,main,nav,section{display:block}mark{background:#FF0;color:#000}template{display:none}")),f||l(e,a),e}var u,f,m="3.7.3",d=e.html5||{},p=/^<|^(?:button|map|select|textarea|object|iframe|option|optgroup)$/i,h=/^(?:a|b|code|div|fieldset|h1|h2|h3|h4|h5|h6|i|label|li|ol|p|q|span|strong|style|table|tbody|td|th|tr|ul)$/i,g="_html5shiv",v=0,y={};!function(){try{var e=t.createElement("a");e.innerHTML="<xyz></xyz>",u="hidden"in e,f=1==e.childNodes.length||function(){t.createElement("a");var e=t.createDocumentFragment();return"undefined"==typeof e.cloneNode||"undefined"==typeof e.createDocumentFragment||"undefined"==typeof e.createElement}()}catch(n){u=!0,f=!0}}();var E={elements:d.elements||"abbr article aside audio bdi canvas data datalist details dialog figcaption figure footer header hgroup main mark meter nav output picture progress section summary template time video",version:m,shivCSS:d.shivCSS!==!1,supportsUnknownElements:f,shivMethods:d.shivMethods!==!1,type:"default",shivDocument:c,createElement:i,createDocumentFragment:s,addElements:r};e.html5=E,c(t),"object"==typeof module&&module.exports&&(module.exports=E)}("undefined"!=typeof e?e:this,t);var m=i("input"),d="search tel url email datetime date month week time datetime-local number range color".split(" "),p={};Modernizr.inputtypes=function(e){for(var a,r,o,i=e.length,s="1)",l=0;i>l;l++)m.setAttribute("type",a=e[l]),o="text"!==m.type&&"style"in m,o&&(m.value=s,m.style.cssText="position:absolute;visibility:hidden;",/^range$/.test(a)&&m.style.WebkitAppearance!==n?(u.appendChild(m),r=t.defaultView,o=r.getComputedStyle&&"textfield"!==r.getComputedStyle(m,null).WebkitAppearance&&0!==m.offsetHeight,u.removeChild(m)):/^(search|tel)$/.test(a)||(o=/^(url|email)$/.test(a)?m.checkValidity&&m.checkValidity()===!1:m.value!=s)),p[e[l]]=!!o;return p}(d),r(),o(s),delete c.addTest,delete c.addAsyncTest;for(var h=0;h<Modernizr._q.length;h++)Modernizr._q[h]();e.Modernizr=Modernizr}(window,document);
-
-    /* Loader Class
-     *
-     *
-     *
-     */
-
-
-
-    function relMouseCoords(evt) {
-        var rect = this.getBoundingClientRect();
-        return {
-            x:evt.clientX - rect.left,
-            y:evt.clientY - rect.top
-        };
-    }
-    HTMLCanvasElement.prototype.relMouseCoords = relMouseCoords;
-
-    var chosenbutton = new Image();
-    chosenbutton.src = '{% static "images/choose.png" %}';
-
-    var Loader = function (container) {
-        {#        this.container = container;#}
-        {#        this.spinner = new Object();#}
-        {#        this.spinner = new Spinner();#}
-    };
-
-    Loader.prototype.start = function () {
-
-        {#        var that = this,#}
-        {#                opacity = 1.0,#}
-        {#                animate = function () {#}
-        {#                    that.container.style.opacity = opacity;#}
-        {#                    opacity -= 0.1;#}
-        {#                    if (opacity > 0.2) {#}
-        {#                        setTimeout(animate, 100);#}
-        {#                    }#}
-        {#                }#}
-        {#                ;#}
-        {##}
-        {#        setTimeout(animate, 100);#}
-        {#        this.spinner.spin(this.container);#}
-    };
-
-    Loader.prototype.stop = function () {
-        {#        this.spinner.stop();#}
-        {#        this.container.style.opacity = 1.0;#}
-    };
-
-    var AjaxWrapper = function () {
-        this.makeURL = function (date) {
-            var s = date.split('-');
-            return '/classrooms/terms/' + s[0] + '/' + s[1] + '/' + s[2] + '/';
-        };
-        this.cache = {};
-    };
-
-    AjaxWrapper.prototype.getJson = function (date, callback) {
-
-        if (this.cache.hasOwnProperty(date)) {
-            callback.call(this.cache[date], this.cache[date]);
-            return;
-        }
-
-        var url = this.makeURL(date),
-                that = this;
-        var r = new XMLHttpRequest();
-
-        r.open("GET", url, true);
-        r.onreadystatechange = function () {
-            if (r.readyState != 4 || r.status != 200) return; //error
-            that.cache[date] = JSON.parse(r.responseText);
-            callback.call(that.cache[date], that.cache[date]);
-
-        };
-        r.send('');
-    };
-
-    function check(input) {
-        if (input.value != document.getElementById('email_addr').value) {
-            input.setCustomValidity('The two email addresses must match.');
-        } else {
-            // input is valid -- reset the error message
-            input.setCustomValidity('');
-        }
-    }
-
-    {#    function check(input) {#}
-    {#      if (input.value != document.getElementById('email_addr').value) {#}
-    {#        input;#}
-    {#      } else {#}
-    {#        // input is valid -- reset the error message#}
-    {#        input.#}
-    {#      }#}
-    {#    }#}
-
-
-    var ReservationView = function () {
-
-
-        var container = document.getElementById('addTermForm');
-        var canvas = document.getElementById('can');
-
-        var load = new Loader(container);
-        var Ajax = new AjaxWrapper();
-        var rooms = new ClassroomsList();
-
-        var changeType = function () {
-            var type = document.getElementById('id_type'),
-                    subject = document.getElementById('form_course'),
-                    visible = document.getElementById('form_visible'),
-                    title = document.getElementById('form_title'),
-                    message = document.getElementById('sendmessage_visible'),
-                    onchange = function () {
-                        switch (type.value) {
-                            case '0':
-                            case '1':
-                                $(subject).show();
-                                $(title).hide();
-                                $(visible).hide();
-                                $('#id_course').attr('required', true);
-                                $('#id_title').attr('required', false);
-                                break;
-
-                            case '2':
-                                $(subject).hide();
-                                $(title).show();
-                                $(visible).show();
-                                $('#id_course').attr('required', false);
-                                $('#id_title').attr('required', true);
-                                break;
-                        }
-                    }
-                    ;
-            if (type) {
-                type.addEventListener('change', onchange, true);
-                onchange();
-            }
-        };
-
-        canvas.addEventListener('click', function(event) {
-            rooms.click(event, function(item) {
-                $('#inputplace').val('')
-                $('#hiddenroom').val(item.id);
-                $('#location').val('Sala ' + item.title);
-                $.smoothScroll({
-                    scrollElement:null,
-                    scrollTarget:'#location'
-                });
-            });
-        }, true);
-
-
-        
-
-        $('#term').change(function (event) {
-            if ($(this).val() === '') {
-                $('#location').attr('disabled', true);
-                $('#location').parent().css('border-bottom', '1px solid #DDD');
-                $('#selectroom').hide();
-
-            } else {
-                $('#location').attr('disabled', false);
-                loadTerms($('#term').val());
-            }
-        });
-
-
-
-
-        var loadTerms = function (value) {
-            Ajax.getJson(value, function (data) {
-                rooms.load(data);
-                rooms.setLines($('#begin').val(), $('#end').val());
-                rooms.draw();
-            });
-        };
-
-        $('#timepicker-change').change(function () {
-            rooms.setLines($('#begin').val(), $('#end').val());
-            rooms.draw();
-        });
-
-
-        $('#filteroccupated').change(function () {
-            rooms.draw();
-
-        });
-
-        
-
-        changeType();
-    };
-
-
-    var Classroom = function (ctx, item) {
-                var config = {
-                            width:400,
-                            height:30,
-                            corner:10,
-                            boxheight:65,
-                            x1:120,
-                            y1:30,
-                            y1a:30,
-                            calculate:function () {
-                                /*
-                                 a******b
-                                 e        g
-                                 *        *
-                                 f        h
-                                 c******d
-
-                                 for example b-g is rounded corner
-                                 a - (x1, y1)
-                                 b - (x2, y1)
-                                 c - (x2, y2)
-                                 d - (x2, y2)
-                                 e - (x1corner, y1corner)
-                                 f - (x1corner, y2corner)
-                                 g - (x2corner, y1corner)
-                                 h - (x2corner, y2corner)
-
-                                 */
-                                this.x2 = this.x1 + this.width;
-                                this.y2 = this.y1 + this.height;
-                                this.x1corner = this.x1 - this.corner;
-                                this.x2corner = this.x2 + this.corner;
-                                this.y1corner = this.y1 + this.corner;
-                                this.y2corner = this.y2 - this.corner;
-                                this.strokeStyle = ctx.strokeStyle;
-                                this.evenHours = ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'];
-                                that = this;
-
-                                var getPixel = function (hour) {
-                                    /*
-                                     Find pixel location for time (clock).
-                                     Eg. 8:00 - it's begining of axe, 22:00 - end,
-                                     15:00 - it's center.
-                                     */
-                                    var cellSize = that.width / (that.evenHours.length - 1);
-                                    var time = hour.split(":"),
-                                            hours = (parseInt(time[0]) - 8) * cellSize / 2,
-                                            minutes = Math.floor(( parseInt(time[1]) / 60 ) * cellSize) / 2;
-                                    return hours + minutes;
-                                };
-                                this.terms = [];
-                                for (var key in item.terms) {
-                                    if (item.terms.hasOwnProperty(key)) {
-                                        var event = item.terms[key];
-
-
-                                        begin = getPixel(event.begin) + this.x1;
-                                        end = getPixel(event.end) + this.x1;
-                                        this.terms.push({'begin':begin, 'end':end});
-                                    }
-                                }
-
-                                return this;
-                            },
-                            init:function () {
-                                this.calculate();
-                                delete this.init;
-                                return this;
-                            }
-                        }.init(),
-
-                        cellSize = config.width / (config.evenHours.length - 1),
-
-                        drawButton = function () {
-
-                            if (is_free()) {
-                                ctx.drawImage(chosenbutton, config.x1 - 100, config.y1 + 1);
-                            }
-                        },
-
-                        drawTitle = function () {
-                            ctx.beginPath();
-                            var save = ctx.font;
-                            ctx.strokeStyle = config.strokeStyle;
-                            ctx.font = '20px Calibri';
-                            ctx.fillText(item.title + ' pojemność: ' + item.capacity + ', ' + item.type, config.x2corner + 10, config.y1 + 3 * config.height / 4);
-                            ctx.stroke();
-                            ctx.font = save;
-
-                        },
-
-                        drawBorder = function () {
-                            /*
-                             Draw borders
-                             */
-                            var c = config,
-                                    save = ctx.strokeStyle;
-                            ctx.beginPath();
-                            ctx.moveTo(c.x1, c.y1);
-                            ctx.lineTo(c.x2, c.y1);
-                            ctx.quadraticCurveTo(c.x2corner, c.y1, c.x2corner, c.y1corner);
-                            ctx.lineTo(c.x2corner, c.y2corner);
-                            ctx.quadraticCurveTo(c.x2corner, c.y2, c.x2, c.y2);
-                            ctx.lineTo(c.x1, c.y2);
-                            ctx.quadraticCurveTo(c.x1corner, c.y2, c.x1corner, c.y2corner);
-                            ctx.lineTo(c.x1corner, c.y1corner);
-                            ctx.quadraticCurveTo(c.x1corner, c.y1, c.x1, c.y1);
-                            ctx.stroke();
-
-                            ctx.strokeStyle = save;
-                        },
-
-                        drawHours = function () {
-                            var saveStroke = ctx.strokeStyle,
-                                    saveAlign = ctx.textAlign,
-                                    saveFont = ctx.font;
-                            ctx.beginPath();
-                            ctx.strokeStyle = "#787878";
-                            ctx.textAlign = "left";
-                            ctx.font = '12px Calibri';
-
-                            for (var i = 0; i < config.evenHours.length; ++i) {
-                                var x = config.x1 + i * cellSize;
-                                ctx.moveTo(x, config.y1);
-                                ctx.lineTo(x, config.y2);
-                                ctx.fillText(config.evenHours[i], x - 14, config.y2 + 12);
-
-                            }
-                            ctx.stroke();
-                            ctx.strokeStyle = saveStroke;
-                            ctx.textAlign = saveAlign;
-                            ctx.font = saveFont;
-                        },
-
-
-                        drawEvents = function () {
-                            var saveStyle = ctx.fillStyle;
-                            for (var key in config.terms) {
-                                if (config.terms.hasOwnProperty(key)) {
-                                    var event = config.terms[key];
-                                    ctx.beginPath();
-                                    ctx.fillStyle = "#b0c2f7";
-                                    ctx.globalAlpha = 0.5; // Half opacity
-                                    ctx.fillRect(event.begin, config.y1, event.end - event.begin, config.height);
-                                    ctx.stroke();
-                                    ctx.globalAlpha = 1;
-                                }
-                            }
-                            ctx.fillStyle = saveStyle;
-                        },
-
-                        draw = function (index) {
-
-                            config.y1 = config.y1a + index * config.boxheight;
-                            config.calculate();
-                            drawButton();
-                            drawTitle();
-                            drawBorder();
-                            drawHours();
-                            drawEvents();
-                        },
-
-                        getPixel = function (hour) {
-                            /*
-                             Find pixel location for time (clock).
-                             Eg. 8:00 - it's begining of axe, 22:00 - end,
-                             15:00 - it's center.
-                             */
-
-                            var time = hour.split(":"),
-                                    hours = (parseInt(time[0]) - 8) * cellSize / 2,
-                                    minutes = Math.floor(( parseInt(time[1]) / 60 ) * cellSize) / 2;
-                            return hours + minutes;
-                        },
-
-                        click = function (event, cordinates, callback) {
-                            if (!is_free()) return;
-                            if ((cordinates.x >= config.x1 - 100) && (cordinates.x < config.x1 - 20)
-                                    && (cordinates.y >= config.y1 + 1) && ( cordinates.y < config.y1 + 32)) {
-                                callback.call(item, item);
-                            }
-                        },
-                        lpixel, rpixel,
-                        setLimit = function (left, right) {
-                            lpixel = left;
-                            rpixel = right;
-                        },
-
-                        is_free = function (force) {
-                            {% if perms.schedule.manage_events %}
-                              return true
-                            {% endif %}
-                            if (!rpixel || !lpixel) {
-                                return false;
-                            }
-                            for (var key in config.terms) {
-                                if (config.terms.hasOwnProperty(key)) {
-                                    var pitem = config.terms[key];
-                                    if (!(lpixel >= pitem.end || rpixel <= pitem.begin ))
-                                    {
-                                        return false;
-                                    }
-                                }
-                            }
-                            return true;
-                        }
-                        ;
-
-                return {
-                    draw:draw,
-                    getPixel:function (item) {
-                        return getPixel(item) + config.x1;
-                    },
-                    shouldBeShow:function (l, r) {
-                        setLimit(getPixel(l) + config.x1, getPixel(r) + config.x1);
-                        return is_free(true);
-                    },
-                    setLimit:setLimit,
-                    click:click
-                }
-            },
-            ClassroomsList = function () {
-
-                var that = this,
-                        init = function () {
-                            that.canvas = document.getElementById("can");
-                            that.ctx = document.getElementById("can").getContext("2d");
-                        },
-
-                        click = function (event, callback) {
-                            var cords = that.canvas.relMouseCoords(event);
-                            var nr = Math.floor(cords.y / 65);
-                            classrooms[ toDraw[nr] ].click(event, cords, callback);
-                        },
-
-                        classrooms = [],
-                        clearClassrooms = function () {
-                            classrooms = [];
-                        },
-                        createClassroom = function (data) {
-                            for (var classroom in data) {
-
-                                if (data.hasOwnProperty(classroom)) {
-                                    classrooms.push(new Classroom(that.ctx, data[classroom]));
-                                }
-                            }
-                        },
-
-                        lineFrom, lineTo,
-                        setLines = function (from, to) {
-                            lineFrom = from;
-                            lineTo = to;
-                        },
-
-                        redraw = function () {
-
-                        },
-                        toDraw,
-                        draw = function () {
-                            var index = 0
-                                    ;
-
-                            toDraw = [];
-
-                            for (var classroom in classrooms) {
-                                if (classrooms.hasOwnProperty(classroom) && (shouldBeShow(classrooms[classroom]) || $('#filteroccupated').attr('checked') )) {
-                                    toDraw[index] = classroom;
-                                    index++;
-                                }
-                                that.canvas.height = 65 * (index + 1);
-                            }
-                            index = 0;
-                            var lPixel, rPixel;
-                            for (var c in toDraw) {
-                                if (toDraw.hasOwnProperty(c)) {
-                                    if (index === 0) {
-                                        if (lineFrom) {
-                                            lPixel = classrooms[toDraw[c]].getPixel(lineFrom);
-
-                                        }
-                                        if (lineTo) {
-                                            rPixel = classrooms[toDraw[c]].getPixel(lineTo);
-                                        }
-                                    }
-                                    classrooms[toDraw[c]].setLimit(lPixel, rPixel);
-                                    classrooms[toDraw[c]].draw(index++);
-                                }
-                            }
-
-                            if (lPixel) {
-                                that.ctx.strokeStyle = "red";
-                                that.ctx.beginPath();
-                                that.ctx.moveTo(lPixel, 0);
-                                that.ctx.lineTo(lPixel, that.canvas.height);
-                                that.ctx.stroke();
-                            }
-
-                            if (rPixel) {
-                                that.ctx.strokeStyle = "red";
-                                that.ctx.beginPath();
-                                that.ctx.moveTo(rPixel, 0);
-                                that.ctx.lineTo(rPixel, that.canvas.height);
-                                that.ctx.stroke();
-                            }
-                        },
-
-                        shouldBeShow = function (classroom) {
-                            var r = classroom.shouldBeShow(lineFrom, lineTo);
-                            return r;
-                        },
-                        load = function (data) {
-                            clearClassrooms();
-                            createClassroom(data);
-                        }
-                        ;
-
-                init();
-
-                return {
-                    'draw':draw,
-                    'load':load,
-                    'setLines':setLines,
-                    'redraw':redraw,
-                    'click':click
-                };
-
-            },
-
-
-            cleanAddTermForm = function () {
-            },
-
-
-            init = function () {
-                addterm();
-            };
-
-    $(document).ready(() => {
-        ReservationView();
-        $('#term').change();
-    });
+    <script id="reservation-data" type="application/json">
+{
+    "canManageEvents": {% if perms.schedule.manage_events %}true{% else %}false{% endif %},
+    "imageChoose": "{% static "images/choose.png" %}"
+}
     </script>
+    {% render_bundle "schedule-classroom-chooser" %}
+    {% render_bundle "schedule-reservation" %}
 {% endblock %}
 
 
 {% block content %}
-<div class="container mb-3">
-    <h2>{% if is_edit %}Zmień rezerwacje{% else %}Nowa rezerwacja{% endif %}</h2>
+<h2>{% if is_edit %}Zmień rezerwacje{% else %}Nowa rezerwacja{% endif %}</h2>
 
-    <form method="POST" id="mainform">
-        {% csrf_token %}
-        {% for hidden in form.hidden_fields %}
-            {{ hidden }}
-        {% endfor %}
-        {{ form.non_field_errors }}
-        <fieldset class="my-3">
+<form method="POST" id="mainform">
+    {% csrf_token %}
+    {% for hidden in form.hidden_fields %}
+        {{ hidden }}
+    {% endfor %}
+    {{ form.non_field_errors }}
+    <fieldset class="my-3">
 
-            {% if user.employee %}
-                <div class="form-group row">
-                    <label for="id_type" class="col-sm-2 col-form-label">Rodzaj</label>
-                    <div class="col-sm-10">
-                        {{ form.type }}
-                    </div>
-                </div>
-                <div class="alert alert-info alert-dismissible fade show" role="alert">
-                    <table class="table">
-                        <tbody>
-                            <tr>
-                                <th>Egzaminy</th>
-                                <td rowspan="2" class="align-middle pl-4">
-                                    prowadzący może zarezerwować salę, rezerwacja nie wymaga potwierdzenia
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>Kolokwia</th>
-                            </tr>
-                            <tr>
-                                <th>Wydarzenia</th>
-                                <td class="pl-4">
-                                    każdy zalogowany może zgłosić chęć rezerwacji;
-                                    rezerwacja zostaje potwierdzona lub odrzucona przez administratora sal.
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-
-                <div id="form_course" class="form-group row">
-                    <label for="id_course" class="col-sm-2 col-form-label">Przedmiot</label>
-                    <div class="col-sm-10">
-                        {{ form.course }}
-                    </div>
-                </div>
-            {% endif %}
-
-            <div id="form_title" class="form-group row">
-                <label for="id_title" class="col-sm-2 col-form-label">Tytuł</label>
-                <div class="col-sm-10">
-                    {{ form.title }}
-                    <small class="form-text text-muted">
-                        Tytuł pod jakim widoczne będzie wydarzenie
-                    </small>
-                </div>
-            </div>
-
-            <div id="form_visible" class="form-group row">
-                <label id="optionsCheckboxes" for="id_visible" class="col-sm-2 col-form-label">
-                    Opcje
-                </label>
-                <div class="col-sm-10 custom-control custom-checkbox">
-                    {{ form.visible }}
-                    <label class="custom-control-label" for="id_visible">
-                        Wydarzenie widoczne dla wszystkich użytkowników systemu
-                    </label>
-                    <small class="form-text text-muted">
-                        <strong>Uwagi:</strong>
-                        Wydarzenia niepubliczne widoczne są jedynie dla autorów i osób z uprawnieniami moderatora.
-                    </small>
-                </div>
-            </div>
-
+        {% if user.employee %}
             <div class="form-group row">
-                <label for="id_description" class="col-sm-2 col-form-label">Opis</label>
+                <label for="id_type" class="col-sm-2 col-form-label">Rodzaj</label>
                 <div class="col-sm-10">
-                    {{ form.description }}
-                    {{ form.description.errors }}
-                    <small class="form-text text-muted">
-                        Opis wydarzenia widoczny jest dla wszystkich, jeśli wydarzenie jest publiczne;
-                        widoczny tylko dla rezerwującego i administratora sal, gdy wydarzenie jest prywatne.
-                    </small>
+                    {{ form.type }}
                 </div>
             </div>
-
-        </fieldset><hr>
-
-
-
-
-        <h3>Terminy</h3>
-
-        {{ formset.management_form }}
-        <table id="termstable" class="table mb-0">
-            <thead>
-                <tr>
-                    <th class="termtbl1">Dzień</th>
-                    <th class="termtbl2">Od</th>
-                    <th class="termtbl2">Do</th>
-                    <th class="termtbl4">Lokalizacja</th>
-                    <th class="termtbl3">Akcje</th>
-                </tr>
-            </thead>
-            <tbody>
-            {% for form in formset %}
-                <tr>
-                    <td><strong>{{ form.instance.day|date:"Y-m-d" }}</strong>{{ form.day }}</td>
-                    <td>{{ form.instance.start|time }}{{ form.start }}</td>
-                    <td>{{ form.instance.end|time }}{{ form.end }}</td>
-                    <td>{% if form.instance.room %}Sala
-                        {{ form.instance.room.number }}{% else %}
-                        {{ form.instance.place }}{% endif %}{{ form.room }}{{ form.place }}
-                        {% if form.non_field_errors %}{{ form.non_field_errors }}{% endif %}
-                    </td>
-
-                    <td>
-                        <button type="button" class="d-none btn btn-success unremoveterm">
-                            Cofnij usunięcie
-                        </button>
-                        <button type="button" class="btn btn-danger removeterm">Usuń</button>
-                        <button type="button" class="btn btn-info editterm float-right">Edytuj</button>
-                        <div class="d-none">{{ form.DELETE }}</div>
-                        <div class="d-none ignore_conflicts">{{ form.ignore_conflicts }}</div>
-                    </td>
-                    {{ form.id }}
-                </tr>
-            {% endfor %}
-                <tr class="termstable-template bg-light d-none">
-                    <td class="termstable-template-term">
-                        <strong></strong>
-                        <input class="d-none">
-                    </td>
-                    <td class="termstable-template-begin">
-                        <input class="d-none">
-                    </td>
-                    <td class="termstable-template-end">
-                        <input class="d-none">
-                    </td>
-                    <td class="termstable-template-location">
-                        <input class="d-none termstable-template-place" maxlength="255">
-                        <input class="d-none termstable-template-room">
-                    </td>
-                    <td>
-                        <button type="button" class="d-none btn btn-success unremoveterm">
-                            Cofnij usunięcie
-                        </button>
-                        <button type="button" class="btn btn-danger removeterm">Usuń</button>
-                        <button type="button" class="btn btn-info editterm float-right">Edytuj</button>
-                        <div class="d-none">
-                            <input type="checkbox" class="termstable-template-delete">
-                        </div>
-                        <div class="d-none termstable-template-ignore-conflicts ignore_conflicts"></div>
-                    </tr>
-                    </td>
-
-            </tbody>
-        </table>
-        <input type="submit" class="d-none" name="sendthisform" value="test" id="testmainform">
-    </form>
-
-
-    <form id="addtermform" class="needs-validation">
-        <table class="table">
-            <tbody>
-            <tr>
-                <td class="termtbl1">
-                    <input id="term" type="date" class="term form-control" value="{% now "Y-m-d" %}"
-                        min="{% now "Y-m-d" %}" required>
-                    <small class="form-text text-muted">
-                        Wybierz termin, by zobaczyć sale wolne w tym czasie.
-                    </small>
-                </td>
-                <div>
-                <td class="termtbl2x2" colspan="2">
-                    <div class=" input-group">
-                        <input id="begin" type="time" class="begin timepicker form-control" required
-                            pattern="^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$">
-                        <input id="end" type="time" class="end timepicker form-control rounded-right" required
-                            pattern="^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$">
-                        <div class="invalid-feedback">
-                            Koniec musi następować po początku.
-                        </div>
-                        <input type="hidden" id="timepicker-change">
-                    </div>
-                </td>
-                <td class="termtbl4">
-                    <input class="form-control bg-light" id="location" name="location"
-                        placeholder="Miejsce" type="text" required readonly>
-                    <div class="invalid-feedback">
-                        Lokalizacja jest wymagana.
-                    </div>
-                    <small class="form-text text-muted">
-                        Wybierz lokalizaje poniżej.
-                    </small>
-                    <input type="hidden" id="hiddenroom" value="">
-                    <input type="hidden" id="hiddenid" value="">
-                    <input type="hidden" id="hiddeneventid" value="">
-                </td>
-                <td class="termtbl3">
-                    <button id="addterm" class="btn btn-success float-right">Dodaj termin</button>
-                </td>
-            </tr>
-            </tbody>
-        </table>
-    </form>
-
-    <form action="javascript:void(0);">
-        <nav>
-            <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                <a class="nav-item nav-link" id="nav-place-in-tab" data-toggle="tab" href="#nav-place-in" role="tab" aria-controls="nav-place-in" aria-selected="false">Sala Instytutu</a>
-                <a class="nav-item nav-link active" id="nav-place-out-tab" data-toggle="tab" href="#nav-place-out" role="tab" aria-controls="nav-place-out" aria-selected="true">Miejsce zewnętrzne</a>
+            <div class="alert alert-info alert-dismissible fade show" role="alert">
+                <table class="table">
+                    <tbody>
+                        <tr>
+                            <th>Egzaminy</th>
+                            <td rowspan="2" class="align-middle pl-4">
+                                prowadzący może zarezerwować salę, rezerwacja nie wymaga potwierdzenia
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>Kolokwia</th>
+                        </tr>
+                        <tr>
+                            <th>Wydarzenia</th>
+                            <td class="pl-4">
+                                każdy zalogowany może zgłosić chęć rezerwacji;
+                                rezerwacja zostaje potwierdzona lub odrzucona przez administratora sal.
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
             </div>
-        </nav>
 
-        <div class="tab-content mt-3" id="nav-tabContent">
-            <div class="tab-pane fade show active" id="nav-place-out" role="tabpanel" aria-labelledby="nav-place-out-tab">
-                <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                    Musisz samemu zatroszczyć się o rezerwację!
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div id="inputplacediv" class="container">
-                    <div class="form-group row">
-                        <label for="inputplace" class="col-sm-2 col-form-label">Miejsce</label>
-                        <div class="col-sm-10 input-group">
-                            <input type="text" class="form-control" id="inputplace" 
-                                placeholder="np. Instytu Matematyczny, Sala HS">
-                            <div class="input-group-append">
-                                <button type="button" class="btn btn-info" id="addoutsidelocation">Wybierz</button>
-                            </div>
-                        </div>
-                    </div>
+            <div id="form_course" class="form-group row">
+                <label for="id_course" class="col-sm-2 col-form-label">Przedmiot</label>
+                <div class="col-sm-10">
+                    {{ form.course }}
                 </div>
             </div>
-            <div class="tab-pane fade" id="nav-place-in" role="tabpanel" aria-labelledby="nav-place-in-tab">
+        {% endif %}
 
-                <fieldset id="rooms_filter" class="container">
-                    <legend class="d-none">Filtruj sale</legend>
-                    <div class="d-none custom-control custom-checkbox">
-                        <input type="checkbox" id="filteroccupated" name="selectsssplace"
-                        value="outside" class="custom-control-input" checked>
-                        <label class="custom-control-label" for="filteroccupated">Pokaż zajęte</label>
-                    </div>
-                    <div class="input">
-                        <ul class="inputs-list">
-                            {#                                    <li>#}
-                            {#                                        <label>#}
-                            {#                                            <input type="checkbox" name="selesssctplace" value="inside">#}
-                            {#                                            <span>Minimalna liczba miejsc</span>#}
-                            {#                                        </label>#}
-                            {#                                    </li>#}
-
-                        </ul>
-                    </div>
-                </fieldset>
-
-                <div id="canvasplacediv" class="container">
-                    <canvas id="can" width="900">
-                        Niestety Twoja przeglądarka nie wspiera HTML5.
-                    </canvas>
-                </div>
-
+        <div id="form_title" class="form-group row">
+            <label for="id_title" class="col-sm-2 col-form-label">Tytuł</label>
+            <div class="col-sm-10">
+                {{ form.title }}
+                <small class="form-text text-muted">
+                    Tytuł pod jakim widoczne będzie wydarzenie
+                </small>
             </div>
         </div>
-    </form>
-    <form action="javascript:void(0);">
-        <div class="container row">
+
+        <div id="form_visible" class="form-group row">
+            <label id="optionsCheckboxes" for="id_visible" class="col-sm-2 col-form-label">
+                Opcje
+            </label>
+            <div class="col-sm-10 custom-control custom-checkbox">
+                {{ form.visible }}
+                <label class="custom-control-label" for="id_visible">
+                    Wydarzenie widoczne dla wszystkich użytkowników systemu
+                </label>
+                <small class="form-text text-muted">
+                    <strong>Uwagi:</strong>
+                    Wydarzenia niepubliczne widoczne są jedynie dla autorów i osób z uprawnieniami moderatora.
+                </small>
+            </div>
+        </div>
+
+        <div class="form-group row">
+            <label for="id_description" class="col-sm-2 col-form-label">Opis</label>
+            <div class="col-sm-10">
+                {{ form.description }}
+                {{ form.description.errors }}
+                <small class="form-text text-muted">
+                    Opis wydarzenia widoczny jest dla wszystkich, jeśli wydarzenie jest publiczne;
+                    widoczny tylko dla rezerwującego i administratora sal, gdy wydarzenie jest prywatne.
+                </small>
+            </div>
+        </div>
+
+    </fieldset><hr>
+
+
+
+
+    <h3>Terminy</h3>
+
+    {{ formset.management_form }}
+    <table id="termstable" class="table mb-0">
+        <thead>
+            <tr>
+                <th class="termtbl1">Dzień</th>
+                <th class="termtbl2">Od</th>
+                <th class="termtbl2">Do</th>
+                <th class="termtbl4">Lokalizacja</th>
+                <th class="termtbl3">Akcje</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for form in formset %}
+            <tr>
+                <td><strong>{{ form.instance.day|date:"Y-m-d" }}</strong>{{ form.day }}</td>
+                <td>{{ form.instance.start|time }}{{ form.start }}</td>
+                <td>{{ form.instance.end|time }}{{ form.end }}</td>
+                <td>{% if form.instance.room %}Sala
+                    {{ form.instance.room.number }}{% else %}
+                    {{ form.instance.place }}{% endif %}{{ form.room }}{{ form.place }}
+                    {% if form.non_field_errors %}{{ form.non_field_errors }}{% endif %}
+                </td>
+
+                <td>
+                    <button type="button" class="d-none btn btn-success unremoveterm">
+                        Cofnij usunięcie
+                    </button>
+                    <button type="button" class="btn btn-danger removeterm">Usuń</button>
+                    <button type="button" class="btn btn-info editterm float-right">Edytuj</button>
+                    <div class="d-none">{{ form.DELETE }}</div>
+                    <div class="d-none ignore_conflicts">{{ form.ignore_conflicts }}</div>
+                </td>
+                {{ form.id }}
+            </tr>
+        {% endfor %}
+            <tr class="termstable-template bg-light d-none">
+                <td class="termstable-template-term">
+                    <strong></strong>
+                    <input class="d-none">
+                </td>
+                <td class="termstable-template-begin">
+                    <input class="d-none">
+                </td>
+                <td class="termstable-template-end">
+                    <input class="d-none">
+                </td>
+                <td class="termstable-template-location">
+                    <input class="d-none termstable-template-place" maxlength="255">
+                    <input class="d-none termstable-template-room">
+                </td>
+                <td>
+                    <button type="button" class="d-none btn btn-success unremoveterm">
+                        Cofnij usunięcie
+                    </button>
+                    <button type="button" class="btn btn-danger removeterm">Usuń</button>
+                    <button type="button" class="btn btn-info editterm float-right">Edytuj</button>
+                    <div class="d-none">
+                        <input type="checkbox" class="termstable-template-delete">
+                    </div>
+                    <div class="d-none termstable-template-ignore-conflicts ignore_conflicts"></div>
+                </tr>
+                </td>
+
+        </tbody>
+    </table>
+    <input type="submit" class="d-none" name="sendthisform" value="test" id="testmainform">
+</form>
+
+
+<form id="addtermform" class="needs-validation">
+    <table class="table">
+        <tbody>
+        <tr>
+            <td class="termtbl1">
+                <input id="term" type="date" class="term form-control" value=""
+                    min="{% now "Y-m-d" %}" required>
+                <small class="form-text text-muted">
+                    Wybierz termin, by zobaczyć sale wolne w tym czasie.
+                </small>
+            </td>
+            <div>
+            <td class="termtbl2x2" colspan="2">
+                <div class=" input-group">
+                    <input id="begin" type="time" class="begin timepicker form-control" required
+                        placeholder="np. 8:00" 
+                        pattern="^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$">
+                    <input id="end" type="time" class="end timepicker  form-control rounded-right" required
+                        placeholder="np. 10:00" 
+                        pattern="^([0-1]?[0-9]|2[0-4]):([0-5][0-9])(:[0-5][0-9])?$">
+                    <div class="invalid-feedback">
+                        Koniec musi następować po początku.
+                    </div>
+                </div>
+            </td>
+            <td class="termtbl4">
+                <input class="form-control bg-light" id="location" name="location"
+                    placeholder="Miejsce" type="text" required readonly>
+                <div class="invalid-feedback">
+                    Lokalizacja jest wymagana.
+                </div>
+                <small class="form-text text-muted">
+                    Wybierz lokalizaje poniżej.
+                </small>
+                <input type="hidden" id="hiddenroom" value="">
+                <input type="hidden" id="hiddenid" value="">
+                <input type="hidden" id="hiddeneventid" value="">
+            </td>
+            <td class="termtbl3">
+                <button id="addterm" class="btn btn-success float-right">Dodaj termin</button>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</form>
+
+<form action="javascript:void(0);">
+    <nav>
+        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+            <a class="nav-item nav-link" id="nav-place-in-tab" data-toggle="tab" href="#nav-place-in" role="tab" aria-controls="nav-place-in" aria-selected="false">Sala Instytutu</a>
+            <a class="nav-item nav-link active" id="nav-place-out-tab" data-toggle="tab" href="#nav-place-out" role="tab" aria-controls="nav-place-out" aria-selected="true">Miejsce zewnętrzne</a>
+        </div>
+    </nav>
+
+    <div class="tab-content mt-3" id="nav-tabContent">
+        <div class="tab-pane fade show active" id="nav-place-out" role="tabpanel" aria-labelledby="nav-place-out-tab">
+            <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                Musisz samemu zatroszczyć się o rezerwację!
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div id="inputplacediv" class="container">
+                <div class="form-group row">
+                    <label for="inputplace" class="col-sm-2 col-form-label">Miejsce</label>
+                    <div class="col-sm-10 input-group">
+                        <input type="text" class="form-control" id="inputplace" 
+                            placeholder="np. Instytu Matematyczny, Sala HS">
+                        <div class="input-group-append">
+                            <button type="button" class="btn btn-info" id="addoutsidelocation">Wybierz</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="nav-place-in" role="tabpanel" aria-labelledby="nav-place-in-tab">
+
+            <fieldset id="rooms_filter" class="container">
+                <legend >Filtruj sale</legend>
+                <div class="custom-control custom-checkbox">
+                    <input type="checkbox" id="filteroccupated" name="selectsssplace"
+                    value="outside" class="custom-control-input" checked>
+                    <label class="custom-control-label" for="filteroccupated">Pokaż zajęte</label>
+                </div>
+            </fieldset>
+
+            <div id="canvasplacediv" class="container">
+                <canvas id="can" width="900">
+                    Niestety Twoja przeglądarka nie wspiera HTML5.
+                </canvas>
+            </div>
+
+        </div>
+    </div>
+</form>
+<form action="javascript:void(0);">
+    <div class="d-flex">
+        <div class="custom-control custom-checkbox col">
         {% if errors and perms.schedule.manage_events %}
-            <div class="custom-control custom-checkbox col">
                 <input type="checkbox" class="custom-control-input" id="ignore_all_conflicts">
                 <label class="custom-control-label" for="ignore_all_conflicts">
                     Zignoruj konflikty
                 </label>
-            </div>
         {% endif %}
-            <input type="button" id="save_event" class="btn btn-success" name="zapisz" value="Zapisz">
         </div>
-    </form>
-
-</div>
+        <input type="button" id="save_event" class="btn btn-success" name="zapisz" value="Zapisz">
+    </div>
+</form>
 {% endblock %}

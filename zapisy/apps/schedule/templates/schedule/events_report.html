@@ -2,6 +2,8 @@
 {% load static %}
 {% load compressed %}
 
+{% block events_report %} class="active"{% endblock %}
+
 {% block bread %}
     <li class="breadcrumb-item"><a href="{% url 'main-page' %}">Strona główna</a></li>
     <li class="breadcrumb-item"><a href="{% url 'events:classrooms' %}">Sale</a></li>
@@ -14,54 +16,52 @@
     {% compressed_js 'proposal_edit' %}
     <script type="text/javascript">
         window.addEventListener('load', function(e) {
-            $(".selector-available > h2").addClass("text-light bg-info text-center")[0].innerHTML = "Sale";
-            $(".selector-chosen > h2").addClass("text-light bg-info text-center")[0].innerHTML = "Wybrane";
-            $("#id_rooms_from").addClass("form-control").attr('size', 15);
-            $("#id_rooms_to").addClass("form-control").attr('size', 15);
-            $("#id_rooms_filter").insertAfter(".selector");
-            $("#id_rooms_input").addClass("form-control");
-            $("#id_rooms_add_all_link").text("Wybierz wszystkie");
-            $("#id_rooms_remove_all_link").text("Usuń wszystkie");
-            $(".selector").addClass("d-flex justify-content-center").removeClass("selector");
-            $(".selector-available").addClass("form-group flex-fill p-2 text-center").removeClass("selector-available");
-            $(".selector-chooser").addClass("form-group p-2 list-unstyled align-self-center").removeClass("selector-chooser");
-            $(".selector-chosen").addClass("form-group flex-fill p-2 text-center").removeClass("selector-chosen");
+            let widget = $('#selector-widget');
+            widget.find(".selector-available > h2").addClass("text-light bg-info text-center mb-0").text("Sale")
+                .parent().addClass("flex-fill p-0 text-center").removeClass("selector-available")
+                .children("#id_rooms_from").addClass("form-control").attr('size', 15)
+                .siblings("#id_rooms_add_all_link").text("Wybierz wszystkie");
+            widget.find(".selector-chosen > h2").addClass("text-light bg-info text-center mb-0").text("Wybrane")
+                .parent().addClass("flex-fill p-0 text-center").removeClass("selector-chosen")
+                .children("#id_rooms_to").addClass("form-control").attr('size', 15)
+                .siblings("#id_rooms_remove_all_link").text("Usuń wszystkie");
+            widget.find("#id_rooms_input").appendTo(widget).addClass("form-control");
+            widget.find("#id_rooms_filter").remove();
+            widget.children(".selector").addClass("d-flex justify-content-center").removeClass("selector")
+                .children(".selector-chooser").addClass("p-2 list-unstyled align-self-center").removeClass("selector-chooser");
         });
     </script>
 {% endblock %}
 
 {% block content %}
-    <div class="container mb-3"> 
-        <h2>Raport</h2>
+    <h2>Raport</h2>
+    <form action="{% url 'events:events_report' %}" method="post">
 
-        <form action="{% url 'events:events_report' %}" method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {% for hidden in form.hidden_fields %}
+            {{ hidden }}
+        {% endfor %}
 
-            {% csrf_token %}
-            {{ form.non_field_errors }}
-            {% for hidden in form.hidden_fields %}
-                {{ hidden }}
-            {% endfor %}
-
-            <div class="d-flex justify-content-center">
-                <div class="p-2 flex-fill">
-                {{ form.rooms }}
-                {{ form.rooms.errors }}
-                </div>
+        <div class="d-flex justify-content-center">
+            <div id="selector-widget" class="p-1 flex-fill mb-2">
+            {{ form.rooms }}
+            {{ form.rooms.errors }}
             </div>
+        </div>
 
-            <div class="input-group mb-3">
-                <div class="input-group-prepend">
-                    <label class="input-group-text">{{ form.beg_date.label }}</label>
-                </div>
-                {{ form.beg_date }}
-                <div class="input-group-prepend input-group-append">
-                    <label class="input-group-text">{{ form.end_date.label }}</label>
-                </div>
-                {{ form.end_date }}
-                <div class="input-group-append">
-                    <input type="submit" value="Generuj raport" class="btn btn-success">
-                </div>
+        <div class="input-group">
+            <div class="input-group-prepend">
+                <label class="input-group-text">{{ form.beg_date.label }}</label>
             </div>
-        </form>
-    </div>
+            {{ form.beg_date }}
+            <div class="input-group-prepend input-group-append">
+                <label class="input-group-text">{{ form.end_date.label }}</label>
+            </div>
+            {{ form.end_date }}
+            <div class="input-group-append">
+                <input type="submit" value="Generuj raport" class="btn btn-success">
+            </div>
+        </div>
+    </form>
 {% endblock %}
