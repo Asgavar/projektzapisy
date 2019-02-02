@@ -7,29 +7,11 @@
 {% block styles %}
     {{ block.super }}
 <style>
-    .description {
-      font-size: 14px;
-      line-height: 1.5;
-    }
-    .description p {
-        min-height: 42px !important;
-    }
-    .description p.collapse:not(.show) {
-        height: 42px !important;
-        overflow: hidden;
-      
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;  
-    }
-    .description button.collapsing {
-        min-height: 42px !important;
-    }
-    .description button.collapsed:after  {
-        content: 'Więcej';
-    }
-    .description button:not(.collapsed):after {
+    .description a.txt-more:after  {
         content: 'Mniej';
+    }
+    .description a:not(.txt-more):after {
+        content: 'Więcej';
     }
 </style>
 {% endblock %}
