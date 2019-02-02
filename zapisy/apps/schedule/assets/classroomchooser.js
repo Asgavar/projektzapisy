@@ -1,6 +1,5 @@
 import "jquery";
 const $ = jQuery;
-var that;
 
 var scroll = function(id) {
     $('html, body').animate({
@@ -171,7 +170,7 @@ var Classroom = function (ctx, item) {
                             this.y2corner = this.y2 - this.corner;
                             this.strokeStyle = ctx.strokeStyle;
                             this.evenHours = ['08:00', '10:00', '12:00', '14:00', '16:00', '18:00', '20:00', '22:00'];
-                            that = this;
+                            var that = this;
 
                             var getPixel = function (hour) {
                                 /*
@@ -191,8 +190,8 @@ var Classroom = function (ctx, item) {
                                     var event = item.terms[key];
 
 
-                                    begin = getPixel(event.begin) + this.x1;
-                                    end = getPixel(event.end) + this.x1;
+                                    let begin = getPixel(event.begin) + this.x1;
+                                    let end = getPixel(event.end) + this.x1;
                                     this.terms.push({'begin':begin, 'end':end});
                                 }
                             }
@@ -311,7 +310,7 @@ var Classroom = function (ctx, item) {
                     },
 
                     click = function (event, cordinates, callback) {
-                        if (!is_free()) return;
+                        if (!reservationData.canManageEvents && !is_free()) return;
                         if ((cordinates.x >= config.x1 - 100) && (cordinates.x < config.x1 - 20)
                                 && (cordinates.y >= config.y1 + 1) && ( cordinates.y < config.y1 + 32)) {
                             callback.call(item, item);
