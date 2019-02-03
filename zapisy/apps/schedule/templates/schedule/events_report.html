@@ -1,4 +1,5 @@
 {% extends 'schedule/base.html' %}
+{% load render_bundle from webpack_loader %}
 {% load static %}
 {% load compressed %}
 
@@ -14,23 +15,15 @@
     <link rel="stylesheet" type="text/css" href="/static/admin/css/forms.css" />
     <script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
     {% compressed_js 'proposal_edit' %}
-    <script type="text/javascript">
-        window.addEventListener('load', function(e) {
-            let widget = $('#selector-widget');
-            widget.find(".selector-available > h2").addClass("text-light bg-info text-center mb-0").text("Sale")
-                .parent().addClass("flex-fill p-0 text-center").removeClass("selector-available")
-                .children("#id_rooms_from").addClass("form-control").attr('size', 15)
-                .siblings("#id_rooms_add_all_link").text("Wybierz wszystkie");
-            widget.find(".selector-chosen > h2").addClass("text-light bg-info text-center mb-0").text("Wybrane")
-                .parent().addClass("flex-fill p-0 text-center").removeClass("selector-chosen")
-                .children("#id_rooms_to").addClass("form-control").attr('size', 15)
-                .siblings("#id_rooms_remove_all_link").text("Usuń wszystkie");
-            widget.find("#id_rooms_input").appendTo(widget).addClass("form-control");
-            widget.find("#id_rooms_filter").remove();
-            widget.children(".selector").addClass("d-flex justify-content-center").removeClass("selector")
-                .children(".selector-chooser").addClass("p-2 list-unstyled align-self-center").removeClass("selector-chooser");
-        });
+        <script id="filtered-select-multiple-data" type="application/json">
+[{
+   "id": "#selector-widget",
+   "size": 15,
+   "txtAvailable": "Sale",
+   "txtChosen": "Wybrane"
+}]
     </script>
+    {% render_bundle "filtered-select-multiple-converter" %}
 {% endblock %}
 
 {% block content %}

@@ -17,5 +17,8 @@ export default {
 		"fullcalendar": [
 			"common/fullcalendar.ts"
 		],
+		"filtered-select-multiple-converter": [
+			"common/filtered-select-multiple-converter.js"
+		],
 	},
 };
