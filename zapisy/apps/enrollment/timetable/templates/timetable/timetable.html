@@ -10,8 +10,13 @@
 {% block enrollment_menu_schedule %} class="active"{% endblock %}
 
 {% block bread %}
-	<a href="{% url 'main-page' %}">{% trans "Strona główna" %}</a> &raquo;
-	<a href="{% url 'course-list' %}">{% trans "Zapisy" %}</a>
+    <li class="breadcrumb-item">
+        <a href="{% url 'main-page' %}">{% trans "Strona główna" %}</a>
+    </li>
+
+    <li class="breadcrumb-item active" aria-current="page">
+        <a href="{% url 'course-list' %}">{% trans "Zapisy" %}</a>
+    </li>
 {% endblock %}
 
 

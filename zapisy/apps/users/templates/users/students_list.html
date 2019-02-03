@@ -12,9 +12,9 @@
 {% endblock %}
 
 {% block bread %}
-	<a href="{% url 'main-page' %}">Strona główna</a> &raquo;
-	<a href="{% url 'course-list' %}">Zapisy</a> &raquo;
-	Studenci
+  <li class="breadcrumb-item"><a href="/">Strona główna</a></li>
+  <li class="breadcrumb-item"><a href="/courses">Zapisy</a></li>
+  <li class="breadcrumb-item active" aria-current="page">Studenci</li>
 {% endblock %}
 
 

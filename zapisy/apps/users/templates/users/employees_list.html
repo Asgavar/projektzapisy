@@ -13,12 +13,12 @@
 {% endblock %}
 
 {% block bread %}
-	<a href="{% url 'main-page' %}">Strona główna</a> &raquo;
-	<a href="{% url 'course-list' %}">Zapisy</a> &raquo;
-	Pracownicy
+  <li class="breadcrumb-item"><a href="/">Strona główna</a></li>
+  <li class="breadcrumb-item"><a href="/courses">Zapisy</a></li>
+  <li class="breadcrumb-item active" aria-current="page">Pracownicy</li>
 {% endblock %}
-{% block enrollment_menu_employees %} class="active"{% endblock %}
 
+{% block enrollment_menu_employees %} class="active"{% endblock %}
 
 {% block content %}
 <div id="employee-profile" class="col-lg">

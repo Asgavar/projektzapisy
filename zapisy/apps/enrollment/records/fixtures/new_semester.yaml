@@ -19,7 +19,7 @@
   fields:
     name: ECTS
 
-# We will have two students.
+# We will have three students.
 - model: auth.User
   pk: 1
   fields:
@@ -51,7 +51,7 @@
     matricula: 100003
 
 
-# Bolek's T0 will be 25 hours after Lolek's.
+# Bolek's T0 will be 25 hours after Lolek's. Tola's T0 is two days after.
 - model: records.T0Times
   pk: 1
   fields:

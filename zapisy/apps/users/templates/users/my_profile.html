@@ -28,8 +28,8 @@ $('.checkall').live('click', function(){
 {% endblock %}
 
 {% block bread %}
-	<a href="{% url 'main-page' %}">{% trans "Strona główna" %}</a> &raquo;
-	{% trans "Moje konto" %}
+    <li class="breadcrumb-item"><a href="/">Strona główna</a></li>
+    <li class="breadcrumb-item active" aria-current="page">Moje konto</li>
 {% endblock %}
 
 {% block main-subtitle %}Moje konto{% endblock %}
