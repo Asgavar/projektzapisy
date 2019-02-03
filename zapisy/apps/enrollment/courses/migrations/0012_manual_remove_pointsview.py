@@ -12,7 +12,7 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunSQL("DROP VIEW student_course_points_unmaterialized;"),
+        migrations.RunSQL("DROP VIEW IF EXISTS student_course_points_unmaterialized;"),
         migrations.RunSQL("DROP FUNCTION IF EXISTS change_entity_update_points_dt() CASCADE;"),
         migrations.RunSQL("DROP FUNCTION IF EXISTS change_entity_update_points_it() CASCADE;"),
         migrations.RunSQL("DROP FUNCTION IF EXISTS change_entity_update_points_ut() CASCADE;"),

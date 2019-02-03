@@ -14,13 +14,13 @@ class Migration(migrations.Migration):
     ]
 
     operations = [
-        migrations.RunSQL("DROP VIEW users_openingtimesview_unmaterialized;"),
-        migrations.RunSQL("DROP VIEW users_minutes_bonus_view;"),
+        migrations.RunSQL("DROP VIEW IF EXISTS users_openingtimesview_unmaterialized;"),
+        migrations.RunSQL("DROP VIEW IF EXISTS users_minutes_bonus_view;"),
         migrations.RunSQL("DROP FUNCTION IF EXISTS users_openingtimesview_refresh_for_semester(integer);"),
         migrations.RunSQL("DROP FUNCTION IF EXISTS users_openingtimesview_refresh_for_student(integer);"),
-        migrations.RunSQL("DROP TRIGGER change_semester_update_points_delete ON courses_semester;"),
-        migrations.RunSQL("DROP TRIGGER change_semester_update_points_insert ON courses_semester;"),
-        migrations.RunSQL("DROP TRIGGER change_semester_update_points_update ON courses_semester;"),
+        migrations.RunSQL("DROP TRIGGER IF EXISTS change_semester_update_points_delete ON courses_semester;"),
+        migrations.RunSQL("DROP TRIGGER IF EXISTS change_semester_update_points_insert ON courses_semester;"),
+        migrations.RunSQL("DROP TRIGGER IF EXISTS change_semester_update_points_update ON courses_semester;"),
         migrations.RunSQL("DROP FUNCTION IF EXISTS change_semester_update_user_opening_times_dt() CASCADE;"),
         migrations.RunSQL("DROP FUNCTION IF EXISTS change_semester_update_user_opening_times_it() CASCADE;"),
         migrations.RunSQL("DROP FUNCTION IF EXISTS change_semester_update_user_opening_times_ut() CASCADE;"),
