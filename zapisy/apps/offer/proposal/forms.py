@@ -83,5 +83,5 @@ class SyllabusForm(ModelForm):
             'project_presentation_hours')
         model = Syllabus
         widgets = {
-            'learning_methods': FilteredSelectMultiple("Metody kształcenia", is_stacked=False),
+            'learning_methods': FilteredSelectMultiple("Metody kształcenia", is_stacked=False)
         }

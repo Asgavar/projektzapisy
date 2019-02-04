@@ -21,30 +21,27 @@
         types_data = {{ types_data|safe }};
         proposal_init(types_data);
     </script>
-     <script id="filtered-select-multiple-data-effects" type="application/json">
+     <script id="filtered-select-multiple-data" type="application/json">
         [{
            "id": "#selector-effects",
            "size": 15,
            "txtAvailable": "Efekty",
            "txtChosen": "Wybrane"
-        }]
+        },
+        {
+            "id": "#selector-requirements",
+            "size": 15,
+            "txtAvailable": "Wymagania",
+            "txtChosen": "Wybrane"
+         },
+         {
+            "id": "#selector-learning-methods",
+            "size": 15,
+            "txtAvailable": "Wymagania",
+            "txtChosen": "Wybrane"
+         }]
     </script>
-    <script id="filtered-select-multiple-data-requirements" type="application/json">
-        [{
-           "id": "#selector-requirements",
-           "size": 15,
-           "txtAvailable": "Wymagania",
-           "txtChosen": "Wybrane"
-        }]
-    </script>
-    <script id="filtered-select-multiple-data-learning-methods" type="application/json">
-        [{
-           "id": "#selector-learning-methods",
-           "size": 15,
-           "txtAvailable": "Wymagania",
-           "txtChosen": "Wybrane"
-        }]
-    </script>
+    
     {% render_bundle "filtered-select-multiple-converter" %}
 {% endblock %}
 
