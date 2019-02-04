@@ -1,4 +1,5 @@
 {% extends 'offer/proposal/proposal.html' %}
+{% load render_bundle from webpack_loader %}
 {% load compressed %}
 {% load filters %}
 
@@ -10,22 +11,41 @@
     <!-- <script>tinymce.init({ selector:'textarea' });</script> -->
     {% compressed_js 'proposal_edit' %}
     <style>
-        label { width: 150px;}
-        textarea,input,select {width: 100%;}
-        #id_entity-exam, #id_entity-english{width: auto !important; box-shadow: none !important;}
-        .hours-table {width: 100% !important;}
+        table { max-width: 90vw !important;}
+        label { text-align: right !important;}
+        input[type="checkbox"] { width: auto; }
         tr.haserrors {background-color: #ffd1d1;}
-        td.hours-col input {width:100px;}
-        td.hours-col {width:350px;}
-        th.name-col input {width:300px;}
-        th.name-col {width:550px;}
-        div#main-content form {width:770px;}
         a.delete-row {margin-left: 15px !important;}
     </style>
     <script type="text/javascript">
         types_data = {{ types_data|safe }};
         proposal_init(types_data);
     </script>
+     <script id="filtered-select-multiple-data-effects" type="application/json">
+        [{
+           "id": "#selector-effects",
+           "size": 15,
+           "txtAvailable": "Efekty",
+           "txtChosen": "Wybrane"
+        }]
+    </script>
+    <script id="filtered-select-multiple-data-requirements" type="application/json">
+        [{
+           "id": "#selector-requirements",
+           "size": 15,
+           "txtAvailable": "Wymagania",
+           "txtChosen": "Wybrane"
+        }]
+    </script>
+    <script id="filtered-select-multiple-data-learning-methods" type="application/json">
+        [{
+           "id": "#selector-learning-methods",
+           "size": 15,
+           "txtAvailable": "Wymagania",
+           "txtChosen": "Wybrane"
+        }]
+    </script>
+    {% render_bundle "filtered-select-multiple-converter" %}
 {% endblock %}
 
 
@@ -56,16 +76,17 @@
         <form action="{% url 'proposal-form' %}" method="POST">
     {% endif %}
         {% csrf_token %}
+        
             <table class="table text-muted">
+                
             {% for field in form %}
-                {% if not field.name in 'lectures,exercises,repetitions,laboratories,exercises_laboratiories,seminars,ects'|slice:',' %}
+            {% if not field.name in 'lectures,exercises,repetitions,laboratories,exercises_laboratiories,seminars,ects,effects'|slice:',' %}
                 <tr>
-                    <th>
-                    {% if field.field.required %}
-                    <span class="text-muted" style="position:absolute; left:160px;">*</span>
-                    {% endif %}
+                    <th scope="row">
                     <span class="text-right">{{field.label_tag}}</span>
-                    
+                    {% if field.field.required %}
+                    <span class="text-muted" >*</span>
+                    {% endif %}
                     </th>
                     {% if field.errors %}
                     <td>{{field | add_class:"form-control"}}</td>
@@ -78,18 +99,49 @@
                 </tr>
                 {% endif %}
             {% endfor %}
+                 <tr>
+                    <th scope="row">
+                    <span class="text-right">{{form.effects.label_tag}}</span>
+                                            
+                    </th>
+                    {% if form.effects.errors %}
+                    <td>{{form.effects | add_class:"form-control"}}</td>
+                    <td>{{form.effects.errors}}</td>
+                    {% else %}
+                    <td><div id="selector-effects" class="text-left">{{form.effects | add_class:"form-control"}}</div></td>
+                    {% endif %}
+                </tr>
         </table>
-
+        <div class="table-responsive">
         <table class="table text-muted">
-            {{ desc }}
+                <tr>
+                    <th scope="row">
+                        <span>{{ desc.description.label_tag }}</span>
+                    </th>
+                    {% if desc.description.errors %}
+                        <td>{{ desc.description }}</td>
+                        <td>{{ desc.description.errors }}</td>
+                    {% else %}
+                        <td><div>{{ desc.description }}</div></td>
+                    {% endif %}
+                </tr>
+                <tr>
+                    <th scope="row"><span>{{ desc.requirements.label_tag }}</span></th>
+                    {% if desc.requirements.errors %}
+                        <td>{{ desc.requirements }}</td>
+                        <td>{{ desc.requirements.errors }}</td>
+                    {% else %}
+                        <td><div id="selector-requirements">{{ desc.requirements }}</div></td>
+                    {% endif %}
+                </tr>
             {% for field in syllabus %}
                 {% if not field.name in 'exam_hours,tests_hours,project_presentation_hours'|slice:',' %}
                 <tr>
-                    <th>
-                    {% if field.field.required %}
-                    <span style="position:absolute; left:160px;">*</span>
-                    {% endif %}
-                    {{field.label_tag}}
+                    <th scope="row">
+                        <span class="text-right">{{field.label_tag}}</span>
+                        {% if field.field.required %}
+                            <span class="text-muted" >*</span>
+                        {% endif %}
                     </th>
                     {% if field.errors %}
                     <td>{{field}}</td>
@@ -97,106 +149,111 @@
                         {{field.errors | add_class:"form-control"}}
                     </td>
                     {% else %}
-                    <td colspan="2">{{field | add_class:"form-control"}}</td>
+                        {% if field.name == 'learning_methods'%}
+                            <td><div id="selector-learning-methods">{{field | add_class:"form-control"}}</div></td>
+                        {% else %}
+                        <td>{{field | add_class:"form-control"}}</td>
+                        {% endif %}
                     {% endif %}
                 </tr>
                 {% endif %}
             {% endfor %}
         </table>
-        <table id="hours-table" class="table text-muted">
-        <h3>Nakład pracy studenta</h3>
-        <tr>
-            <th></th>
-            <th class="text-left">Forma aktywności studenta</th>
-            <th class="text-left">Liczba godzin</th>
-        </tr>
-        <tr>
-            <th><label>Godziny zajęć</label></th>
-            <th></th>
-            <th></th>
-        </tr>
-
-        <tr>
-            <th></th>
-            <th class="name-col">repetytorium</th>
-            <td class="hours-col">{{ form.repetitions | add_class:"form-control"}}</td>
-        </tr>
-        <tr>
-            <th></th>
-            <th class="name-col">wykład</th>
-            <td class="hours-col">{{ form.lectures | add_class:"form-control"}}</td>
-        </tr>
-        <tr>
-            <th></th>
-            <th class="name-col">ćwiczenia</th>
-            <td class="hours-col">{{ form.exercises | add_class:"form-control"}}</td>
-        </tr>
-        <tr>
-            <th></th>
-            <th class="name-col">pracownię</th>
-            <td class="hours-col">{{ form.laboratories | add_class:"form-control"}}</td>
-        </tr>
-        <tr>
-            <th></th>
-            <th class="name-col">ćwiczenio-pracownię</th>
-            <td class="hours-col">{{ form.exercises_laboratiories | add_class:"form-control"}}</td>
-        </tr>
-        <tr>
-            <th></th>
-            <th class="name-col">seminarium</th>
-            <td class="hours-col">{{ form.seminars | add_class:"form-control"}}</td>
-        </tr>
-        <tr>
-            <th></th>
-            <th class="name-col">egzamin</th>
-            <td class="hours-col">{{ syllabus.exam_hours | add_class:"form-control"}}</td>
-        </tr>
-        <tr>
-            <th></th>
-            <th class="name-col">sprawdziany/kolokwia</th>
-            <td class="hours-col">{{ syllabus.tests_hours | add_class:"form-control"}}</td>
-        </tr>
-        <tr>
-            <th></th>
-            <th class="name-col">prezentacja projektu</th>
-            <td class="hours-col">{{ syllabus.project_presentation_hours | add_class:"form-control"}}</td>
-        </tr>
-        <tr>
-            <th><label>Praca własna studenta</label></th>
-            <th></th>
-            <th></th>
-        </tr>
-        {% for form in student_work_formset.forms %}
-        <tr class="dynamic-formset">
-            <th>{{ form.name.errors }}{{ form.hours.errors }}</th>
-            <th class="name-col">
-              {% if form.instance.pk %}{{ form.DELETE }}{% endif %}
-              {{ form.id | add_class:"form-control"}}
-              {{ form.name | add_class:"form-control"}}
-            </th>
-            <td class="hours-col form-row">{{ form.hours  | add_class:"form-control"}}</th>
-        </tr>
-        {% endfor %}
-        </table>
-        {{ student_work_formset.management_form }}
-        <table class="table text-muted">
-        <tr>
-            <th>Suma godzin</th>
-            <td></td>
-            <td id="target_sum"></td>
-        </tr>
-        <tr>
-            <th>Powinno być (z dokładnością do 20h)</th>
-            <td></td>
-            <td id="hours_should_be">{% widthratio form.ects.value 1 25 %}</td>
-        </tr>
-
-        <tr>
-        </tr>
-            <th>ECTS</th>
-            <td></td>
-            <td>{{ form.ects | add_class:"form-control"}}</td>
-        </table>
-        <button type="submit" class="btn btn-success" onclick="beforeSubmitButton('id_entity-name','id_entity-name_en')">Zapisz</button>
-    </form>
+    </div>
+    <table id="hours-table" class="table text-muted">
+            <h3>Nakład pracy studenta</h3>
+            <tr>
+                <th></th>
+                <th class="text-left">Forma aktywności studenta</th>
+                <th class="text-left">Liczba godzin</th>
+            </tr>
+            <tr>
+                <th><label>Godziny zajęć</label></th>
+                <th></th>
+                <th></th>
+            </tr>
+    
+            <tr>
+                <th></th>
+                <th class="name-col">repetytorium</th>
+                <td class="hours-col">{{ form.repetitions | add_class:"form-control"}}</td>
+            </tr>
+            <tr>
+                <th></th>
+                <th class="name-col">wykład</th>
+                <td class="hours-col">{{ form.lectures | add_class:"form-control"}}</td>
+            </tr>
+            <tr>
+                <th></th>
+                <th class="name-col">ćwiczenia</th>
+                <td class="hours-col">{{ form.exercises | add_class:"form-control"}}</td>
+            </tr>
+            <tr>
+                <th></th>
+                <th class="name-col">pracownię</th>
+                <td class="hours-col">{{ form.laboratories | add_class:"form-control"}}</td>
+            </tr>
+            <tr>
+                <th></th>
+                <th class="name-col">ćwiczenio-pracownię</th>
+                <td class="hours-col">{{ form.exercises_laboratiories | add_class:"form-control"}}</td>
+            </tr>
+            <tr>
+                <th></th>
+                <th class="name-col">seminarium</th>
+                <td class="hours-col">{{ form.seminars | add_class:"form-control"}}</td>
+            </tr>
+            <tr>
+                <th></th>
+                <th class="name-col">egzamin</th>
+                <td class="hours-col">{{ syllabus.exam_hours | add_class:"form-control"}}</td>
+            </tr>
+            <tr>
+                <th></th>
+                <th class="name-col">sprawdziany/kolokwia</th>
+                <td class="hours-col">{{ syllabus.tests_hours | add_class:"form-control"}}</td>
+            </tr>
+            <tr>
+                <th></th>
+                <th class="name-col">prezentacja projektu</th>
+                <td class="hours-col">{{ syllabus.project_presentation_hours | add_class:"form-control"}}</td>
+            </tr>
+            <tr>
+                <th><label>Praca własna studenta</label></th>
+                <th></th>
+                <th></th>
+            </tr>
+            {% for form in student_work_formset.forms %}
+            <tr class="dynamic-formset">
+                <th>{{ form.name.errors }}{{ form.hours.errors }}</th>
+                <th class="name-col">
+                  {% if form.instance.pk %}{{ form.DELETE }}{% endif %}
+                  {{ form.id | add_class:"form-control"}}
+                  {{ form.name | add_class:"form-control"}}
+                </th>
+                <td class="hours-col form-row">{{ form.hours  | add_class:"form-control"}}</th>
+            </tr>
+            {% endfor %}
+            </table>
+            {{ student_work_formset.management_form }}
+            <table class="table text-muted">
+            <tr>
+                <th>Suma godzin</th>
+                <td></td>
+                <td id="target_sum"></td>
+            </tr>
+            <tr>
+                <th>Powinno być (z dokładnością do 20h)</th>
+                <td></td>
+                <td id="hours_should_be">{% widthratio form.ects.value 1 25 %}</td>
+            </tr>
+    
+            <tr>
+            </tr>
+                <th>ECTS</th>
+                <td></td>
+                <td>{{ form.ects | add_class:"form-control"}}</td>
+            </table>
+            <button type="submit" class="btn btn-success" onclick="beforeSubmitButton('id_entity-name','id_entity-name_en')">Zapisz</button>
+        </form>
 {% endblock %}

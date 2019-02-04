@@ -15,6 +15,7 @@
 <h1 class="text-dark font-weight-bold">{{course}}</h1>
 <form action="{{path}}" method="POST" id="groups">
 {% csrf_token %}
+<div class="table-responsive">
 <table class="table table-stripped">
 <thead class="text-muted">
 <tr>
@@ -61,6 +62,7 @@
   {% endfor %}
 </tbody>
 </table>
+</div>
 <input value="Zapisz" class="btn btn-primary" type="submit" />
 </form>
 <script type="text/javascript">$("form#groups select").chosen()</script>

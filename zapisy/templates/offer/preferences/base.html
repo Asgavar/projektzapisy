@@ -54,20 +54,22 @@
 {% block content-width %}16{% endblock %}
 {% block content %}
     <p class="text-muted">UWAGA: Po zmianie statusu preferencji zostaje ona automatycznie zapisana</p>
-    <table class="table table-striped">
-        <thead>
-        <tr>
-            <th scope="col">{% trans "Przedmiot" %}</th>
-            <th scope="col">{% trans "Wykład" %}/{% trans "Seminarium" %}</th>
-            <th scope="col">{% trans "Ćwiczenia" %}</th>
-            <th scope="col">{% trans "Pracownia" %}/{% trans "Ćwiczenio-Pracownia" %}</th>
-            <th scope="col">{% trans "Repetytorium" %}</th>
-        </tr>
-        </thead>
-        {% for form in formset %}
-            {% include "offer/preferences/form_row.html" %}
-        {% endfor %}
-    </table>
+    <div class="table-responsive-sm">
+        <table class="table table-striped">
+            <thead>
+            <tr>
+                <th scope="col">{% trans "Przedmiot" %}</th>
+                <th scope="col">{% trans "Wykład" %}/{% trans "Seminarium" %}</th>
+                <th scope="col">{% trans "Ćwiczenia" %}</th>
+                <th scope="col">{% trans "Pracownia" %}/{% trans "Ćwiczenio-Pracownia" %}</th>
+                <th scope="col">{% trans "Repetytorium" %}</th>
+            </tr>
+            </thead>
+            {% for form in formset %}
+                {% include "offer/preferences/form_row.html" %}
+            {% endfor %}
+        </table>
+    </div>
 {% endblock %}
 
 {% block sidebar-width %}0{% endblock %}
