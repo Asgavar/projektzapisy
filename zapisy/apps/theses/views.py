@@ -107,7 +107,9 @@ class ThesesViewSet(viewsets.ModelViewSet):
         a DB hit, so it's a good idea to do it here and pass it to the serializer
         """
         result = super().get_serializer_context()
-        result["is_staff"] = is_thesis_staff(wrap_user(self.request.user))
+        wrapped_user = wrap_user(self.request.user)
+        result["user"] = wrapped_user
+        result["is_staff"] = is_thesis_staff(wrapped_user)
         return result
 
 

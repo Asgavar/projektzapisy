@@ -88,3 +88,32 @@ def can_set_advisor(user: BaseUser, advisor: Optional[Employee]) -> bool:
 def can_cast_vote_as_user(caster: Employee, user: Employee) -> bool:
     """Can the specified user cast a vote in the other user's name?"""
     return is_admin(caster) or is_theses_board_member(user) and caster == user
+
+
+BOARD_MEMBER_VOTEABLE_STATUSES = (
+    ThesisStatus.BEING_EVALUATED,
+    ThesisStatus.RETURNED_FOR_CORRECTIONS
+)
+
+
+def can_change_vote_for_thesis(user: Employee, thesis: Thesis) -> bool:
+    """Can the specified user change votes for the specified thesis?"""
+    return (
+        is_admin(user) or
+        is_theses_board_member(user) and ThesisStatus(thesis.status) in BOARD_MEMBER_VOTEABLE_STATUSES
+    )
+
+
+def can_see_thesis_rejection_reason(thesis: Thesis, is_staff: bool, user: BaseUser):
+    """Should the official rejection reason be disclosed to the specified user?
+    As an optimization, is_staff is passed directly so that we don't need to check
+    that in this function (this will be called for every serialized thesis)
+    """
+    return is_staff or thesis.advisor == user or thesis.auxiliary_advisor == user
+
+
+def can_see_thesis_votes(is_staff: bool):
+    """Should the votes for a thesis be disclosed to this user?
+    As above, this takes a bool argument as an optimization
+    """
+    return is_staff

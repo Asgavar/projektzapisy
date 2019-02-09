@@ -1,5 +1,5 @@
 from enum import Enum
-from typing import Tuple
+from typing import Tuple, NamedTuple, Iterable
 from datetime import datetime
 
 from django.db import models
@@ -11,6 +11,7 @@ from .system_settings import get_num_required_votes
 from .users import is_admin
 
 MAX_THESIS_TITLE_LEN = 300
+MIN_REJECTION_REASON_LENGTH = 100
 MAX_REJECTION_REASON_LENGTH = 500
 
 
@@ -65,7 +66,12 @@ THESIS_VOTE_CHOICES = (
 )
 
 
-VotesInfo = Tuple[Employee, ThesisVote]
+class VoteToProcess(NamedTuple):
+    voter: Employee
+    value: ThesisVote
+    # if rejecting
+    reason: str
+VotesToProcess = Iterable[VoteToProcess]
 
 
 """If a thesis is in one of those statuses, a vote will not reject/accept it"""
@@ -109,7 +115,7 @@ class Thesis(models.Model):
             self.votes.all().delete()
 
     def process_new_votes(
-        self, votes: VotesInfo, changing_user: Employee, should_update_status: True
+        self, votes: VotesToProcess, changing_user: Employee, should_update_status: True
     ):
         """Whenever one or more votes for a thesis change, this function
         should be called to process & save them
@@ -125,36 +131,33 @@ class Thesis(models.Model):
         counts (only if the condition above holds)
         """
         had_vote_as_self = False
-        for voter, vote in votes:
-            try:
-                if voter == changing_user:
-                    had_vote_as_self = True
-                existing_vote = self.votes.get(voter=voter)
-                existing_vote.value = vote.value
-                existing_vote.save()
-            except ThesisVoteBinding.DoesNotExist:
-                ThesisVoteBinding.objects.create(thesis=self, voter=voter, value=vote.value)
+        for vote in votes:
+            if vote.voter == changing_user:
+                had_vote_as_self = True
+            self.votes.update_or_create(
+                voter=vote.voter,
+                defaults={
+                    "value": vote.value.value,
+                    "reason": vote.reason if vote.value == ThesisVote.REJECTED else ""
+                }
+            )
         if had_vote_as_self and should_update_status:
             self.check_for_vote_status_change()
 
     def check_for_vote_status_change(self):
-        """If we have enough approving votes, accept this thesis - unless there's a rejecting
-        vote, then we return it for corrections
+        """If we have enough approving votes, accept this thesis
         Don't change the status if it's in progress/defended
+        (while board members would not be allowed to vote in this scenario, admins
+        could theoretically still do it)
         """
         if ThesisStatus(self.status) in STATUSES_UNCHANGEABLE_BY_VOTE:
             return
-        if self.get_reject_votes_cnt():
-            self.status = ThesisStatus.RETURNED_FOR_CORRECTIONS.value
-        elif self.get_approve_votes_cnt() >= get_num_required_votes():
+        if self.get_approve_votes_cnt() >= get_num_required_votes():
             self.status = ThesisStatus.ACCEPTED.value
         self.save()
 
     def get_approve_votes_cnt(self):
         return self.votes.filter(value=ThesisVote.ACCEPTED.value).count()
-
-    def get_reject_votes_cnt(self):
-        return self.votes.filter(value=ThesisVote.REJECTED.value).count()
 
     def is_archived(self):
         return self.status == ThesisStatus.DEFENDED.value
