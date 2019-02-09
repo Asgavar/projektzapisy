@@ -156,6 +156,13 @@ class ThesisSerializer(serializers.ModelSerializer):
             result["votes"] = convert_votes(data["votes"], self.instance)
         return result
 
+    def to_representation(self, instance: Thesis):
+        result = super().to_representation(instance)
+        if ThesisStatus(instance.status) == ThesisStatus.RETURNED_FOR_CORRECTIONS:
+            result["reason"] = instance.rejection_reason
+        return result
+
+
     # We need to define this field here manually to disable DRF's unique validator which
     # isn't flexible enough to override the error code it returns (throws a 400, we want 409)
     # See https://stackoverflow.com/q/33475334

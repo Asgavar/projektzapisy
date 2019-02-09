@@ -11,6 +11,7 @@ from .system_settings import get_num_required_votes
 from .users import is_admin
 
 MAX_THESIS_TITLE_LEN = 300
+MAX_REJECTION_REASON_LENGTH = 500
 
 
 class ThesisKind(Enum):
@@ -100,6 +101,8 @@ class Thesis(models.Model):
     added_date = models.DateTimeField(auto_now_add=True)
     # A thesis is _modified_ when its status changes
     modified_date = models.DateTimeField(auto_now_add=True)
+    # The "official" rejection reason, filled out by the rejecter
+    rejection_reason = models.TextField(blank=True)
 
     def on_title_changed_by(self, user: BaseUser):
         if self.advisor == user and not is_admin(user):
@@ -198,8 +201,10 @@ def vote_to_string(vote_value: int) -> str:
 class ThesisVoteBinding(models.Model):
     thesis = models.ForeignKey(Thesis, on_delete=models.CASCADE, related_name="votes")
     # should be a member of the theses board group
-    voter = models.ForeignKey(Employee, on_delete=models.PROTECT, related_name="thesis_votes")
+    voter = models.ForeignKey(Employee, on_delete=models.PROTECT)
     value = models.SmallIntegerField(choices=THESIS_VOTE_CHOICES)
+    # Usually only filled out if the value is 'rejected'
+    reason = models.CharField(max_length=MAX_REJECTION_REASON_LENGTH, blank=True)
 
     def __str__(self) -> str:
         return f'Głos {self.voter} na {self.thesis} - {vote_to_string(self.value)}'
@@ -237,9 +242,8 @@ class ThesesSystemSettings(models.Model):
         verbose_name="Liczba głosów wymaganych do zaakceptowania",
         validators=[validate_num_required_votes]
     )
-
-    def __str__(self):
-        return "Ustawienia systemu"
+    # should be a member of the theses board group
+    rejecter = models.ForeignKey(Employee, null=True, on_delete=models.PROTECT)
 
     def __str__(self):
         return "Ustawienia systemu"
