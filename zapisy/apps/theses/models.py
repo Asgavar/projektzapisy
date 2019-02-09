@@ -180,12 +180,20 @@ class Thesis(models.Model):
         elif current_status == ThesisStatus.IN_PROGRESS and not self.student and not self.student_2:
             self.status = ThesisStatus.ACCEPTED.value
 
+    def notify_on_status_change(self):
+        if ThesisStatus(self.status) == ThesisStatus.ACCEPTED:
+            notify_thesis_accepted(self)
+        elif ThesisStatus(self.status) == ThesisStatus.RETURNED_FOR_CORRECTIONS:
+            notify_thesis_rejected(self)
+
     def save(self, *args, **kwargs):
         self.full_clean()
         self.adjust_status()
         if self.status != self.__original_status:
             # If the status changed, update modified date
             self.modified_date = datetime.now()
+            # Maybe send notifications
+            self.notify_on_status_change()
         super().save(*args, **kwargs)
         self.__original_status = self.status
 
