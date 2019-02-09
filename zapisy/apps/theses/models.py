@@ -1,5 +1,6 @@
 from enum import Enum
 from typing import Tuple
+from datetime import datetime
 
 from django.db import models
 from django.db.models.expressions import RawSQL
@@ -16,16 +17,19 @@ class ThesisKind(Enum):
     MASTERS = 0
     ENGINEERS = 1
     BACHELORS = 2
-    BACHELORS_ENGINEERS = 3
-    ISIM = 4
+    ISIM = 3
+    # Certain theses will be appropriate for both bachelor and engineer degrees
+    BACHELORS_ENGINEERS = 4
+    BACHELORS_ENGINEERS_ISIM = 5
 
 
 THESIS_KIND_CHOICES = (
     (ThesisKind.MASTERS.value, "mgr"),
     (ThesisKind.ENGINEERS.value, "inż"),
     (ThesisKind.BACHELORS.value, "lic"),
-    (ThesisKind.BACHELORS_ENGINEERS.value, "lic+inż"),
     (ThesisKind.ISIM.value, "isim"),
+    (ThesisKind.BACHELORS_ENGINEERS.value, "lic+inż"),
+    (ThesisKind.BACHELORS_ENGINEERS_ISIM.value, "lic+inż+isim"),
 )
 
 
@@ -39,7 +43,7 @@ class ThesisStatus(Enum):
 
 
 THESIS_STATUS_CHOICES = (
-    (ThesisStatus.BEING_EVALUATED.value, "poddana pod głosowanie"),
+    (ThesisStatus.BEING_EVALUATED.value, "weryfikowana przez komisję"),
     (ThesisStatus.RETURNED_FOR_CORRECTIONS.value, "zwrócona do poprawek"),
     (ThesisStatus.ACCEPTED.value, "zaakceptowana"),
     (ThesisStatus.IN_PROGRESS.value, "w realizacji"),
@@ -69,6 +73,12 @@ STATUS_VALUES_UNCHANGEABLE_BY_VOTE = [s.value for s in STATUSES_UNCHANGEABLE_BY_
 
 
 class Thesis(models.Model):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        # Save the status so that, when saving, we can determine whether or not it changed
+        # See https://stackoverflow.com/a/1793323
+        self.__original_status = self.status
+
     title = models.CharField(max_length=MAX_THESIS_TITLE_LEN, unique=True)
     advisor = models.ForeignKey(
         Employee, on_delete=models.PROTECT, blank=True, null=True, related_name="thesis_advisor",
@@ -79,7 +89,7 @@ class Thesis(models.Model):
     )
     kind = models.SmallIntegerField(choices=THESIS_KIND_CHOICES)
     status = models.SmallIntegerField(choices=THESIS_STATUS_CHOICES)
-    reserved = models.BooleanField(default=False)
+    reserved_until = models.DateField(blank=True, null=True)
     description = models.TextField(blank=True)
     student = models.ForeignKey(
         Student, on_delete=models.PROTECT, blank=True, null=True, related_name="thesis_student",
@@ -88,7 +98,8 @@ class Thesis(models.Model):
         Student, on_delete=models.PROTECT, blank=True, null=True, related_name="thesis_student_2",
     )
     added_date = models.DateTimeField(auto_now_add=True)
-    modified_date = models.DateTimeField(auto_now=True)
+    # A thesis is _modified_ when its status changes
+    modified_date = models.DateTimeField(auto_now_add=True)
 
     def on_title_changed_by(self, user: BaseUser):
         if self.advisor == user and not is_admin(user):
@@ -152,9 +163,25 @@ class Thesis(models.Model):
         """Ensure that the title never contains superfluous whitespace"""
         self.title = self.title.strip()
 
+    def adjust_status(self):
+        """If there is a student and the thesis has been accepted, we automatically
+        move it to "in progress"; conversely, if it was in progress but the students
+        have been removed, go back to accepted
+        """
+        current_status = ThesisStatus(self.status)
+        if current_status == ThesisStatus.ACCEPTED and (self.student or self.student_2):
+            self.status = ThesisStatus.IN_PROGRESS.value
+        elif current_status == ThesisStatus.IN_PROGRESS and not self.student and not self.student_2:
+            self.status = ThesisStatus.ACCEPTED.value
+
     def save(self, *args, **kwargs):
         self.full_clean()
+        self.adjust_status()
+        if self.status != self.__original_status:
+            # If the status changed, update modified date
+            self.modified_date = datetime.now()
         super().save(*args, **kwargs)
+        self.__original_status = self.status
 
     class Meta:
         verbose_name = "praca dyplomowa"
@@ -210,6 +237,9 @@ class ThesesSystemSettings(models.Model):
         verbose_name="Liczba głosów wymaganych do zaakceptowania",
         validators=[validate_num_required_votes]
     )
+
+    def __str__(self):
+        return "Ustawienia systemu"
 
     def __str__(self):
         return "Ustawienia systemu"

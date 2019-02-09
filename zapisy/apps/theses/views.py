@@ -22,7 +22,7 @@ from .drf_permission_classes import ThesisPermissions
 from .permissions import is_thesis_staff
 from .users import (
     wrap_user, get_theses_board, get_user_type,
-    get_theses_user_full_name, is_theses_board_member, ThesisUserType
+    get_theses_user_full_name, is_theses_board_member, is_student, ThesisUserType
 )
 
 """Names of processing parameters in query strings"""
@@ -45,12 +45,14 @@ class ThesisTypeFilter(Enum):
     MASTERS = 3
     ENGINEERS = 4
     BACHELORS = 5
-    BACHELORS_ISIM = 6
-    AVAILABLE_MASTERS = 7
-    AVAILABLE_ENGINEERS = 8
-    AVAILABLE_BACHELORS = 9
-    AVAILABLE_BACHELORS_ISIM = 10
-    UNGRADED = 11
+    BACHELORS_OR_ENGINEERS = 6
+    ISIM = 7
+    AVAILABLE_MASTERS = 8
+    AVAILABLE_ENGINEERS = 9
+    AVAILABLE_BACHELORS = 10
+    AVAILABLE_BACHELORS_OR_ENGINEERS = 11
+    AVAILABLE_ISIM = 12
+    UNGRADED = 13
 
     DEFAULT = EVERYTHING
 
@@ -61,7 +63,7 @@ class ThesesPagination(LimitOffsetPagination):
 
 class ThesesViewSet(viewsets.ModelViewSet):
     # NOTICE if you change this, you might also want to change the permission class
-    http_method_names = ["patch", "get", "post"]
+    http_method_names = ["patch", "get", "post", "delete"]
     permission_classes = (ThesisPermissions,)
     serializer_class = serializers.ThesisSerializer
     pagination_class = ThesesPagination
@@ -153,6 +155,7 @@ def filter_queryset(
 ) -> QuerySet:
     """Filter the specified theses queryset based on the passed conditions"""
     result = filter_theses_queryset_for_type(qs, user, thesis_type)
+    result = filter_theses_queryset_for_user(qs, user)
     if only_mine:
         result = filter_theses_queryset_for_only_mine(result, user)
     if title:
@@ -186,7 +189,23 @@ def available_thesis_filter(qs: QuerySet) -> QuerySet:
     """Returns only theses that are considered "available" from the specified queryset"""
     return qs.exclude(
         status=ThesisStatus.IN_PROGRESS.value
-    ).exclude(_is_archived=True).exclude(reserved=True)
+    ).exclude(_is_archived=True).filter(reserved_until__isnull=True)
+
+
+# Determines the thesis kinds that match given filter values
+# i.e. if the user asks for all engineer theses, we assume they want
+# all theses suitable for engineer degrees, so bachelors+engineers should
+# be returned as well
+ENGINEERS_KINDS = tuple(k.value for k in (
+    ThesisKind.ENGINEERS, ThesisKind.BACHELORS_ENGINEERS, ThesisKind.BACHELORS_ENGINEERS_ISIM
+))
+BACHELORS_KINDS = tuple(k.value for k in(
+    ThesisKind.BACHELORS, ThesisKind.BACHELORS_ENGINEERS, ThesisKind.BACHELORS_ENGINEERS_ISIM
+))
+BACHELORS_OR_ENGINEERS_KINDS = tuple(set(ENGINEERS_KINDS + BACHELORS_KINDS))
+ISIM_KINDS = (k.value for k in (
+    ThesisKind.ISIM, ThesisKind.BACHELORS_ENGINEERS_ISIM
+))
 
 
 def ungraded_theses_filter(queryset, user: Employee):
@@ -209,19 +228,23 @@ def filter_theses_queryset_for_type(
     elif thesis_type == ThesisTypeFilter.MASTERS:
         return qs.filter(kind=ThesisKind.MASTERS.value)
     elif thesis_type == ThesisTypeFilter.ENGINEERS:
-        return qs.filter(kind=ThesisKind.ENGINEERS.value)
+        return qs.filter(kind__in=ENGINEERS_KINDS)
     elif thesis_type == ThesisTypeFilter.BACHELORS:
-        return qs.filter(kind=ThesisKind.BACHELORS.value)
-    elif thesis_type == ThesisTypeFilter.BACHELORS_ISIM:
-        return qs.filter(kind=ThesisKind.ISIM.value)
+        return qs.filter(kind__in=BACHELORS_KINDS)
+    elif thesis_type == ThesisTypeFilter.BACHELORS_OR_ENGINEERS:
+        return qs.filter(kind__in=BACHELORS_OR_ENGINEERS_KINDS)
+    elif thesis_type == ThesisTypeFilter.ISIM:
+        return qs.filter(kind__in=ISIM_KINDS)
     elif thesis_type == ThesisTypeFilter.AVAILABLE_MASTERS:
         return available_thesis_filter(qs.filter(kind=ThesisKind.MASTERS.value))
     elif thesis_type == ThesisTypeFilter.AVAILABLE_ENGINEERS:
-        return available_thesis_filter(qs.filter(kind=ThesisKind.ENGINEERS.value))
+        return available_thesis_filter(qs.filter(kind__in=ENGINEERS_KINDS))
     elif thesis_type == ThesisTypeFilter.AVAILABLE_BACHELORS:
-        return available_thesis_filter(qs.filter(kind=ThesisKind.BACHELORS.value))
-    elif thesis_type == ThesisTypeFilter.AVAILABLE_BACHELORS_ISIM:
-        return available_thesis_filter(qs.filter(kind=ThesisKind.ISIM.value))
+        return available_thesis_filter(qs.filter(kind__in=BACHELORS_KINDS))
+    elif thesis_type == ThesisTypeFilter.AVAILABLE_BACHELORS_OR_ENGINEERS:
+        return available_thesis_filter(qs.filter(kind__in=BACHELORS_OR_ENGINEERS_KINDS))
+    elif thesis_type == ThesisTypeFilter.AVAILABLE_ISIM:
+        return available_thesis_filter(qs.filter(kind__in=ISIM_KINDS))
     elif thesis_type == ThesisTypeFilter.UNGRADED:
         return ungraded_theses_filter(qs, user)
     # Should never get here
@@ -234,6 +257,21 @@ def filter_theses_queryset_for_only_mine(qs: QuerySet, user: BaseUser):
         return qs.filter(Q(student=user) | Q(student_2=user))
     return qs.filter(Q(advisor=user) | Q(auxiliary_advisor=user))
 
+
+NOT_READY_STATUSES = (
+    ThesisStatus.BEING_EVALUATED.value,
+    ThesisStatus.RETURNED_FOR_CORRECTIONS.value
+)
+
+
+def filter_theses_queryset_for_user(qs: QuerySet, user: BaseUser):
+    """Filter the queryset based on special logic depending
+    on the type of the user
+    """
+    # Students should not see theses that are not "ready" yet
+    if is_student(user):
+        return qs.exclude(status__in=NOT_READY_STATUSES)
+    return qs
 
 class ThesesBoardViewSet(viewsets.ModelViewSet):
     http_method_names = ["get"]

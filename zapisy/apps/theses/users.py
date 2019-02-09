@@ -9,6 +9,11 @@ from apps.users.models import BaseUser, Employee, Student, is_user_in_group
 THESIS_BOARD_GROUP_NAME = "Komisja prac dyplomowych"
 
 
+def is_student(user: BaseUser) -> bool:
+    """Determine if the specified user is a student"""
+    return get_user_type(user) == ThesisUserType.STUDENT
+
+
 def is_theses_board_member(user: BaseUser) -> bool:
     """Is the specified user a member of the theses board?"""
     return is_user_in_group(user.user, THESIS_BOARD_GROUP_NAME)
@@ -16,6 +21,10 @@ def is_theses_board_member(user: BaseUser) -> bool:
 
 def is_admin(user: BaseUser):
     return get_user_type(user) == ThesisUserType.ADMIN
+
+
+def is_regular_employee(user: BaseUser):
+    return get_user_type(user) == ThesisUserType.REGULAR_EMPLOYEE
 
 
 def get_theses_board():
@@ -32,7 +41,7 @@ def get_num_board_members() -> int:
 
 class ThesisUserType(Enum):
     STUDENT = 0
-    EMPLOYEE = 1
+    REGULAR_EMPLOYEE = 1
     ADMIN = 2
     NONE = 3
 
@@ -43,7 +52,7 @@ def get_user_type(base_user: BaseUser) -> ThesisUserType:
     if isinstance(base_user, Employee):
         if base_user.user.is_staff:
             return ThesisUserType.ADMIN
-        return ThesisUserType.EMPLOYEE
+        return ThesisUserType.REGULAR_EMPLOYEE
     elif isinstance(base_user, Student):
         return ThesisUserType.STUDENT
     return ThesisUserType.NONE

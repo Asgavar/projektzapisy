@@ -14,8 +14,8 @@ from apps.users.models import Employee, Student, BaseUser
 from .models import Thesis, ThesisStatus, ThesisVote, MAX_THESIS_TITLE_LEN, VotesInfo
 from .users import wrap_user, get_user_type, is_theses_board_member, get_theses_user_full_name
 from .permissions import (
-    can_set_status, can_set_advisor,
-    can_cast_vote_as_user, can_change_status, can_change_title
+    can_set_advisor, can_set_status_for_new, can_change_status_to,
+    can_change_title, can_cast_vote_as_user,
 )
 from .drf_errors import ThesisNameConflict
 
@@ -141,19 +141,12 @@ def check_advisor_permissions(user: BaseUser, advisor: Employee):
 
 
 class ThesisSerializer(serializers.ModelSerializer):
-    advisor = serializers.PrimaryKeyRelatedField(
-        allow_null=True, required=False, queryset=Employee.objects.all()
-    )
-    auxiliary_advisor = serializers.PrimaryKeyRelatedField(
-        allow_null=True, required=False, queryset=Employee.objects.all()
-    )
     student = ThesesPersonSerializer(
         allow_null=True, required=False, queryset=Student.objects.all()
     )
     student_2 = ThesesPersonSerializer(
         allow_null=True, required=False, queryset=Student.objects.all()
     )
-    added_date = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S%z", required=False)
     modified_date = serializers.DateTimeField(format="%Y-%m-%dT%H:%M:%S%z", required=False)
     votes = serializers.SerializerMethodField()
 
@@ -186,7 +179,7 @@ class ThesisSerializer(serializers.ModelSerializer):
         if "advisor" in validated_data:
             check_advisor_permissions(user, validated_data["advisor"])
         status = validated_data["status"]
-        if not can_set_status(user, ThesisStatus(status)):
+        if not can_set_status_for_new(user, ThesisStatus(status)):
             raise exceptions.PermissionDenied(f'This type of user cannot set status to {status}')
         if "votes" in validated_data:
             check_votes_permissions(user, validated_data["votes"])
@@ -195,7 +188,7 @@ class ThesisSerializer(serializers.ModelSerializer):
             title=validated_data.get("title"),
             kind=validated_data.get("kind"),
             status=validated_data.get("status"),
-            reserved=validated_data.get("reserved"),
+            reserved_until=validated_data.get("reserved_until"),
             description=validated_data.get("description", ""),
             advisor=validated_data.get("advisor"),
             auxiliary_advisor=validated_data.get("auxiliary_advisor"),
@@ -212,8 +205,12 @@ class ThesisSerializer(serializers.ModelSerializer):
         user = wrap_user(request.user)
         if "advisor" in validated_data:
             check_advisor_permissions(user, validated_data["advisor"])
-        if "status" in validated_data and not can_change_status(user):
-            raise exceptions.PermissionDenied("This type of user cannot modify the status")
+        if "status" in validated_data and not can_change_status_to(
+            user, self.instance, ThesisStatus(validated_data["status"])
+        ):
+            raise exceptions.PermissionDenied(
+                f'This type of user cannot set status to {validated_data["status"]}'
+            )
         if "title" in validated_data and not can_change_title(user, self.instance):
             raise exceptions.PermissionDenied("This type of user cannot change the title")
         if "votes" in validated_data:
@@ -222,7 +219,7 @@ class ThesisSerializer(serializers.ModelSerializer):
         old_title = instance.title
         instance.title = validated_data.get("title", instance.title)
         instance.kind = validated_data.get("kind", instance.kind)
-        instance.reserved = validated_data.get("reserved", instance.reserved)
+        instance.reserved_until = validated_data.get("reserved_until", instance.reserved_until)
         instance.description = validated_data.get("description", instance.description)
         instance.status = validated_data.get("status", instance.status)
         instance.advisor = validated_data.get("advisor", instance.advisor)
@@ -251,10 +248,23 @@ class ThesisSerializer(serializers.ModelSerializer):
         read_only_fields = ("id",)
         fields = (
             "id", "title", "advisor", "auxiliary_advisor",
-            "kind", "reserved", "description", "status",
-            "student", "student_2", "added_date", "modified_date",
-            "votes",
+            "kind", "reserved_until", "description", "status",
+            "student", "student_2", "modified_date", "votes"
         )
+        extra_kwargs = {
+            "reserved_until": {
+                "required": False,
+                "allow_null": True
+            },
+            "advisor": {
+                "required": False,
+                "allow_null": True
+            },
+            "auxiliary_advisor": {
+                "required": False,
+                "allow_null": True
+            }
+        }
 
 
 class CurrentUserSerializer(serializers.ModelSerializer):
