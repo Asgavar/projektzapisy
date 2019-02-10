@@ -1,11 +1,11 @@
 import * as React from "react";
 import { compact } from "lodash";
 
-import { SingleVote } from "./SingleVote";
-import { Thesis } from "../../../../thesis";
-import { Employee, AppUser } from "../../../../users";
-import { ThesisVote } from "../../../../protocol_types";
-import { canChangeThesisVote } from "../../../../permissions";
+import { SingleVoteView } from "./SingleVoteView";
+import { Thesis } from "../../../thesis";
+import { Employee, AppUser } from "../../../users";
+import { ThesisVote } from "../../../protocol_types";
+import { canChangeThesisVote } from "../../../permissions";
 import { strcmp } from "common/utils";
 
 type Props = {
@@ -19,23 +19,19 @@ type Props = {
  */
 export const VoteDetails = React.memo(function(props: Props) {
 	const displayAll = shouldDisplayAllVotes(props.thesis);
-	if (!props.thesis.hasVoteDetails()) {
-		console.error(`Cannot render vote details for ${props.thesis}`);
-		return null;
-	}
 	const details = props.thesis.getVoteDetails();
 	const votes = Array.from(details.getAllVotes().entries());
 	votes.sort(([e1, _1], [e2, _2]) => (
 		strcmp(e1.username, e2.username)
 	));
 	const result = compact(votes.map(([voter, vote], i) => {
-		if (!displayAll && vote === ThesisVote.None) {
+		if (!displayAll && vote.value === ThesisVote.None) {
 			return null;
 		}
-		return <SingleVote
+		return <SingleVoteView
 			key={i}
 			voter={voter}
-			value={vote}
+			vote={vote}
 			user={props.user}
 			thesis={props.thesis}
 			onChange={props.onChange}

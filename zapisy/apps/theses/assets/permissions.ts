@@ -108,3 +108,17 @@ export function canChangeStatusTo(thesis: Thesis, newStatus: ThesisStatus) {
 export function canSetArbitraryAdvisor() {
 	return Users.isUserStaff();
 }
+
+/** Should the official rejection reason be disclosed to the app user? */
+export function canSeeThesisRejectionReason(thesis: Thesis) {
+	return (
+		Users.isUserStaff() ||
+		isOwnerOfThesis(thesis) ||
+		!!thesis.advisor && thesis.advisor.isEqual(Users.currentUser.person)
+	);
+}
+
+/** Should the votes for a thesis be disclosed to the current user? */
+export function canSeeThesisVotes() {
+	return Users.isUserStaff();
+}

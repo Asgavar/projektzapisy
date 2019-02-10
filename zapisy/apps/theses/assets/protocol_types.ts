@@ -107,4 +107,5 @@ export function thesisTypeFilterToString(type: ThesisTypeFilter) {
 	}
 }
 
-export type VoteMap = { [_: number]: ThesisVote };
+export type ProtocolVote = { value: ThesisVote; reason?: string };
+export type VoteMap = { [_: number]: ProtocolVote };

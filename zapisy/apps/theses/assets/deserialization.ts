@@ -1,9 +1,9 @@
 import * as moment from "moment";
 
-import { ThesisKind, ThesisStatus, UserType, ThesisVote, VoteMap } from "./protocol_types";
+import { ThesisKind, ThesisStatus, UserType, VoteMap } from "./protocol_types";
 import { Thesis } from "./thesis";
 import { Employee, Student, AppUser } from "./users";
-import { ThesisVoteCounts, ThesisVoteDetails } from "./votes";
+import { ThesisVoteDetails, SingleVote } from "./votes";
 import { Users } from "./app_logic/users";
 
 type PersonInJson = {
@@ -14,7 +14,6 @@ type StudentInJson = PersonInJson;
 type EmployeeInJson = { username: string } & PersonInJson;
 
 type ThesisVotesInJson = VoteMap;
-type ThesisCountsInJson = { accept_cnt: number, reject_cnt: number };
 
 /**
  * This is the format in which we receive theses from the backend
@@ -31,7 +30,8 @@ export type ThesisInJson = {
 	student?: PersonInJson;
 	student_2?: PersonInJson;
 	modified_date: string;
-	votes: ThesisVotesInJson | ThesisCountsInJson;
+	votes?: ThesisVotesInJson;
+	reason?: string;
 };
 
 type CurrentUserInJson = {
@@ -60,19 +60,21 @@ export function deserializeThesis(json: ThesisInJson) {
 	result.student = json.student ? deserializeStudent(json.student) : null;
 	result.secondStudent = json.student_2 ? deserializeStudent(json.student_2) : null;
 	result.modifiedDate = moment(json.modified_date);
-	result.votes = deserializeVotes(json.votes);
+	if (json.votes) {
+		result.votes = deserializeVotes(json.votes);
+	}
+	if (json.reason) {
+		result.rejectionReason = json.reason;
+	}
 	return result;
 }
 
-function deserializeVotes(
-	votes: ThesisVotesInJson | ThesisCountsInJson
-) {
-	if ("accept_cnt" in votes && "reject_cnt" in votes) {
-		return new ThesisVoteCounts(votes.accept_cnt, votes.reject_cnt);
-	}
+function deserializeVotes(votes: ThesisVotesInJson) {
 	const entries = Object
 		.entries(votes)
-		.map(([idStr, value]) => [Number(idStr), value]) as Array<[number, ThesisVote]>;
+		.map(([idStr, vote]) => (
+			[Number(idStr), new SingleVote(vote.value, vote.reason)]
+		)) as Array<[number, SingleVote]>;
 	return new ThesisVoteDetails(new Map(entries));
 }
 

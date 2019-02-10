@@ -14,7 +14,10 @@ import "./style.less";
 import { Spinner } from "../Spinner";
 import { getDisabledStyle, macosifyKeys } from "../../utils";
 import { ThesisWorkMode, ApplicationState } from "../../app_types";
-import { canModifyThesis, canChangeThesisVote, canDeleteThesis } from "../../permissions";
+import {
+	canModifyThesis, canChangeThesisVote,
+	canDeleteThesis, canSeeThesisRejectionReason
+} from "../../permissions";
 import { Thesis } from "../../thesis";
 import { AppUser, Employee, Student } from "../../users";
 import { ThesisStatus, ThesisKind, ThesisVote } from "../../protocol_types";
@@ -63,6 +66,11 @@ const RightDetailsContainer = styled.div`
 const ButtonsContainer = styled.div`
 	display: grid;
 	grid-gap: 10px;
+`;
+
+const RejectionReasonContainer = styled.textarea`
+	width: 100%;
+	height: 100px;
 `;
 
 const DEFAULT_THESIS_RESERVATION_YEARS = 2;
@@ -118,6 +126,7 @@ export class ThesisDetails extends React.PureComponent<Props> {
 				<LeftDetailsContainer>{this.renderThesisLeftPanel()}</LeftDetailsContainer>
 				<RightDetailsContainer>{this.renderThesisRightPanel()}</RightDetailsContainer>
 			</MainDetailsContainer>
+			{this.renderRejectionReasonIfApplicable()}
 		</DetailsSectionWrapper>;
 	}
 
@@ -204,6 +213,19 @@ export class ThesisDetails extends React.PureComponent<Props> {
 
 	private getActionDescription() {
 		return this.props.mode === ThesisWorkMode.Adding ? "Dodaj nową pracę" : "Zapisz zmiany";
+	}
+
+	private renderRejectionReasonIfApplicable() {
+		if (
+			this.props.original.status !== ThesisStatus.ReturnedForCorrections ||
+			!canSeeThesisRejectionReason(this.props.original)
+		) {
+			return null;
+		}
+		return <>
+			<hr />
+			<RejectionReasonContainer disabled>{this.props.original.rejectionReason}</RejectionReasonContainer>
+		</>;
 	}
 
 	private onAcceptThesis = () => {

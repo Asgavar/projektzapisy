@@ -2,10 +2,12 @@
  * @file Defines types we'll be sending to the backend and provides
  * functions to serialize local objects to those types
  */
-import { ThesisKind, ThesisStatus, VoteMap, ThesisVote } from "./protocol_types";
+import { ThesisKind, ThesisStatus, VoteMap, ThesisVote, ProtocolVote } from "./protocol_types";
 import { Thesis, MAX_THESIS_TITLE_LEN } from "./thesis";
 import { Person } from "./users";
 import { Moment } from "moment";
+import { canChangeThesisVote } from "./permissions";
+import { SingleVote } from "./votes";
 
 /**
  * The representation of a new thesis object sent to the backend
@@ -29,6 +31,13 @@ type ThesisAddOutSerialized = {
 type ThesisModOutSerialized = {
 	id: number;
 } & ThesisAddOutSerialized;
+
+/** Serializes a single thesis vote */
+function serializeVote(vote: SingleVote): ProtocolVote {
+	return vote.value === ThesisVote.Rejected
+		? { value: vote.value, reason: vote.reason }
+		: { value: vote.value };
+}
 
 /**
  * Given a new thesis object, convert it to a representation
@@ -57,13 +66,13 @@ export function serializeNewThesis(thesis: Thesis): ThesisAddOutSerialized {
 	if (thesis.reservedUntil) {
 		result.reserved_until = serializeReservationDate(thesis.reservedUntil);
 	}
-	if (thesis.hasVoteDetails()) {
+	if (canChangeThesisVote(thesis)) {
 		const details = thesis.getVoteDetails();
 		const votes = details.getAllVotes();
 		result.votes = {};
 		for (const [voter, vote] of votes) {
-			if (vote !== ThesisVote.None) {
-				result.votes[voter.id] = vote;
+			if (vote.value !== ThesisVote.None) {
+				result.votes[voter.id] = serializeVote(vote);
 			}
 		}
 	}
@@ -126,12 +135,12 @@ export function serializeThesisDiff(orig: Thesis, mod: Thesis): ThesisModOutSeri
 		result.status = mod.status;
 	}
 
-	if (orig.hasVoteDetails() && mod.hasVoteDetails()) {
-		const diff: {[_: number]: ThesisVote} = {};
+	if (canChangeThesisVote(orig)) {
+		const diff: { [_: number]: ProtocolVote } = {};
 		const origVotes = orig.getVoteDetails(); const modVotes = mod.getVoteDetails();
 		for (const [emp, vote] of modVotes.getAllVotes()) {
-			if (origVotes.getVoteForMember(emp) !== vote) {
-				diff[emp.id] = vote;
+			if (!origVotes.getVoteForMember(emp).isEqual(vote)) {
+				diff[emp.id] = serializeVote(vote);
 			}
 		}
 		if (Object.keys(diff).length) {

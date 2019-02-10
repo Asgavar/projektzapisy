@@ -5,7 +5,7 @@ import * as moment from "moment";
 
 import { Employee, Student, Person } from "./users";
 import { ThesisKind, ThesisStatus, ThesisVote } from "./protocol_types";
-import { ThesisVoteCounts, ThesisVoteDetails } from "./votes";
+import { ThesisVoteDetails, SingleVote } from "./votes";
 import { Users } from "./app_logic/users";
 import { nullableValuesEqual } from "./utils";
 
@@ -27,7 +27,8 @@ export class Thesis {
 	public student: Student | null;
 	public secondStudent: Student | null;
 	public modifiedDate: moment.Moment;
-	public votes: ThesisVoteDetails | ThesisVoteCounts;
+	public votes: ThesisVoteDetails;
+	public rejectionReason: string;
 
 	/** Construct a new thesis object with default values */
 	public constructor() {
@@ -42,8 +43,9 @@ export class Thesis {
 		this.student = null;
 		this.secondStudent = null;
 		this.modifiedDate = moment();
-		const entries = Users.thesesBoard.map(e => [e.id, ThesisVote.None]);
-		this.votes = new ThesisVoteDetails(new Map(entries as Array<[number, ThesisVote]>));
+		const entries = Users.thesesBoard.map(e => [e.id, new SingleVote()]);
+		this.votes = new ThesisVoteDetails(new Map(entries as Array<[number, SingleVote]>));
+		this.rejectionReason = "";
 	}
 
 	public toString() {
@@ -90,7 +92,6 @@ export class Thesis {
 			this.modifiedDate.isSame(other.modifiedDate)
 		)) { return false; }
 		if (
-			this.hasVoteDetails() && other.hasVoteDetails() &&
 			!this.getVoteDetails().isEqual(other.getVoteDetails())
 		) {
 			return false;
@@ -107,38 +108,21 @@ export class Thesis {
 	}
 
 	public getVoteDetails() {
-		if (!this.hasVoteDetails) {
-			throw new Error(`Thesis ${this} has no votes`);
-		}
-		return this.votes as ThesisVoteDetails;
-	}
-
-	public getVoteCounts() {
-		if (this.hasVoteDetails()) {
-			throw new Error(`Thesis ${this} has no vote counts`);
-		}
-		return this.votes as ThesisVoteCounts;
-	}
-
-	public hasVoteDetails() {
-		return this.votes instanceof ThesisVoteDetails;
+		return this.votes;
 	}
 
 	public hasAnyVotes() {
-		if (this.hasVoteDetails()) {
-			return this.getVoteDetails().hasDefiniteVote();
-		}
-		return this.getVoteCounts().hasAnyVotes();
+		return this.getVoteDetails().hasDefiniteVote();
 	}
 
 	public isUngraded(): boolean {
-		if (!this.hasVoteDetails() || !Users.isUserMemberOfBoard()) {
+		if (!Users.isUserMemberOfBoard()) {
 			return false;
 		}
 		const voteDetails = this.getVoteDetails();
 		return voteDetails.getVoteForMember(
 			Users.currentUser.person as Employee
-		) === ThesisVote.None;
+		).value === ThesisVote.None;
 	}
 }
 
