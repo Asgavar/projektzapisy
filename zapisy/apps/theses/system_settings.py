@@ -17,6 +17,6 @@ def get_num_required_votes():
     return _get_settings().num_required_votes
 
 
-def get_rejecter():
+def get_master_rejecter():
     """Get the special board member responsible for rejecting theses"""
-    return _get_settings().rejecter
+    return _get_settings().master_rejecter

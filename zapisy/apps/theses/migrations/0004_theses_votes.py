@@ -24,7 +24,7 @@ class Migration(migrations.Migration):
         ),
         migrations.AddField(
             model_name='thesessystemsettings',
-            name='rejecter',
+            name='master_rejecter',
             field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='users.Employee'),
             preserve_default=False,
         ),

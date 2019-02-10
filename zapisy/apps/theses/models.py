@@ -9,6 +9,10 @@ from apps.users.models import Employee, Student, BaseUser
 from .validators import validate_num_required_votes
 from .system_settings import get_num_required_votes
 from .users import is_admin
+from .notifications import (
+    notify_thesis_accepted, notify_thesis_rejected,
+    notify_rejecting_vote_cast
+)
 
 MAX_THESIS_TITLE_LEN = 300
 MIN_REJECTION_REASON_LENGTH = 100
@@ -131,9 +135,12 @@ class Thesis(models.Model):
         counts (only if the condition above holds)
         """
         had_vote_as_self = False
+        self_rejecting_vote = None
         for vote in votes:
             if vote.voter == changing_user:
                 had_vote_as_self = True
+                if vote.value == ThesisVote.REJECTED:
+                    self_rejecting_vote = vote
             self.votes.update_or_create(
                 voter=vote.voter,
                 defaults={
@@ -143,6 +150,8 @@ class Thesis(models.Model):
             )
         if had_vote_as_self and should_update_status:
             self.check_for_vote_status_change()
+        if self_rejecting_vote:
+            notify_rejecting_vote_cast(self, changing_user, self_rejecting_vote.reason)
 
     def check_for_vote_status_change(self):
         """If we have enough approving votes, accept this thesis
@@ -254,7 +263,7 @@ class ThesesSystemSettings(models.Model):
         validators=[validate_num_required_votes]
     )
     # should be a member of the theses board group
-    rejecter = models.ForeignKey(Employee, null=True, on_delete=models.PROTECT)
+    master_rejecter = models.ForeignKey(Employee, null=True, on_delete=models.PROTECT)
 
     def __str__(self):
         return "Ustawienia systemu"
