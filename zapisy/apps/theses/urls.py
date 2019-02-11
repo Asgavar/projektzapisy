@@ -23,5 +23,6 @@ urlpatterns = [
     ),
     url(r"^api/current_user/$", views.get_current_user, name="current_user"),
     url(r"^api/num_ungraded/$", views.get_num_ungraded, name="num_ungraded"),
+    url(r"^api/is_master_rejecter/$", views.get_is_master_rejecter, name="is_master_rejecter"),
     url(r"^api/", include(router.urls))
 ]

@@ -22,7 +22,8 @@ from .drf_permission_classes import ThesisPermissions
 from .permissions import is_thesis_staff
 from .users import (
     wrap_user, get_theses_board, get_user_type,
-    get_theses_user_full_name, is_theses_board_member, is_student, ThesisUserType
+    get_theses_user_full_name, is_theses_board_member, is_student,
+    is_master_rejecter, ThesisUserType
 )
 
 """Names of processing parameters in query strings"""
@@ -300,6 +301,14 @@ def get_current_user(request):
     wrapped_user = wrap_user(request.user)
     serializer = serializers.CurrentUserSerializer(wrapped_user)
     return Response(serializer.data)
+
+
+@api_view(http_method_names=["get"])
+@permission_classes((permissions.IsAuthenticated,))
+def get_is_master_rejecter(request):
+    """Allows the front end to determine whether the current user has master rejecter rights"""
+    wrapped_user = wrap_user(request.user)
+    return Response(is_master_rejecter(wrapped_user))
 
 
 @api_view(http_method_names=["get"])

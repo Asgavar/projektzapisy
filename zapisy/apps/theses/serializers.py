@@ -174,6 +174,8 @@ class ThesisSerializer(serializers.ModelSerializer):
         result = super().to_internal_value(data)
         if "votes" in data:
             result["votes"] = convert_votes(data["votes"], self.instance)
+        if "reason" in data:
+            result["reason"] = data["reason"]
         return result
 
     def to_representation(self, instance: Thesis):
@@ -262,6 +264,8 @@ class ThesisSerializer(serializers.ModelSerializer):
         )
         instance.student = validated_data.get("student", instance.student)
         instance.student_2 = validated_data.get("student_2", instance.student_2)
+        if instance.status == ThesisStatus.RETURNED_FOR_CORRECTIONS.value:
+            instance.rejection_reason = validated_data.get("reason", instance.rejection_reason)
         instance.save()
         if "votes" in validated_data:
             instance.process_new_votes(

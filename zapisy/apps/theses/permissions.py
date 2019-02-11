@@ -7,7 +7,8 @@ from apps.users.models import Employee, BaseUser
 
 from .models import Thesis, ThesisStatus
 from .users import (
-    ThesisUserType, get_user_type, is_theses_board_member, is_admin, is_regular_employee
+    ThesisUserType, get_user_type, is_theses_board_member,
+    is_admin, is_regular_employee, is_master_rejecter,
 )
 
 
@@ -75,7 +76,9 @@ def can_change_status_to(user: BaseUser, thesis: Thesis, new_status: ThesisStatu
     of the specified thesis to the new specified status?"""
     old_status = ThesisStatus(thesis.status)
     return (
-        is_thesis_staff(user) or
+        is_admin(user) or
+        is_master_rejecter(user) or
+        is_theses_board_member(user) and new_status != ThesisStatus.RETURNED_FOR_CORRECTIONS or
         old_status == ThesisStatus.IN_PROGRESS and new_status == ThesisStatus.DEFENDED
     )
 
@@ -90,7 +93,7 @@ def can_cast_vote_as_user(caster: Employee, user: Employee) -> bool:
     return is_admin(caster) or is_theses_board_member(user) and caster == user
 
 
-BOARD_MEMBER_VOTEABLE_STATUSES = (
+INDETERMINATE_STATUSES = (
     ThesisStatus.BEING_EVALUATED,
     ThesisStatus.RETURNED_FOR_CORRECTIONS
 )
@@ -100,7 +103,7 @@ def can_change_vote_for_thesis(user: Employee, thesis: Thesis) -> bool:
     """Can the specified user change votes for the specified thesis?"""
     return (
         is_admin(user) or
-        is_theses_board_member(user) and ThesisStatus(thesis.status) in BOARD_MEMBER_VOTEABLE_STATUSES
+        is_theses_board_member(user) and ThesisStatus(thesis.status) in INDETERMINATE_STATUSES
     )
 
 

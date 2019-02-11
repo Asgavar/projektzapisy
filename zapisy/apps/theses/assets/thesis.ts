@@ -89,13 +89,10 @@ export class Thesis {
 			this.kind === other.kind &&
 			this.isReservationDateSame(other.reservedUntil) &&
 			this.status === other.status &&
-			this.modifiedDate.isSame(other.modifiedDate)
+			this.modifiedDate.isSame(other.modifiedDate) &&
+			this.getVoteDetails().isEqual(other.getVoteDetails()) &&
+			this.rejectionReason === other.rejectionReason
 		)) { return false; }
-		if (
-			!this.getVoteDetails().isEqual(other.getVoteDetails())
-		) {
-			return false;
-		}
 		return true;
 	}
 
@@ -113,6 +110,15 @@ export class Thesis {
 
 	public hasAnyVotes() {
 		return this.getVoteDetails().hasDefiniteVote();
+	}
+
+	public getDefaultRejectionReason() {
+		const voteDetails = this.getVoteDetails();
+		const votes = Object.values(voteDetails.getAllVotes()) as SingleVote[];
+		const rejectionReasons = votes.filter(vote =>
+			vote.value === ThesisVote.Rejected && vote.reason
+		).map(vote => vote.reason);
+		return rejectionReasons.join("\n\n");
 	}
 
 	public isUngraded(): boolean {

@@ -16,7 +16,7 @@ import { getDisabledStyle, macosifyKeys } from "../../utils";
 import { ThesisWorkMode, ApplicationState } from "../../app_types";
 import {
 	canModifyThesis,
-	canDeleteThesis, canSeeThesisRejectionReason
+	canDeleteThesis, canSeeThesisRejectionReason, canRejectThesis
 } from "../../permissions";
 import { Thesis } from "../../thesis";
 import { AppUser, Employee, Student } from "../../users";
@@ -25,6 +25,7 @@ import { AppMode } from "../../app_logic/app_mode";
 import { confirmationDialog } from "../Dialogs/ConfirmationDialog";
 import { formatTitle } from "../util";
 import { SingleVote } from "../../votes";
+import { showMasterRejectionDialog } from "../Dialogs/MasterRejectionDialog";
 
 const ActionButton = React.memo(Button.extend`
 	&:disabled:hover {
@@ -40,13 +41,14 @@ const ActionButton = React.memo(Button.extend`
 
 const DetailsSectionWrapper = styled.div`
 	display: flex;
+	flex-direction: column;
 	justify-content: center;
 	align-items: center;
+	border: 1px solid black;
+	padding: 15px;
 `;
 
 const MainDetailsContainer = styled.div`
-	border: 1px solid black;
-	padding: 15px;
 	display: flex;
 	flex-direction: row;
 	width: 100%;
@@ -72,6 +74,7 @@ const ButtonsContainer = styled.div`
 const RejectionReasonContainer = styled.textarea`
 	width: 100%;
 	height: 100px;
+	box-sizing: border-box;
 `;
 
 const DEFAULT_THESIS_RESERVATION_YEARS = 2;
@@ -167,11 +170,28 @@ export class ThesisDetails extends React.PureComponent<Props> {
 				save={this.handleSave}
 			/>
 			<ButtonsContainer>
+				{this.renderRejectButton()}
 				{this.renderResetButton()}
 				{this.renderDeleteButton()}
 				{this.renderSaveButton()}
 			</ButtonsContainer>
 		</>;
+	}
+
+	private renderRejectButton() {
+		if (!canRejectThesis(this.props.original)) {
+			return null;
+		}
+		const { hasUnsavedChanges } = this.props;
+		return <ActionButton
+			onClick={this.onReject}
+			disabled={hasUnsavedChanges}
+			title={hasUnsavedChanges ? "Wprowadzono niezapisane zmiany" : "Zwróć pracę do poprawek"}
+		>Do poprawek</ActionButton>;
+	}
+
+	private onReject = () => {
+		this.onStatusChanged(ThesisStatus.ReturnedForCorrections);
 	}
 
 	private renderResetButton() {
@@ -225,7 +245,10 @@ export class ThesisDetails extends React.PureComponent<Props> {
 		}
 		return <>
 			<hr />
-			<RejectionReasonContainer disabled>{this.props.original.rejectionReason}</RejectionReasonContainer>
+			<RejectionReasonContainer
+				readOnly
+				defaultValue={this.props.original.rejectionReason}
+			/>
 		</>;
 	}
 
@@ -278,8 +301,26 @@ export class ThesisDetails extends React.PureComponent<Props> {
 		this.updateThesisState({ reservedUntil: { $set: newDate } });
 	}
 
-	private onStatusChanged = (newStatus: ThesisStatus): void => {
+	private onStatusChanged = async (newStatus: ThesisStatus) => {
+		// update UI right away for nice feedback
 		this.updateThesisState({ status: { $set: newStatus } });
+		if (newStatus === ThesisStatus.ReturnedForCorrections) {
+			const { thesis } = this.props;
+			const msg = "Podaj podsumowanie uwag do tematu w polu poniżej. " +
+				"Informacja ta zostanie wysłana do promotora pracy";
+			try {
+				const finalRejectionReason = await showMasterRejectionDialog({
+					message: msg,
+					cancelText: "Anuluj",
+					acceptText: "Potwierdź",
+					initialReason: thesis.rejectionReason || thesis.getDefaultRejectionReason()
+				});
+				this.updateThesisState({ rejectionReason: { $set: finalRejectionReason } });
+			} catch (_) {
+				// restore old status
+				this.updateThesisState({ status: { $set: this.props.original.status } });
+			}
+		}
 	}
 
 	private onTitleChanged = (newTitle: string): void => {

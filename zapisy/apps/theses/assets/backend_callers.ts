@@ -129,6 +129,11 @@ export async function getCurrentUser(): Promise<AppUser> {
 	return deserializeCurrentUser(await getData(`${BASE_API_URL}/current_user/`));
 }
 
+/** Find out if the current user has master rejecter rights */
+export function getIsRejecter(): Promise<boolean> {
+	return getData(`${BASE_API_URL}/is_master_rejecter/`);
+}
+
 /**
  * Get the theses board as an Employee list
  */

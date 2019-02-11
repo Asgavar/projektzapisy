@@ -23,6 +23,7 @@ type ThesisAddOutSerialized = {
 	student?: number | null;
 	student_2?: number | null;
 	votes?: VoteMap;
+	reason?: string;
 };
 
 /**
@@ -65,6 +66,9 @@ export function serializeNewThesis(thesis: Thesis): ThesisAddOutSerialized {
 	}
 	if (thesis.reservedUntil) {
 		result.reserved_until = serializeReservationDate(thesis.reservedUntil);
+	}
+	if (thesis.status === ThesisStatus.ReturnedForCorrections) {
+		result.reason = thesis.rejectionReason;
 	}
 	if (canChangeThesisVote(thesis)) {
 		const details = thesis.getVoteDetails();
@@ -133,6 +137,9 @@ export function serializeThesisDiff(orig: Thesis, mod: Thesis): ThesisModOutSeri
 	}
 	if (orig.status !== mod.status) {
 		result.status = mod.status;
+	}
+	if (mod.status === ThesisStatus.ReturnedForCorrections) {
+		result.reason = mod.rejectionReason;
 	}
 
 	if (canChangeThesisVote(orig)) {
