@@ -15,8 +15,8 @@ ACCEPTED_BODY = "Temat pracy „{}” został zaakceptowany."
 REJECTED_SUBJECT = SUBJECT_PREFIX + "Temat zwrócony do poprawek"
 ACCEPTED_BODY = "Temat pracy „{}” został zwrócony do poprawek. Podano następujący powód:\n\n{}"
 
-REJECTING_VOTE_CAST_SUBJECT = SUBJECT_PREFIX + "Oddano głos przeciwko pracy"
-REJECTING_VOTE_CAST_BODY = "{} oddał(a) głos przeciwko tematowi „{}”. Podano następujące uzasadnienie:\n\n{}"
+REJECTING_VOTE_CAST_SUBJECT = SUBJECT_PREFIX + "Zgłoszono uwagi do tematu"
+REJECTING_VOTE_CAST_BODY = "{} zgłosił(a) następujące uwagi do tematu „{}”:\n\n{}"
 
 
 def notify_thesis_accepted(thesis: 'Thesis'):

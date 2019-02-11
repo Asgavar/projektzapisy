@@ -53,7 +53,10 @@ class MessageDialogUI extends React.PureComponent<RejectionDialogUIProps, State>
 	}
 
 	public componentDidMount() {
-		Mousetrap.bindGlobal("shift+enter", this.onAccept);
+		Mousetrap.bindGlobal("shift+enter", e => {
+			this.onAccept();
+			e.preventDefault();
+		});
 		Mousetrap.bindGlobal("esc", this.onCancel);
 		const txtarea = this.reasonFieldRef.current;
 		if (txtarea) {
