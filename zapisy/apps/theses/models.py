@@ -88,7 +88,8 @@ class Thesis(models.Model):
         super().__init__(*args, **kwargs)
         # Save the status so that, when saving, we can determine whether or not it changed
         # See https://stackoverflow.com/a/1793323
-        self.__original_status = self.status
+        # If pk is None, we are creating this model, so don't save the status
+        self.__original_status = self.status if self.pk is not None else None
 
     title = models.CharField(max_length=MAX_THESIS_TITLE_LEN, unique=True)
     advisor = models.ForeignKey(
