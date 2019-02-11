@@ -134,7 +134,7 @@ def check_votes_permissions(user: BaseUser, votes: List, thesis: Optional[Thesis
         raise exceptions.PermissionDenied(f'this user is not permitted to change vote(s) for thesis {thesis}')
     for vote in votes:
         if not can_cast_vote_as_user(user, vote.voter):
-            raise exceptions.PermissionDenied(f'user {user} cannot change the vote of {voter}')
+            raise exceptions.PermissionDenied(f'user {user} cannot change the vote of {vote.voter}')
 
 
 def check_advisor_permissions(user: BaseUser, advisor: Employee):
@@ -153,9 +153,9 @@ def serialize_thesis_votes(thesis: Thesis) -> Dict[int, GenericDict]:
     )
     return {
         vote.voter.pk: (
-            { "value": vote.value, "reason": vote.reason}
+            {"value": vote.value, "reason": vote.reason}
             if vote.value == ThesisVote.REJECTED.value
-            else { "value": vote.value }
+            else {"value": vote.value}
         )
         for vote in definite_votes
     }
@@ -190,7 +190,6 @@ class ThesisSerializer(serializers.ModelSerializer):
         if can_see_thesis_votes(is_staff):
             result["votes"] = serialize_thesis_votes(instance)
         return result
-
 
     # We need to define this field here manually to disable DRF's unique validator which
     # isn't flexible enough to override the error code it returns (throws a 400, we want 409)
@@ -232,7 +231,7 @@ class ThesisSerializer(serializers.ModelSerializer):
             student=validated_data.get("student"),
             student_2=validated_data.get("student_2"),
             rejection_reason=validated_data.get("reason")
-                if status == ThesisStatus.RETURNED_FOR_CORRECTIONS.value else "",
+            if status == ThesisStatus.RETURNED_FOR_CORRECTIONS.value else "",
         )
         if "votes" in validated_data:
             new_instance.process_new_votes(validated_data["votes"], user, True)

@@ -75,6 +75,8 @@ class VoteToProcess(NamedTuple):
     value: ThesisVote
     # if rejecting
     reason: str
+
+
 VotesToProcess = Iterable[VoteToProcess]
 
 
