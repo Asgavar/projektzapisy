@@ -15,3 +15,8 @@ def get_num_required_votes():
     is considered accepted
     """
     return _get_settings().num_required_votes
+
+
+def get_master_rejecter():
+    """Get the special board member responsible for rejecting theses"""
+    return _get_settings().master_rejecter
