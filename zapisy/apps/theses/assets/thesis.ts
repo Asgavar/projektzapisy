@@ -114,7 +114,7 @@ export class Thesis {
 
 	public getDefaultRejectionReason() {
 		const voteDetails = this.getVoteDetails();
-		const votes = Object.values(voteDetails.getAllVotes()) as SingleVote[];
+		const votes = Array.from(voteDetails.getAllVotes().values());
 		const rejectionReasons = votes.filter(vote =>
 			vote.value === ThesisVote.Rejected && vote.reason
 		).map(vote => vote.reason);

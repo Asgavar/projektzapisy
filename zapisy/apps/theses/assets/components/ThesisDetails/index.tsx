@@ -34,7 +34,7 @@ const ActionButton = React.memo(Button.extend`
 	&:disabled {
 		color: grey;
 		cursor: default;
-	}../Dialogs/Dialogs
+	}
 	min-height: initial;
 	height: 25px;
 `);
@@ -183,10 +183,17 @@ export class ThesisDetails extends React.PureComponent<Props> {
 			return null;
 		}
 		const { hasUnsavedChanges } = this.props;
+		const alreadyReturned = this.props.original.status === ThesisStatus.ReturnedForCorrections;
+		let tooltip = "Zwróć pracę do poprawek";
+		if (alreadyReturned) {
+			tooltip = "Praca została już zwrócona do poprawek";
+		} else if (hasUnsavedChanges) {
+			tooltip = "Wprowadzono niezapisane zmiany";
+		}
 		return <ActionButton
 			onClick={this.onReject}
-			disabled={hasUnsavedChanges}
-			title={hasUnsavedChanges ? "Wprowadzono niezapisane zmiany" : "Zwróć pracę do poprawek"}
+			disabled={hasUnsavedChanges || alreadyReturned}
+			title={tooltip}
 		>Do poprawek</ActionButton>;
 	}
 
@@ -304,10 +311,14 @@ export class ThesisDetails extends React.PureComponent<Props> {
 	private onStatusChanged = async (newStatus: ThesisStatus) => {
 		// update UI right away for nice feedback
 		this.updateThesisState({ status: { $set: newStatus } });
-		if (newStatus === ThesisStatus.ReturnedForCorrections) {
+		const originalStatus = this.props.original.status;
+		if (
+			originalStatus !== ThesisStatus.ReturnedForCorrections &&
+			newStatus === ThesisStatus.ReturnedForCorrections
+		) {
 			const { thesis } = this.props;
 			const msg = "Podaj podsumowanie uwag do tematu w polu poniżej. " +
-				"Informacja ta zostanie wysłana do promotora pracy";
+				"Informacja ta zostanie wysłana do promotora pracy.";
 			try {
 				const finalRejectionReason = await showMasterRejectionDialog({
 					message: msg,
@@ -318,7 +329,7 @@ export class ThesisDetails extends React.PureComponent<Props> {
 				this.updateThesisState({ rejectionReason: { $set: finalRejectionReason } });
 			} catch (_) {
 				// restore old status
-				this.updateThesisState({ status: { $set: this.props.original.status } });
+				this.updateThesisState({ status: { $set: originalStatus } });
 			}
 		}
 	}

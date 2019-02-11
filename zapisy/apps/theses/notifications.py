@@ -13,7 +13,7 @@ ACCEPTED_SUBJECT = SUBJECT_PREFIX + "Temat zaakceptowany"
 ACCEPTED_BODY = "Temat pracy „{}” został zaakceptowany."
 
 REJECTED_SUBJECT = SUBJECT_PREFIX + "Temat zwrócony do poprawek"
-ACCEPTED_BODY = "Temat pracy „{}” został zwrócony do poprawek. Podano następujący powód:\n\n{}"
+REJECTED_BODY = "Temat pracy „{}” został zwrócony do poprawek. Podano następujący powód:\n\n{}"
 
 REJECTING_VOTE_CAST_SUBJECT = SUBJECT_PREFIX + "Zgłoszono uwagi do tematu"
 REJECTING_VOTE_CAST_BODY = "{} zgłosił(a) następujące uwagi do tematu „{}”:\n\n{}"
@@ -40,10 +40,10 @@ def notify_thesis_rejected(thesis: 'Thesis'):
         recipients.append(thesis.advisor.user.email)
     if thesis.auxiliary_advisor:
         recipients.append(thesis.auxiliary_advisor.user.email)
-    formatted_body = REJECTED_SUBJECT.format(thesis.title, thesis.rejection_reason)
+    formatted_body = REJECTED_BODY.format(thesis.title, thesis.rejection_reason)
     rejecter = get_master_rejecter()
     msg = EmailMessage(
-        ACCEPTED_SUBJECT,
+        REJECTED_SUBJECT,
         formatted_body,
         settings.MASS_MAIL_FROM,
         recipients,

@@ -219,17 +219,20 @@ class ThesisSerializer(serializers.ModelSerializer):
             raise exceptions.PermissionDenied(f'This type of user cannot set status to {status}')
         if "votes" in validated_data:
             check_votes_permissions(user, validated_data["votes"], None)
+        status = validated_data.get("status")
 
         new_instance = Thesis.objects.create(
             title=validated_data.get("title"),
             kind=validated_data.get("kind"),
-            status=validated_data.get("status"),
+            status=status,
             reserved_until=validated_data.get("reserved_until"),
             description=validated_data.get("description", ""),
             advisor=validated_data.get("advisor"),
             auxiliary_advisor=validated_data.get("auxiliary_advisor"),
             student=validated_data.get("student"),
             student_2=validated_data.get("student_2"),
+            rejection_reason=validated_data.get("reason")
+                if status == ThesisStatus.RETURNED_FOR_CORRECTIONS.value else "",
         )
         if "votes" in validated_data:
             new_instance.process_new_votes(validated_data["votes"], user, True)
