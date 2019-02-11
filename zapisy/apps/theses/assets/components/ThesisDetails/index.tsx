@@ -15,15 +15,16 @@ import { Spinner } from "../Spinner";
 import { getDisabledStyle, macosifyKeys } from "../../utils";
 import { ThesisWorkMode, ApplicationState } from "../../app_types";
 import {
-	canModifyThesis, canChangeThesisVote,
+	canModifyThesis,
 	canDeleteThesis, canSeeThesisRejectionReason
 } from "../../permissions";
 import { Thesis } from "../../thesis";
 import { AppUser, Employee, Student } from "../../users";
-import { ThesisStatus, ThesisKind, ThesisVote } from "../../protocol_types";
+import { ThesisStatus, ThesisKind } from "../../protocol_types";
 import { AppMode } from "../../app_logic/app_mode";
 import { confirmationDialog } from "../Dialogs/ConfirmationDialog";
 import { formatTitle } from "../util";
+import { SingleVote } from "../../votes";
 
 const ActionButton = React.memo(Button.extend`
 	&:disabled:hover {
@@ -101,15 +102,12 @@ export class ThesisDetails extends React.PureComponent<Props> {
 			this.handleSave();
 			ev.preventDefault();
 		});
-		Mousetrap.bind("a", this.onAcceptThesis);
-		Mousetrap.bind("r", this.onRejectThesis);
 		Mousetrap.bind("del", () => {
 			this.handleDelete();
 		});
 	}
 
 	public componentWillUnmount() {
-		Mousetrap.unbind(["a", "r"]);
 		Mousetrap.unbindGlobal(macosifyKeys("ctrl+s"));
 		Mousetrap.unbind("del");
 	}
@@ -161,9 +159,12 @@ export class ThesisDetails extends React.PureComponent<Props> {
 				thesis={this.props.thesis}
 				thesesBoard={this.props.thesesBoard}
 				isStaff={this.props.isStaff}
+				isBoardMember={this.props.isBoardMember}
 				user={this.props.user}
 				workMode={this.props.mode}
+				hasUnsavedChanges={this.props.hasUnsavedChanges}
 				onChange={this.onVoteChanged}
+				save={this.handleSave}
 			/>
 			<ButtonsContainer>
 				{this.renderResetButton()}
@@ -226,26 +227,6 @@ export class ThesisDetails extends React.PureComponent<Props> {
 			<hr />
 			<RejectionReasonContainer disabled>{this.props.original.rejectionReason}</RejectionReasonContainer>
 		</>;
-	}
-
-	private onAcceptThesis = () => {
-		this.onShortcutVoteCast(ThesisVote.Accepted);
-	}
-	private onRejectThesis = () => {
-		this.onShortcutVoteCast(ThesisVote.Rejected);
-	}
-	private onShortcutVoteCast(vote: ThesisVote) {
-		const { props } = this;
-		if (
-			props.isBoardMember &&
-			canModifyThesis(props.thesis) &&
-			canChangeThesisVote(props.thesis) &&
-			!props.hasUnsavedChanges &&
-			props.mode === ThesisWorkMode.Editing
-		) {
-			this.onVoteChanged(props.user.person as Employee, vote);
-			props.onSaveRequested();
-		}
 	}
 
 	private handleDelete = async () => {
@@ -339,7 +320,7 @@ export class ThesisDetails extends React.PureComponent<Props> {
 		this.updateThesisState({ description: { $set: newDesc } });
 	}
 
-	private onVoteChanged = (voter: Employee, newValue: ThesisVote): void => {
+	private onVoteChanged = (voter: Employee, newValue: SingleVote): void => {
 		const newVotes = cloneDeep(this.props.thesis.getVoteDetails());
 		newVotes.setVote(voter, newValue);
 		this.updateThesisState({ votes: { $set: newVotes } });

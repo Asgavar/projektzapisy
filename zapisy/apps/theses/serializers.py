@@ -132,8 +132,8 @@ def check_votes_permissions(user: BaseUser, votes: List, thesis: Optional[Thesis
     """Check that the specified user is permitted to modify the votes as specified"""
     if thesis and not can_change_vote_for_thesis(user, thesis):
         raise exceptions.PermissionDenied(f'this user is not permitted to change vote(s) for thesis {thesis}')
-    for voter, _ in votes:
-        if not can_cast_vote_as_user(user, voter):
+    for vote in votes:
+        if not can_cast_vote_as_user(user, vote.voter):
             raise exceptions.PermissionDenied(f'user {user} cannot change the vote of {voter}')
 
 

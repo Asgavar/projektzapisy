@@ -16,7 +16,7 @@ type Props = {
 	onChange: (voter: Employee, v: ThesisVote) => void;
 };
 
-const voteCycle = [ThesisVote.None, ThesisVote.Accepted, ThesisVote.Rejected];
+const VOTE_CYCLE = [ThesisVote.None, ThesisVote.Accepted, ThesisVote.Rejected];
 
 export class SingleVoteView extends React.PureComponent<Props> {
 	public render() {
@@ -40,9 +40,10 @@ export class SingleVoteView extends React.PureComponent<Props> {
 	}
 }
 
+/** Get the next vote value in the cycle */
 function nextValue(value: ThesisVote) {
-	const valIdx = voteCycle.indexOf(value);
-	return voteCycle[(valIdx + 1) % voteCycle.length];
+	const valIdx = VOTE_CYCLE.indexOf(value);
+	return VOTE_CYCLE[(valIdx + 1) % VOTE_CYCLE.length];
 }
 
 const VoteContainerBase = styled.div`

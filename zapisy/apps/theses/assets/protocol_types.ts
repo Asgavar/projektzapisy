@@ -3,6 +3,9 @@
  * this should be kept synchronized with types defined there
  */
 
+export const MIN_REJECTION_REASON_LENGTH = 100;
+export const MAX_REJECTION_REASON_LENGTH = 500;
+
 export const enum ThesisKind {
 	Masters = 0,
 	Engineers = 1,

@@ -9,6 +9,7 @@ type Props = {
 	active: boolean;
 };
 
+/** Renders an indicator icon for the given vote value */
 export function VoteIndicator(props: Props) {
 	const Component = props.active ? Container : DisabledContainer;
 	const { contents, color = "" } = paramsForValue(props.value);
