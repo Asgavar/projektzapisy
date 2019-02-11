@@ -197,8 +197,11 @@ export class ThesisDetails extends React.PureComponent<Props> {
 		>Do poprawek</ActionButton>;
 	}
 
-	private onReject = () => {
-		this.onStatusChanged(ThesisStatus.ReturnedForCorrections);
+	private onReject = async () => {
+		const didChange = await this.onStatusChanged(ThesisStatus.ReturnedForCorrections);
+		if (didChange) {
+			this.handleSave();
+		}
 	}
 
 	private renderResetButton() {
@@ -327,9 +330,11 @@ export class ThesisDetails extends React.PureComponent<Props> {
 					initialReason: thesis.rejectionReason || thesis.getDefaultRejectionReason()
 				});
 				this.updateThesisState({ rejectionReason: { $set: finalRejectionReason } });
+				return true;
 			} catch (_) {
 				// restore old status
 				this.updateThesisState({ status: { $set: originalStatus } });
+				return false;
 			}
 		}
 	}

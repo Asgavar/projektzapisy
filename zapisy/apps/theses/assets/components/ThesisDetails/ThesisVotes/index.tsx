@@ -96,7 +96,7 @@ export class ThesisVotes extends React.Component<Props> {
 		try {
 			const newReason = await showRejectionReasonDialog({
 				message: "Wprowadź uzasadnienie oddanego głosu.",
-				acceptText: "Zgłoś poprawki",
+				acceptText: "Potwierdź głos",
 				cancelText: "Anuluj",
 				initialReason: vote.reason,
 			});
