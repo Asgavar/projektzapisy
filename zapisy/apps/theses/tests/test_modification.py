@@ -8,7 +8,7 @@ from apps.users.models import Employee, BaseUser
 from ..models import ThesisStatus, ThesisVote
 from ..system_settings import get_num_required_votes
 from .base import ThesesBaseTestCase
-from .utils import random_vote
+from .utils import random_vote, random_reserved_until
 
 
 class ThesesModificationTestCase(ThesesBaseTestCase):
@@ -36,11 +36,10 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         """Ensure that students are not permitted to modify theses"""
         student = self.get_random_student()
         self.login_as(student)
-        new_reserved = not self.thesis.reserved
-        response = self.update_thesis_with_data(reserved=new_reserved)
+        response = self.update_thesis_with_data(reserved=random_reserved_until())
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         modified_thesis = self.get_modified_thesis()
-        self.assertEqual(modified_thesis["reserved"], self.thesis.reserved)
+        self.assertEqual(modified_thesis["reserved_until"], self.thesis.reserved_until)
 
     def test_emp_can_modify_their_thesis(self):
         """Ensure an employee can modify their own thesis, including changing the title

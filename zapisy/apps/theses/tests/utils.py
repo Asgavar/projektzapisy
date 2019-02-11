@@ -1,6 +1,7 @@
 import random
 import sys
 from typing import List, Any
+from datetime import date, timedelta
 
 from faker import Faker
 
@@ -49,8 +50,8 @@ def random_available_status():
     ])
 
 
-def random_reserved():
-    return random_bool()
+def random_reserved_until():
+    return date.today() + timedelta(days=random.randrange(100))
 
 
 def random_description():
@@ -71,6 +72,10 @@ def random_definite_vote():
         ThesisVote.ACCEPTED,
         ThesisVote.REJECTED,
     ])
+
+
+def random_rejection_reason():
+    return fake.text()
 
 
 def make_employee_with_name(name: str) -> Employee:

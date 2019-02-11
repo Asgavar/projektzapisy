@@ -78,7 +78,7 @@ class OtherEndpointsTestCase(ThesesBaseTestCase):
         type of user
         """
         self._test_current_user_for_user(self.get_admin(), ThesisUserType.ADMIN)
-        self._test_current_user_for_user(self.get_random_emp(), ThesisUserType.EMPLOYEE)
+        self._test_current_user_for_user(self.get_random_emp(), ThesisUserType.REGULAR_EMPLOYEE)
         self._test_current_user_for_user(self.get_random_student(), ThesisUserType.STUDENT)
 
     def test_autocomplete_denied_for_not_logged_in(self):

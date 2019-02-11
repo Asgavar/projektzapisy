@@ -3,7 +3,7 @@ from django.urls import reverse
 
 from apps.users.models import Employee, BaseUser
 from ..models import ThesisStatus
-from .utils import random_title, random_kind, random_reserved
+from .utils import random_title, random_kind, random_reserved_until
 from .base import ThesesBaseTestCase
 
 
@@ -18,7 +18,7 @@ class ThesesAdditionTestCase(ThesesBaseTestCase):
             "title": random_title(),
             "advisor": advisor.pk,
             "kind": random_kind().value,
-            "reserved": random_reserved(),
+            "reserved_until": random_reserved_until(),
             "status": ThesisStatus.BEING_EVALUATED.value
         }
         base_data.update(kwargs)

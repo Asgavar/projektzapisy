@@ -8,13 +8,13 @@ from django.contrib.auth.models import Group
 
 from apps.users.models import Employee, Student, BaseUser
 from apps.users.tests.factories import EmployeeFactory, StudentFactory
-from ..models import Thesis, ThesisVote, ThesisStatus, STATUSES_UNCHANGEABLE_BY_VOTE
+from ..models import Thesis, ThesisVote, ThesisStatus, STATUSES_UNCHANGEABLE_BY_VOTE, VoteToProcess
 from ..users import THESIS_BOARD_GROUP_NAME
 
 from .utils import (
     random_title, random_bool,
-    random_kind, random_current_status, random_reserved,
-    random_description, random_definite_vote,
+    random_kind, random_current_status, random_reserved_until,
+    random_description, random_definite_vote, random_rejection_reason
 )
 
 PAGE_SIZE = 100
@@ -100,7 +100,7 @@ class ThesesBaseTestCase(APITestCase):
             ),
             kind=kwargs.get("kind", random_kind()).value,
             status=kwargs.get("status", random_current_status()).value,
-            reserved=kwargs.get("reserved", random_reserved()),
+            reserved_until=kwargs.get("reserved_until", random_reserved_until()),
             description=kwargs.get("description", random_description()),
             student=kwargs.get("student", cls.get_random_student()),
             student_2=kwargs.get("student_2", cls.get_random_student() if random_bool() else None)
@@ -172,7 +172,10 @@ class ThesesBaseTestCase(APITestCase):
         """Set the specified vote value for the specified employee locally,
         not through the API
         """
-        thesis.process_new_votes(((voter, vote), ), voter, True)
+        vote_to_process = VoteToProcess(
+            voter, vote, random_rejection_reason() if vote == ThesisVote.REJECTED else ""
+        )
+        thesis.process_new_votes((vote_to_process, ), voter, True)
 
     def run_test_with_privileged_users(
         self, test_func: Callable[[Employee], None],

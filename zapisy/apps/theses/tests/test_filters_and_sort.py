@@ -8,6 +8,7 @@ from .base import ThesesBaseTestCase, PAGE_SIZE
 from .utils import (
     random_current_status, random_available_status,
     random_status, make_employee_with_name, exactly_one,
+    random_reserved_until
 )
 
 
@@ -81,14 +82,14 @@ class ThesesFiltersAndSortingTestCase(ThesesBaseTestCase):
             self.make_thesis(
                 kind=ThesisKind.BACHELORS,
                 status=random_available_status(),
-                reserved=False
+                reserved_until=None,
             ) for i in range(num_matching_avail)
         ]
         matching_unavail = [
             self.make_thesis(
                 kind=ThesisKind.BACHELORS,
                 status=random_status() if i % 2 else ThesisStatus.IN_PROGRESS,
-                reserved=bool(i % 2)
+                reserved_until=random_reserved_until() if bool(i % 2) else None
             ) for i in range(num_matching_unavail)
         ]
         other = [
@@ -102,7 +103,7 @@ class ThesesFiltersAndSortingTestCase(ThesesBaseTestCase):
             self.assertEqual(thesis["kind"], ThesisKind.BACHELORS.value)
             self.assertNotEqual(thesis["status"], ThesisStatus.IN_PROGRESS.value)
             self.assertNotEqual(thesis["status"], ThesisStatus.DEFENDED.value)
-            self.assertFalse(thesis["reserved"])
+            self.assertIsNone(thesis["reserved_until"])
 
     def test_ungraded_filter(self):
         board_member = self.get_random_board_member()

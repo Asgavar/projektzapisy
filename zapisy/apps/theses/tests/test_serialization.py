@@ -11,14 +11,14 @@ class ThesesSerializationTestCase(ThesesBaseTestCase):
     """Basic tests to ensure thesis serialization works correctly"""
     def setUp(self):
         self.advisor = self.get_random_emp()
-        self.thesis = self.make_thesis(advisor=self.advisor, status=ThesisStatus.BEING_EVALUATED)
+        self.thesis = self.make_thesis(advisor=self.advisor, status=ThesisStatus.ACCEPTED)
         self.thesis.save()
 
     def get_serialized_thesis(self):
         return self.get_theses_with_data()[0]
 
     def test_basic_fields_serialized_correctly(self):
-        self.login_as(self.get_random_student())
+        self.login_as(self.get_random_emp())
         thesis = self.get_serialized_thesis()
         self.assertEqual(thesis["title"], self.thesis.title)
         self.assertEqual(thesis["advisor"], self.advisor.pk)
@@ -28,7 +28,10 @@ class ThesesSerializationTestCase(ThesesBaseTestCase):
         )
         self.assertEqual(thesis["kind"], self.thesis.kind)
         self.assertEqual(thesis["status"], self.thesis.status)
-        self.assertEqual(thesis["reserved"], self.thesis.reserved)
+        self.assertEqual(
+            thesis["reserved_until"],
+            str(self.thesis.reserved_until) if self.thesis.reserved_until else None
+        )
         self.assertEqual(thesis["description"], self.thesis.description)
         self.assertEqual(thesis["student"]["id"], self.thesis.student.pk)
         if self.thesis.student_2:
@@ -48,26 +51,25 @@ class ThesesSerializationTestCase(ThesesBaseTestCase):
             self.set_thesis_vote_locally(self.thesis, voter, vote)
         self.login_as(user)
         thesis = self.get_serialized_thesis()
-        return votes, thesis["votes"]
+        return thesis, votes
 
-    def _test_vote_counts_for(self, user: BaseUser):
-        votes, votes_dict = self._get_thesis_with_votes(user)
-        self.assertEqual(votes_dict["accept_cnt"], self.thesis.get_approve_votes_cnt())
-        self.assertEqual(votes_dict["reject_cnt"], self.thesis.get_reject_votes_cnt())
-        self.assertEqual(votes_dict["accept_cnt"] + votes_dict["reject_cnt"], len(votes))
-        # There should be no other keys in the votes dict
-        self.assertEqual(len(set(votes_dict.keys())), 2)
+    def _test_no_votes_for(self, user: BaseUser):
+        thesis, _ = self._get_thesis_with_votes(user)
+        self.assertFalse("votes" in thesis)
 
     def test_vote_counts_for_student(self):
-        self._test_vote_counts_for(self.get_random_student())
+        self._test_no_votes_for(self.get_random_student())
 
     def test_vote_counts_for_emp(self):
-        self._test_vote_counts_for(self.get_random_emp())
+        self._test_no_votes_for(self.get_random_emp())
 
     def _test_vote_details_for(self, user: BaseUser):
-        votes, votes_dict = self._get_thesis_with_votes(user)
+        thesis, votes = self._get_thesis_with_votes(user)
+        self.assertTrue("votes" in thesis)
+        votes_dict = thesis["votes"]
         self.assertEqual(len(set(votes_dict.keys())), len(votes))
-        for voter_id, vote_value in votes_dict.items():
+        for voter_id, vote_details in votes_dict.items():
+            vote_value = vote_details["value"]
             self.assertTrue(
                 exactly_one((m.pk == voter_id and v.value == vote_value for m, v in votes))
             )
