@@ -47,7 +47,7 @@ def notify_thesis_rejected(thesis: 'Thesis'):
         formatted_body,
         settings.MASS_MAIL_FROM,
         recipients,
-        bcc=[rejecter.user.email] if rejecter else []
+        cc=[rejecter.user.email] if rejecter else []
     )
     msg.send()
 

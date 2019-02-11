@@ -157,7 +157,7 @@ def filter_queryset(
 ) -> QuerySet:
     """Filter the specified theses queryset based on the passed conditions"""
     result = filter_theses_queryset_for_type(qs, user, thesis_type)
-    result = filter_theses_queryset_for_user(qs, user)
+    result = filter_theses_queryset_for_user(result, user)
     if only_mine:
         result = filter_theses_queryset_for_only_mine(result, user)
     if title:

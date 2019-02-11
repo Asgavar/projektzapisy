@@ -109,11 +109,13 @@ export class ThesisVotes extends React.Component<Props> {
 		}
 	}
 
-	private onAcceptThesis = () => {
+	private onAcceptThesis = (e: ExtendedKeyboardEvent) => {
 		this.onShortcutVoteCast(ThesisVote.Accepted);
+		e.preventDefault();
 	}
-	private onRejectThesis = () => {
+	private onRejectThesis = (e: ExtendedKeyboardEvent) => {
 		this.onShortcutVoteCast(ThesisVote.Rejected);
+		e.preventDefault();
 	}
 	private async onShortcutVoteCast(vote: ThesisVote) {
 		const { props } = this;

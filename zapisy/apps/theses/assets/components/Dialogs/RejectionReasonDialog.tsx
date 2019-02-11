@@ -44,6 +44,7 @@ type State = {
 };
 
 class MessageDialogUI extends React.PureComponent<RejectionDialogUIProps, State> {
+	private reasonFieldRef: React.RefObject<HTMLTextAreaElement> = React.createRef();
 	public constructor(props: RejectionDialogUIProps) {
 		super(props);
 		this.state = {
@@ -54,6 +55,10 @@ class MessageDialogUI extends React.PureComponent<RejectionDialogUIProps, State>
 	public componentDidMount() {
 		Mousetrap.bindGlobal("shift+enter", this.onAccept);
 		Mousetrap.bindGlobal("esc", this.onCancel);
+		const txtarea = this.reasonFieldRef.current;
+		if (txtarea) {
+			txtarea.focus();
+		}
 	}
 
 	public componentWillUnmount() {
@@ -92,6 +97,7 @@ class MessageDialogUI extends React.PureComponent<RejectionDialogUIProps, State>
 				onChange={this.onChange}
 				value={this.state.currentReason}
 				maxLength={MAX_REJECTION_REASON_LENGTH}
+				ref={this.reasonFieldRef}
 			/>
 			{this.renderHelp()}
 			<ButtonsContainer>
