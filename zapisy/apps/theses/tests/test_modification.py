@@ -5,10 +5,14 @@ from django.urls import reverse
 
 from apps.users.models import Employee, BaseUser
 
-from ..models import ThesisStatus, ThesisVote
+from ..models import ThesisStatus, ThesisVote, STATUSES_UNCHANGEABLE_BY_VOTE
 from ..system_settings import get_num_required_votes
+from ..serializers import GenericDict
 from .base import ThesesBaseTestCase
-from .utils import random_vote, random_reserved_until
+from .utils import (
+    random_vote, random_reserved_until,
+    accepting_vote, rejecting_vote, random_definite_vote
+)
 
 
 class ThesesModificationTestCase(ThesesBaseTestCase):
@@ -36,7 +40,8 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         """Ensure that students are not permitted to modify theses"""
         student = self.get_random_student()
         self.login_as(student)
-        response = self.update_thesis_with_data(reserved=random_reserved_until())
+        response = self.update_thesis_with_data(reserved_until=random_reserved_until())
+        print("student tried to modify", response.data)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
         modified_thesis = self.get_modified_thesis()
         self.assertEqual(modified_thesis["reserved_until"], self.thesis.reserved_until)
@@ -132,9 +137,11 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         response = self._try_modify_archived_as(self.get_admin())
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def cast_vote_as(self, voter: Employee, vote: ThesisVote):
+    def cast_vote_as(self, voter: Employee, vote: GenericDict):
         """Cast a vote for self.thesis of the specified value as the specified user"""
-        return self.update_thesis_with_data(votes={voter.pk: vote.value})
+        return self.update_thesis_with_data(votes={
+            voter.pk: {"value": vote["value"].value, "reason": vote.get("reason", "")}
+        })
 
     def test_student_cannot_vote(self):
         """Ensure that students are not permitted to vote"""
@@ -202,11 +209,13 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         voters = self.get_board_members(num_required, voter_to_skip)
         for voter in voters:
             self.login_as(self.get_admin() if as_admin else voter)
-            response = self.cast_vote_as(voter, ThesisVote.ACCEPTED)
+            response = self.cast_vote_as(voter, accepting_vote())
             self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_enough_votes_accept_thesis(self):
         """Test that when enough board members vote "approve" on a thesis, it gets accepted"""
+        self.thesis.student = self.thesis.student_2 = None
+        self.thesis.save()
         self.vote_to_accept_thesis_required_times()
         modified_thesis = self.get_modified_thesis()
         self.assertEqual(modified_thesis["status"], ThesisStatus.ACCEPTED.value)
@@ -214,57 +223,39 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
     def reject_thesis_once(self, voter: Employee):
         """Cast a rejecting vote for the current thesis as the given voter"""
         self.login_as(voter)
-        response = self.cast_vote_as(voter, ThesisVote.REJECTED)
+        response = self.cast_vote_as(voter, rejecting_vote())
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
-    def test_single_rejection_rejects_thesis(self):
-        """Ensure that a single rejection is enough to reject a thesis"""
+    def test_single_rejection_doesnt_reject_thesis(self):
+        """Ensure that a single rejection doesn't reject a thesis"""
         self.reject_thesis_once(self.get_random_board_member())
         modified_thesis = self.get_modified_thesis()
-        self.assertEqual(modified_thesis["status"], ThesisStatus.RETURNED_FOR_CORRECTIONS.value)
+        self.assertNotEqual(modified_thesis["status"], ThesisStatus.RETURNED_FOR_CORRECTIONS.value)
 
-    def test_enough_votes_dont_accept_after_rejection(self):
-        """Ensure that if a thesis was rejected, it will not be accepted again even if
+    def test_enough_votes_do_accept_after_rejection(self):
+        """Ensure that if a thesis was rejected, it will be accepted again if
         enough "approve" votes are cast
         """
+        self.thesis.student = self.thesis.student_2 = None
+        self.thesis.save()
         rejecter = self.get_random_board_member()
         self.reject_thesis_once(rejecter)
         self.vote_to_accept_thesis_required_times(rejecter)
         modified_thesis = self.get_modified_thesis()
-        self.assertEqual(modified_thesis["status"], ThesisStatus.RETURNED_FOR_CORRECTIONS.value)
+        self.assertEqual(modified_thesis["status"], ThesisStatus.ACCEPTED.value)
 
-    def _test_action_does_not_change_status(self, status: ThesisStatus, action: Callable[[], None]):
-        self.thesis.status = status.value
-        self.thesis.save()
-        action()
-        modified_thesis = self.get_modified_thesis()
-        self.assertEqual(modified_thesis["status"], status.value)
-
-    def test_enough_votes_dont_accept_in_progress_or_archived(self):
-        """The usual reject/accept logic should not apply to theses that are
-        in progress/archived"""
-        self._test_action_does_not_change_status(
-            ThesisStatus.IN_PROGRESS, lambda: self.vote_to_accept_thesis_required_times()
-        )
-        # Only admins can modify archived theses
-        self._test_action_does_not_change_status(
-            ThesisStatus.DEFENDED, lambda: self.vote_to_accept_thesis_required_times(None, True)
-        )
-
-    def test_single_vote_doesnt_reject_in_progress_or_archived(self):
-        """As above"""
+    def test_cannot_vote_for_vote_unchangeable(self):
+        """Test that employees are not permitted to vote for "vote unchangeable" theses"""
         voter = self.get_random_board_member()
-        self._test_action_does_not_change_status(
-            ThesisStatus.IN_PROGRESS, lambda: self.reject_thesis_once(voter)
-        )
-        # Only admins can modify archived theses
-        voter = self.get_admin()
-        self._test_action_does_not_change_status(
-            ThesisStatus.IN_PROGRESS, lambda: self.reject_thesis_once(voter)
-        )
+        self.login_as(voter)
+        for thesis_status in STATUSES_UNCHANGEABLE_BY_VOTE:
+            self.thesis.status = thesis_status.value
+            self.thesis.save()
+            response = self.cast_vote_as(voter, random_definite_vote())
+            self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def _vote_then_change_title_as_user(self, user: BaseUser):
-        self.vote_to_accept_thesis_required_times()
+        self.cast_vote_as(self.get_random_board_member(), accepting_vote())
         self.reject_thesis_once(self.get_random_board_member())
         self.login_as(user)
         self.update_thesis_with_data(title="lol123")
@@ -287,20 +278,21 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
     def _vote_as_temp_board_member(self):
         temp_board_member = self.get_random_emp()
         self.board_group.user_set.add(temp_board_member.user)
-        self.set_thesis_vote_locally(self.thesis, temp_board_member, ThesisVote.ACCEPTED)
+        self.set_thesis_vote_locally(self.thesis, temp_board_member, accepting_vote())
         self.board_group.user_set.remove(temp_board_member.user)
         return temp_board_member
 
-    def test_admin_can_modify_previous_board_member(self):
+    def test_admin_can_modify_previous_board_members_vote(self):
+        """Ensure that admins have the right to modify votes cast by previous board members"""
         temp_board_member = self._vote_as_temp_board_member()
         self.login_as(self.get_admin())
-        response = self.cast_vote_as(temp_board_member, ThesisVote.REJECTED)
+        response = self.cast_vote_as(temp_board_member, rejecting_vote())
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_previous_board_member_cannot_modify_their_vote(self):
         temp_board_member = self._vote_as_temp_board_member()
         self.login_as(temp_board_member)
-        response = self.cast_vote_as(temp_board_member, ThesisVote.REJECTED)
+        response = self.cast_vote_as(temp_board_member, rejecting_vote())
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
     def ensure_cannot_modify_thesis_duplicate_title_as_user(self, user: BaseUser):

@@ -7,7 +7,7 @@ from faker import Faker
 
 from apps.users.models import Employee, Student
 from apps.users.tests.factories import EmployeeFactory, StudentFactory
-from ..models import ThesisKind, ThesisStatus, ThesisVote
+from ..models import ThesisKind, ThesisStatus, ThesisVote, VoteToProcess, MIN_REJECTION_REASON_LENGTH
 
 
 fake = Faker()
@@ -62,20 +62,42 @@ def random_student(studs):
     return random.choice(studs)
 
 
+def random_vote_from_list(l: List[ThesisVote]):
+    vote_value = random.choice(l)
+    return {
+        "value": vote_value,
+        "reason": random_rejection_reason() if vote_value == ThesisVote.REJECTED else ""
+    }
+
+
 def random_vote():
-    return random.choice(list(ThesisVote))
+    return random_vote_from_list(list(ThesisVote))
 
 
 def random_definite_vote():
     """Return a random thesis vote other than none"""
-    return random.choice([
+    return random_vote_from_list([
         ThesisVote.ACCEPTED,
         ThesisVote.REJECTED,
     ])
 
 
+def accepting_vote():
+    return {"value": ThesisVote.ACCEPTED}
+
+
+def rejecting_vote():
+    return {
+        "value": ThesisVote.REJECTED,
+        "reason": random_rejection_reason()
+    }
+
+
 def random_rejection_reason():
-    return fake.text()
+    result = fake.text()
+    while len(result) < MIN_REJECTION_REASON_LENGTH:
+        result += fake.text()
+    return result
 
 
 def make_employee_with_name(name: str) -> Employee:

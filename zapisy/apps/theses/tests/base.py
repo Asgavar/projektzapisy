@@ -140,8 +140,8 @@ class ThesesBaseTestCase(APITestCase):
         graded or graded with indeterminate vote values for the given
         board member"""
         num_theses = random.randint(10, 20)
-        graded_theses = [self.make_thesis() for _ in range(num_theses)]
-        ungraded_theses = [self.make_thesis() for _ in range(num_theses)]
+        graded_theses = [self.make_thesis(status=ThesisStatus.BEING_EVALUATED) for _ in range(num_theses)]
+        ungraded_theses = [self.make_thesis(status=ThesisStatus.BEING_EVALUATED) for _ in range(num_theses)]
         all_theses = graded_theses + ungraded_theses
         for thesis in all_theses:
             # This is needed since the thesis vote bindings created below need a pk
@@ -157,8 +157,8 @@ class ThesesBaseTestCase(APITestCase):
         # they should still count as ungraded with those vote values
         ungraded_with_indeterminate = random.sample(ungraded_theses, random.randrange(num_theses))
         for thesis in ungraded_with_indeterminate:
-            self.set_thesis_vote_locally(thesis, board_member, ThesisVote.NONE)
-        # Pick a few thesis, set them to one of the unchangeable statues;
+            self.set_thesis_vote_locally(thesis, board_member, {"value": ThesisVote.NONE})
+        # Pick a few theses, set them to one of the unchangeable statues;
         # they shouldn't count anymore
         unchangeable_theses = random.sample(ungraded_theses, random.randrange(num_theses // 3))
         for unchangeable in unchangeable_theses:
@@ -172,9 +172,7 @@ class ThesesBaseTestCase(APITestCase):
         """Set the specified vote value for the specified employee locally,
         not through the API
         """
-        vote_to_process = VoteToProcess(
-            voter, vote, random_rejection_reason() if vote == ThesisVote.REJECTED else ""
-        )
+        vote_to_process = VoteToProcess(voter, vote["value"], vote.get("reason"))
         thesis.process_new_votes((vote_to_process, ), voter, True)
 
     def run_test_with_privileged_users(

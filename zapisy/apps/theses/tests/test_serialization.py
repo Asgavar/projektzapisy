@@ -55,7 +55,7 @@ class ThesesSerializationTestCase(ThesesBaseTestCase):
 
     def _test_no_votes_for(self, user: BaseUser):
         thesis, _ = self._get_thesis_with_votes(user)
-        self.assertFalse("votes" in thesis)
+        self.assertNotIn("votes", thesis)
 
     def test_vote_counts_for_student(self):
         self._test_no_votes_for(self.get_random_student())
@@ -65,13 +65,13 @@ class ThesesSerializationTestCase(ThesesBaseTestCase):
 
     def _test_vote_details_for(self, user: BaseUser):
         thesis, votes = self._get_thesis_with_votes(user)
-        self.assertTrue("votes" in thesis)
+        self.assertIn("votes", thesis)
         votes_dict = thesis["votes"]
         self.assertEqual(len(set(votes_dict.keys())), len(votes))
         for voter_id, vote_details in votes_dict.items():
             vote_value = vote_details["value"]
             self.assertTrue(
-                exactly_one((m.pk == voter_id and v.value == vote_value for m, v in votes))
+                exactly_one((m.pk == voter_id and v["value"].value == vote_value for m, v in votes))
             )
 
     def test_vote_details_for_board_member(self):
