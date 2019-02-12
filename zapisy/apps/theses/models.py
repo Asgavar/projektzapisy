@@ -120,6 +120,7 @@ class Thesis(models.Model):
     def on_title_changed_by(self, user: BaseUser):
         if self.advisor == user and not is_admin(user):
             self.votes.all().delete()
+            self.status = ThesisStatus.BEING_EVALUATED.value
 
     def process_new_votes(
         self, votes: VotesToProcess, changing_user: Employee, should_update_status: True
@@ -200,7 +201,8 @@ class Thesis(models.Model):
 
     def save(self, *args, **kwargs):
         self.full_clean()
-        self.adjust_status()
+        if not kwargs.get("skip_status_update", False):
+            self.adjust_status()
         if self.status != self.__original_status:
             # If the status changed, update modified date
             self.modified_date = datetime.now()
