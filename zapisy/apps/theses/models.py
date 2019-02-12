@@ -81,7 +81,10 @@ VotesToProcess = Iterable[VoteToProcess]
 
 
 """If a thesis is in one of those statuses, a vote will not reject/accept it"""
-STATUSES_UNCHANGEABLE_BY_VOTE = (ThesisStatus.IN_PROGRESS, ThesisStatus.DEFENDED)
+STATUSES_UNCHANGEABLE_BY_VOTE = (
+    ThesisStatus.ACCEPTED,
+    ThesisStatus.IN_PROGRESS, ThesisStatus.DEFENDED
+)
 STATUS_VALUES_UNCHANGEABLE_BY_VOTE = [s.value for s in STATUSES_UNCHANGEABLE_BY_VOTE]
 
 
@@ -201,7 +204,7 @@ class Thesis(models.Model):
 
     def save(self, *args, **kwargs):
         self.full_clean()
-        if not kwargs.get("skip_status_update", False):
+        if not kwargs.pop("skip_status_update", False):
             self.adjust_status()
         if self.status != self.__original_status:
             # If the status changed, update modified date
