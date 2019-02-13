@@ -8,7 +8,11 @@ from django.contrib.auth.models import Group
 
 from apps.users.models import Employee, Student, BaseUser
 from apps.users.tests.factories import EmployeeFactory, StudentFactory
-from ..models import Thesis, ThesisVote, ThesisStatus, STATUSES_UNCHANGEABLE_BY_VOTE, VoteToProcess
+from ..models import (
+    Thesis, ThesisVote, ThesisStatus, STATUSES_UNCHANGEABLE_BY_VOTE, VoteToProcess,
+    ThesesSystemSettings
+)
+
 from ..users import THESIS_BOARD_GROUP_NAME
 
 from .utils import (
@@ -49,6 +53,11 @@ class ThesesBaseTestCase(APITestCase):
             member = Employee.objects.all()[i]
             cls.board_members.append(member)
             cls.board_group.user_set.add(member.user)
+        
+        cls.rejecter = random.choice(cls.board_members)
+        settings = ThesesSystemSettings.objects.get()
+        settings.master_rejecter = cls.rejecter
+        settings.save()
 
     @classmethod
     def get_random_emp(cls):
@@ -84,6 +93,14 @@ class ThesesBaseTestCase(APITestCase):
     def get_random_board_member_not_admin(cls):
         """Get a random board member, but not the admin"""
         return cls.get_random_board_member_different_from(cls.get_admin())
+    
+    @classmethod
+    def get_random_board_member_not_rejecter(cls):
+        return cls.get_random_board_member_different_from(cls.get_rejecter())
+    
+    @classmethod
+    def get_rejecter(cls):
+        return cls.rejecter
 
     @classmethod
     def get_random_student(cls):

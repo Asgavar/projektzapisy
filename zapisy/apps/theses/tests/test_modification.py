@@ -8,11 +8,16 @@ from apps.users.models import Employee, BaseUser
 from ..models import ThesisStatus, ThesisVote, STATUSES_UNCHANGEABLE_BY_VOTE
 from ..system_settings import get_num_required_votes
 from ..serializers import GenericDict
+from ..views import NOT_READY_STATUSES
 from .base import ThesesBaseTestCase
 from .utils import (
     random_vote, random_reserved_until,
     accepting_vote, rejecting_vote, random_definite_vote
 )
+
+# Students shouldn't be allowed to modify any thesis regardless of status,
+# but depending on the status the error response will be different
+STUDENT_MODIFY_RESPONSES = [status.HTTP_403_FORBIDDEN, status.HTTP_404_NOT_FOUND]
 
 
 class ThesesModificationTestCase(ThesesBaseTestCase):
@@ -40,11 +45,15 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         """Ensure that students are not permitted to modify theses"""
         student = self.get_random_student()
         self.login_as(student)
-        response = self.update_thesis_with_data(reserved_until=random_reserved_until())
-        print("student tried to modify", response.data)
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
-        modified_thesis = self.get_modified_thesis()
-        self.assertEqual(modified_thesis["reserved_until"], self.thesis.reserved_until)
+        for status in ThesisStatus:
+            self.thesis.status = status.value
+            self.thesis.save()
+            response = self.update_thesis_with_data(reserved_until=random_reserved_until())
+            self.assertIn(response.status_code, STUDENT_MODIFY_RESPONSES)
+            if status.value not in NOT_READY_STATUSES:
+                # if not ready, it won't be sent back
+                modified_thesis = self.get_modified_thesis()
+                self.assertEqual(modified_thesis["reserved_until"], str(self.thesis.reserved_until))
 
     def test_emp_can_modify_their_thesis(self):
         """Ensure an employee can modify their own thesis, including changing the title
@@ -148,8 +157,11 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         student = self.get_random_student()
         self.login_as(student)
         board_member = self.get_random_board_member()
-        response = self.cast_vote_as(board_member, random_vote())
-        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+        for status in ThesisStatus:
+            self.thesis.status = status.value
+            self.thesis.save()
+            response = self.cast_vote_as(board_member, random_vote())
+            self.assertIn(response.status_code, STUDENT_MODIFY_RESPONSES)
 
     def test_employee_cannot_vote(self):
         """Ensure that employees are not permitted to vote"""
@@ -246,7 +258,7 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
 
     def test_cannot_vote_for_vote_unchangeable(self):
         """Test that employees are not permitted to vote for "vote unchangeable" theses"""
-        voter = self.get_random_board_member()
+        voter = self.get_random_board_member_not_admin()
         self.login_as(voter)
         for thesis_status in STATUSES_UNCHANGEABLE_BY_VOTE:
             self.thesis.status = thesis_status.value
@@ -309,6 +321,18 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
             self.ensure_cannot_modify_thesis_duplicate_title_as_user
         )
         self.ensure_cannot_modify_thesis_duplicate_title_as_user(self.advisor)
+
+    def test_board_member_cannot_reject(self):
+        """Ensure that no one but the rejecter can reject a thesis"""
+        member = self.get_random_board_member_not_rejecter()
+        self.login_as(member)
+        response = self.update_thesis_with_data(status=ThesisStatus.RETURNED_FOR_CORRECTIONS.value)
+        self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
+
+    def test_rejecter_can_reject_thesis(self):
+        self.login_as(self.get_rejecter())
+        response = self.update_thesis_with_data(status=ThesisStatus.RETURNED_FOR_CORRECTIONS.value)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def ensure_cannot_set_invalid_status_as_user(self, user: BaseUser):
         self.login_as(user)
