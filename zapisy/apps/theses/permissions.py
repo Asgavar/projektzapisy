@@ -5,7 +5,7 @@ from typing import Optional
 
 from apps.users.models import Employee, BaseUser
 
-from .models import Thesis, ThesisStatus
+from .models import Thesis, ThesisStatus, STATUSES_UNCHANGEABLE_BY_VOTE
 from .users import (
     ThesisUserType, get_user_type, is_theses_board_member,
     is_admin, is_regular_employee, is_master_rejecter,
@@ -93,17 +93,11 @@ def can_cast_vote_as_user(caster: Employee, user: Employee) -> bool:
     return is_admin(caster) or is_theses_board_member(user) and caster == user
 
 
-INDETERMINATE_STATUSES = (
-    ThesisStatus.BEING_EVALUATED,
-    ThesisStatus.RETURNED_FOR_CORRECTIONS
-)
-
-
 def can_change_vote_for_thesis(user: Employee, thesis: Thesis) -> bool:
     """Can the specified user change votes for the specified thesis?"""
     return (
         is_admin(user) or
-        is_theses_board_member(user) and ThesisStatus(thesis.status) in INDETERMINATE_STATUSES
+        is_theses_board_member(user) and ThesisStatus(thesis.status) not in STATUSES_UNCHANGEABLE_BY_VOTE
     )
 
 
