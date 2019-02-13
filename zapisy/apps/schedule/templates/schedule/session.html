@@ -20,14 +20,6 @@
         </div>
     </div>
 
-    <div class="alert alert-info alert-dismissible fade show" role="alert">
-        Kolokwia i egzaminy w wybranym semestrze (Uwaga: wybierz semestr z prawej strony!)
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-
-
     <dl>
         {% regroup exams by day as terms_list %}
         {% for exam in terms_list %}
@@ -49,14 +41,4 @@
             <dt>Brak wyników dla zapytania</dt>
         {% endfor %}
     </dl>
-{% endblock %}
-
-{% block sidebar %}
-    <form>
-        <legend>Filtr</legend>
-        {{ exams.form|crispy }}
-        <div class="d-flex justify-content-center">
-            <input type="submit" value="Filtruj" class="btn btn-success">
-        </div>
-    </form>
 {% endblock %}
