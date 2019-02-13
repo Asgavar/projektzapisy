@@ -53,7 +53,7 @@ class ThesesBaseTestCase(APITestCase):
             member = Employee.objects.all()[i]
             cls.board_members.append(member)
             cls.board_group.user_set.add(member.user)
-        
+
         cls.rejecter = random.choice(cls.board_members)
         settings = ThesesSystemSettings.objects.get()
         settings.master_rejecter = cls.rejecter
@@ -93,11 +93,11 @@ class ThesesBaseTestCase(APITestCase):
     def get_random_board_member_not_admin(cls):
         """Get a random board member, but not the admin"""
         return cls.get_random_board_member_different_from(cls.get_admin())
-    
+
     @classmethod
     def get_random_board_member_not_rejecter(cls):
         return cls.get_random_board_member_different_from(cls.get_rejecter())
-    
+
     @classmethod
     def get_rejecter(cls):
         return cls.rejecter

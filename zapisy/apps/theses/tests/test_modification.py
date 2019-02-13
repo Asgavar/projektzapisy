@@ -45,12 +45,12 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         """Ensure that students are not permitted to modify theses"""
         student = self.get_random_student()
         self.login_as(student)
-        for status in ThesisStatus:
-            self.thesis.status = status.value
+        for thesis_status in ThesisStatus:
+            self.thesis.status = thesis_status.value
             self.thesis.save()
             response = self.update_thesis_with_data(reserved_until=random_reserved_until())
             self.assertIn(response.status_code, STUDENT_MODIFY_RESPONSES)
-            if status.value not in NOT_READY_STATUSES:
+            if thesis_status.value not in NOT_READY_STATUSES:
                 # if not ready, it won't be sent back
                 modified_thesis = self.get_modified_thesis()
                 self.assertEqual(modified_thesis["reserved_until"], str(self.thesis.reserved_until))
@@ -157,8 +157,8 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         student = self.get_random_student()
         self.login_as(student)
         board_member = self.get_random_board_member()
-        for status in ThesisStatus:
-            self.thesis.status = status.value
+        for thesis_status in ThesisStatus:
+            self.thesis.status = thesis_status.value
             self.thesis.save()
             response = self.cast_vote_as(board_member, random_vote())
             self.assertIn(response.status_code, STUDENT_MODIFY_RESPONSES)
