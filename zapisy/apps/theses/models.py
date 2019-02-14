@@ -203,10 +203,9 @@ class Thesis(models.Model):
     def notify_on_status_change(self):
         old_status = ThesisStatus(self.__original_status) if self.__original_status else None
         new_status = ThesisStatus(self.status)
-        if (
-            new_status == ThesisStatus.ACCEPTED and old_status in INDETERMINATE_STATUSES or
-            new_status == ThesisStatus.IN_PROGRESS and old_status in [*INDETERMINATE_STATUSES, ThesisStatus.ACCEPTED]
-        ):
+        # it could jump straight to in progress if there is a student defined already
+        newly_accepted_statuses = (ThesisStatus.ACCEPTED, ThesisStatus.IN_PROGRESS)
+        if (new_status in newly_accepted_statuses and old_status in INDETERMINATE_STATUSES):
             notify_thesis_accepted(self)
         elif new_status == ThesisStatus.RETURNED_FOR_CORRECTIONS:
             notify_thesis_rejected(self)
