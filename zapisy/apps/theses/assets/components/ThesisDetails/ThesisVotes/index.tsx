@@ -7,7 +7,7 @@ import { Thesis } from "../../../thesis";
 import { Employee, AppUser } from "../../../users";
 import { ThesisVote } from "../../../protocol_types";
 import { ThesisWorkMode } from "../../../app_types";
-import { canSeeThesisVotes, canChangeThesisVote, canModifyThesis } from "../../../permissions";
+import { canChangeThesisVote, canModifyThesis } from "../../../permissions";
 import { SingleVote } from "../../../votes";
 import { SingleVoteView } from "./SingleVoteView";
 import { strcmp } from "common/utils";
@@ -52,9 +52,6 @@ export class ThesisVotes extends React.Component<Props> {
 	}
 
 	public render() {
-		if (!canSeeThesisVotes()) {
-			return null;
-		}
 		return <VotesContainer>
 			<Header>Głosy</Header>
 			{this.renderVotesList()}
