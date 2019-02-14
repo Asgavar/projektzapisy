@@ -83,9 +83,12 @@ VotesToProcess = Iterable[VoteToProcess]
 """If a thesis is in one of those statuses, a vote will not reject/accept it"""
 STATUSES_UNCHANGEABLE_BY_VOTE = (
     ThesisStatus.ACCEPTED,
-    ThesisStatus.IN_PROGRESS, ThesisStatus.DEFENDED
+    ThesisStatus.IN_PROGRESS,
+    ThesisStatus.DEFENDED
 )
 STATUS_VALUES_UNCHANGEABLE_BY_VOTE = [s.value for s in STATUSES_UNCHANGEABLE_BY_VOTE]
+
+INDETERMINATE_STATUSES = list(set(ThesisStatus) - set(STATUSES_UNCHANGEABLE_BY_VOTE))
 
 
 class Thesis(models.Model):
@@ -170,7 +173,7 @@ class Thesis(models.Model):
             return
         if self.get_approve_votes_cnt() >= get_num_required_votes():
             self.status = ThesisStatus.ACCEPTED.value
-        self.save()
+            self.save()
 
     def get_approve_votes_cnt(self):
         return self.votes.filter(value=ThesisVote.ACCEPTED.value).count()
@@ -197,9 +200,14 @@ class Thesis(models.Model):
             self.status = ThesisStatus.ACCEPTED.value
 
     def notify_on_status_change(self):
-        if ThesisStatus(self.status) == ThesisStatus.ACCEPTED:
+        old_status = ThesisStatus(self.__original_status) if self.__original_status else None
+        new_status = ThesisStatus(self.status)
+        if (
+            new_status == ThesisStatus.ACCEPTED and old_status in INDETERMINATE_STATUSES or
+            new_status == ThesisStatus.IN_PROGRESS and old_status in [*INDETERMINATE_STATUSES, ThesisStatus.ACCEPTED]
+        ):
             notify_thesis_accepted(self)
-        elif ThesisStatus(self.status) == ThesisStatus.RETURNED_FOR_CORRECTIONS:
+        elif new_status == ThesisStatus.RETURNED_FOR_CORRECTIONS:
             notify_thesis_rejected(self)
 
     def save(self, *args, **kwargs):
