@@ -127,6 +127,7 @@ class Thesis(models.Model):
         if self.advisor == user and not is_admin(user):
             self.votes.all().delete()
             self.status = ThesisStatus.BEING_EVALUATED.value
+            self.save()
 
     def process_new_votes(
         self, votes: VotesToProcess, changing_user: Employee, should_update_status: True

@@ -108,10 +108,6 @@ export class Thesis {
 		return this.votes;
 	}
 
-	public hasAnyVotes() {
-		return this.getVoteDetails().hasDefiniteVote();
-	}
-
 	public getDefaultRejectionReason() {
 		const voteDetails = this.getVoteDetails();
 		const votes = Array.from(voteDetails.getAllVotes().values());

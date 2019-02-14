@@ -276,7 +276,10 @@ class ThesesAppInternal extends React.Component<Props, State> {
 		}
 		return confirmationDialog({
 			title: "Uwaga",
-			message: "Zmiana tytułu spowoduje wykasowanie wszystkich głosów. Czy kontynuować?",
+			message: (
+				"Zmiana tytułu spowoduje wykasowanie wszystkich głosów " +
+				"i rozpoczęcie głosowania od nowa. Czy kontynuować?"
+			),
 			yesText: "Tak, zmień tytuł",
 			noText: "Nie, wróć",
 		});

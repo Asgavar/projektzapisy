@@ -138,9 +138,7 @@ class C {
 			AppMode.workMode === ThesisWorkMode.Editing &&
 			thesis.original.advisor &&
 			thesis.original.advisor.isEqual(Users.currentUser.person) &&
-			thesis.original.title.trim() !== thesis.modified.title.trim() &&
-			thesis.original.status !== ThesisStatus.ReturnedForCorrections &&
-			thesis.original.hasAnyVotes()
+			thesis.original.title.trim() !== thesis.modified.title.trim()
 		);
 	}
 
