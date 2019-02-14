@@ -27,6 +27,7 @@ const VotesContainer = styled.div`
 
 type Props = {
 	thesis: Thesis,
+	original: Thesis,
 	thesesBoard: Employee[],
 	user: AppUser,
 	isStaff: boolean;
@@ -61,8 +62,8 @@ export class ThesisVotes extends React.Component<Props> {
 	}
 
 	private renderVotesList() {
-		const { thesis } = this.props;
-		const displayAll = shouldDisplayAllVotes(thesis);
+		const { thesis, original } = this.props;
+		const displayAll = shouldDisplayAllVotes(original);
 		const details = thesis.getVoteDetails();
 		const votes = Array.from(details.getAllVotes().entries());
 		votes.sort(([e1, _1], [e2, _2]) => (

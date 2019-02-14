@@ -15,8 +15,7 @@ import { Spinner } from "../Spinner";
 import { getDisabledStyle, macosifyKeys } from "../../utils";
 import { ThesisWorkMode, ApplicationState } from "../../app_types";
 import {
-	canModifyThesis,
-	canDeleteThesis, canSeeThesisRejectionReason, canRejectThesis
+	canModifyThesis, canDeleteThesis, canSeeThesisRejectionReason, canChangeStatusTo,
 } from "../../permissions";
 import { Thesis } from "../../thesis";
 import { AppUser, Employee, Student } from "../../users";
@@ -160,6 +159,7 @@ export class ThesisDetails extends React.PureComponent<Props> {
 		return <>
 			<ThesisVotes
 				thesis={this.props.thesis}
+				original={this.props.original}
 				thesesBoard={this.props.thesesBoard}
 				isStaff={this.props.isStaff}
 				isBoardMember={this.props.isBoardMember}
@@ -179,7 +179,7 @@ export class ThesisDetails extends React.PureComponent<Props> {
 	}
 
 	private renderRejectButton() {
-		if (!canRejectThesis(this.props.original)) {
+		if (!canChangeStatusTo(this.props.original, ThesisStatus.ReturnedForCorrections)) {
 			return null;
 		}
 		const { hasUnsavedChanges } = this.props;

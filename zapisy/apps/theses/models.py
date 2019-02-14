@@ -271,7 +271,10 @@ class ThesesSystemSettings(models.Model):
         validators=[validate_num_required_votes]
     )
     # should be a member of the theses board group
-    master_rejecter = models.ForeignKey(Employee, null=True, on_delete=models.PROTECT)
+    master_rejecter = models.ForeignKey(
+        Employee, null=True, on_delete=models.PROTECT,
+        verbose_name="Członek komisji odpowiedzialny za zwracanie prac do poprawek"
+    )
 
     def __str__(self):
         return "Ustawienia systemu"
