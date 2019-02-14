@@ -90,6 +90,10 @@ export function canChangeTitle(thesis: Thesis) {
 	);
 }
 
+const INDETERMINATE_STATUSES = [
+	ThesisStatus.BeingEvaluated, ThesisStatus.ReturnedForCorrections,
+];
+
 /**
  * Determine if a user of the specified
  * type can change an existing thesis' status to the specified new status
@@ -98,7 +102,7 @@ export function canChangeStatusTo(thesis: Thesis, newStatus: ThesisStatus) {
 	const oldStatus = thesis.status;
 	return (
 		Users.isUserAdmin() ||
-		Users.isUserRejecter() ||
+		Users.isUserRejecter() && INDETERMINATE_STATUSES.includes(thesis.status) ||
 		Users.isUserMemberOfBoard() && newStatus !== ThesisStatus.ReturnedForCorrections ||
 		oldStatus === ThesisStatus.InProgress && newStatus === ThesisStatus.Defended
 	);
@@ -109,21 +113,6 @@ export function canChangeStatusTo(thesis: Thesis, newStatus: ThesisStatus) {
  */
 export function canSetArbitraryAdvisor() {
 	return Users.isUserStaff();
-}
-
-const INDETERMINATE_STATUSES = [
-	ThesisStatus.BeingEvaluated, ThesisStatus.ReturnedForCorrections,
-];
-
-/**
- * Determine whether the current user is permitted to reject the specified thesis
- * with a reason.
- */
-export function canRejectThesis(thesis: Thesis) {
-	return (
-		Users.isUserAdmin() ||
-		Users.isUserRejecter() && INDETERMINATE_STATUSES.includes(thesis.status)
-	);
 }
 
 /** Should the official rejection reason be disclosed to the app user? */

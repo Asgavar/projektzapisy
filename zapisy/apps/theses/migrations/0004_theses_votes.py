@@ -25,7 +25,7 @@ class Migration(migrations.Migration):
         migrations.AddField(
             model_name='thesessystemsettings',
             name='master_rejecter',
-            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='users.Employee'),
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.PROTECT, to='users.Employee', verbose_name='Członek komisji odpowiedzialny za zwracanie prac do poprawek'),
             preserve_default=False,
         ),
         migrations.AddField(
