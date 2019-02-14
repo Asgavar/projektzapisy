@@ -206,7 +206,7 @@ BACHELORS_KINDS = tuple(k.value for k in(
     ThesisKind.BACHELORS, ThesisKind.BACHELORS_ENGINEERS, ThesisKind.BACHELORS_ENGINEERS_ISIM
 ))
 BACHELORS_OR_ENGINEERS_KINDS = tuple(set(ENGINEERS_KINDS + BACHELORS_KINDS))
-ISIM_KINDS = (k.value for k in (
+ISIM_KINDS = tuple(k.value for k in (
     ThesisKind.ISIM, ThesisKind.BACHELORS_ENGINEERS_ISIM
 ))
 
