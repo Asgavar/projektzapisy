@@ -80,15 +80,14 @@ class VoteToProcess(NamedTuple):
 VotesToProcess = Iterable[VoteToProcess]
 
 
-"""If a thesis is in one of those statuses, a vote will not reject/accept it"""
-STATUSES_UNCHANGEABLE_BY_VOTE = (
+"""Voting for a thesis in one of these statuses is not permitted
+for regular board members
+"""
+UNVOTEABLE_STATUSES = (
     ThesisStatus.ACCEPTED,
     ThesisStatus.IN_PROGRESS,
     ThesisStatus.DEFENDED
 )
-STATUS_VALUES_UNCHANGEABLE_BY_VOTE = [s.value for s in STATUSES_UNCHANGEABLE_BY_VOTE]
-
-INDETERMINATE_STATUSES = list(set(ThesisStatus) - set(STATUSES_UNCHANGEABLE_BY_VOTE))
 
 
 class Thesis(models.Model):
@@ -166,13 +165,13 @@ class Thesis(models.Model):
 
     def check_for_vote_status_change(self):
         """If we have enough approving votes, accept this thesis
-        Don't change the status if it's in progress/defended
-        (while board members would not be allowed to vote in this scenario, admins
-        could theoretically still do it)
+        Only do this if it's still being evaluated; board members can cast
+        votes when it's rejected, but that doesn't change anything
         """
-        if ThesisStatus(self.status) in STATUSES_UNCHANGEABLE_BY_VOTE:
-            return
-        if self.get_approve_votes_cnt() >= get_num_required_votes():
+        if (
+            ThesisStatus(self.status) == ThesisStatus.BEING_EVALUATED and
+            self.get_approve_votes_cnt() >= get_num_required_votes()
+        ):
             self.status = ThesisStatus.ACCEPTED.value
             self.save()
 
@@ -205,7 +204,8 @@ class Thesis(models.Model):
         new_status = ThesisStatus(self.status)
         # it could jump straight to in progress if there is a student defined already
         newly_accepted_statuses = (ThesisStatus.ACCEPTED, ThesisStatus.IN_PROGRESS)
-        if (new_status in newly_accepted_statuses and old_status in INDETERMINATE_STATUSES):
+        nonaccepted_statuses = (ThesisStatus.BEING_EVALUATED, ThesisStatus.RETURNED_FOR_CORRECTIONS)
+        if (new_status in newly_accepted_statuses and old_status in nonaccepted_statuses):
             notify_thesis_accepted(self)
         elif new_status == ThesisStatus.RETURNED_FOR_CORRECTIONS:
             notify_thesis_rejected(self)
