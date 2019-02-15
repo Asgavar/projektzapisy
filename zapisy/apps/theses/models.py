@@ -256,7 +256,7 @@ def filter_ungraded_for_emp(qs, emp: Employee):
     # Uses custom SQL - I couldn't get querysets to do what I wanted them to;
     # doing .exclude(votes__value__ne=none, votes__voter=emp) doesn't do what you want,
     # it ands two selects together rather than and two conditions in one select
-    return qs.exclude(
+    return qs.filter(
         # While voting for rejected theses is allowed, they're not "priority",
         # so we don't count them here
         status=ThesisStatus.BEING_EVALUATED.value
