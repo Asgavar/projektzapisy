@@ -8,7 +8,7 @@ import { ThesisWorkMode, ApplicationState } from "../app_types";
 import { AppMode } from "./app_mode";
 import { List } from "./theses_list";
 import { Users } from "./users";
-import { ThesisTypeFilter, ThesisStatus } from "../protocol_types";
+import { ThesisTypeFilter } from "../protocol_types";
 import { adjustDomForUngraded } from "../utils";
 import { canSetArbitraryAdvisor } from "../permissions";
 import { Employee } from "../users";
@@ -138,9 +138,7 @@ class C {
 			AppMode.workMode === ThesisWorkMode.Editing &&
 			thesis.original.advisor &&
 			thesis.original.advisor.isEqual(Users.currentUser.person) &&
-			thesis.original.title.trim() !== thesis.modified.title.trim() &&
-			thesis.original.status !== ThesisStatus.ReturnedForCorrections &&
-			thesis.original.hasAnyVotes()
+			thesis.original.title.trim() !== thesis.modified.title.trim()
 		);
 	}
 

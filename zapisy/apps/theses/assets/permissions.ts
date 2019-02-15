@@ -65,7 +65,11 @@ export function canModifyThesis(thesis: Thesis) {
 // The functions below will only be used if the one above returns true,
 // so they don't need to repeat their checks
 
-const STATUSES_UNCHANGEABLE_BY_VOTE = [ThesisStatus.InProgress, ThesisStatus.Defended];
+const STATUSES_UNCHANGEABLE_BY_VOTE = [
+	ThesisStatus.Accepted,
+	ThesisStatus.InProgress,
+	ThesisStatus.Defended
+];
 /**
  * Determine whether the current app user can change votes for the specified thesis
  * This only accounts for the thesis status, to check if a user

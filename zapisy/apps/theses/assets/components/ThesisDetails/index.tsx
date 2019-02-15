@@ -15,7 +15,7 @@ import { Spinner } from "../Spinner";
 import { getDisabledStyle, macosifyKeys } from "../../utils";
 import { ThesisWorkMode, ApplicationState } from "../../app_types";
 import {
-	canModifyThesis, canDeleteThesis, canSeeThesisRejectionReason, canChangeStatusTo,
+	canModifyThesis, canDeleteThesis, canSeeThesisRejectionReason, canChangeStatusTo, canSeeThesisVotes,
 } from "../../permissions";
 import { Thesis } from "../../thesis";
 import { AppUser, Employee, Student } from "../../users";
@@ -54,7 +54,11 @@ const MainDetailsContainer = styled.div`
 `;
 
 const LeftDetailsContainer = styled.div`
-	width: 790px;
+	width: 100%;
+`;
+
+const VotesPlaceholder = styled.div`
+	height: 100%;
 `;
 
 const RightDetailsContainer = styled.div`
@@ -114,6 +118,16 @@ export class ThesisDetails extends React.PureComponent<Props> {
 		Mousetrap.unbind("del");
 	}
 
+	private shouldRenderRightPanel() {
+		return (
+			this.shouldRenderVotes() ||
+			this.shouldRenderRejectButton() ||
+			this.shouldRenderResetButton() ||
+			this.shouldRenderDeleteButton() ||
+			this.shouldRenderSaveButton()
+		);
+	}
+
 	public render() {
 		return <DetailsSectionWrapper>
 			{this.props.appState === ApplicationState.Saving
@@ -124,7 +138,10 @@ export class ThesisDetails extends React.PureComponent<Props> {
 				style={AppMode.isPerformingBackendOp() ? getDisabledStyle() : {}}
 			>
 				<LeftDetailsContainer>{this.renderThesisLeftPanel()}</LeftDetailsContainer>
-				<RightDetailsContainer>{this.renderThesisRightPanel()}</RightDetailsContainer>
+				{this.shouldRenderRightPanel()
+					? <RightDetailsContainer>{this.renderThesisRightPanel()}</RightDetailsContainer>
+					: null
+				}
 			</MainDetailsContainer>
 			{this.renderRejectionReasonIfApplicable()}
 		</DetailsSectionWrapper>;
@@ -155,9 +172,13 @@ export class ThesisDetails extends React.PureComponent<Props> {
 		</>;
 	}
 
+	private shouldRenderVotes() {
+		return canSeeThesisVotes();
+	}
+
 	private renderThesisRightPanel() {
 		return <>
-			<ThesisVotes
+			{this.shouldRenderVotes() ? <ThesisVotes
 				thesis={this.props.thesis}
 				original={this.props.original}
 				thesesBoard={this.props.thesesBoard}
@@ -168,7 +189,7 @@ export class ThesisDetails extends React.PureComponent<Props> {
 				hasUnsavedChanges={this.props.hasUnsavedChanges}
 				onChange={this.onVoteChanged}
 				save={this.handleSave}
-			/>
+			/> : this.renderVotesPlaceholder()}
 			<ButtonsContainer>
 				{this.renderRejectButton()}
 				{this.renderResetButton()}
@@ -178,8 +199,16 @@ export class ThesisDetails extends React.PureComponent<Props> {
 		</>;
 	}
 
+	private renderVotesPlaceholder() {
+		return <VotesPlaceholder />;
+	}
+
+	private shouldRenderRejectButton() {
+		return canChangeStatusTo(this.props.original, ThesisStatus.ReturnedForCorrections);
+	}
+
 	private renderRejectButton() {
-		if (!canChangeStatusTo(this.props.original, ThesisStatus.ReturnedForCorrections)) {
+		if (!this.shouldRenderRejectButton()) {
 			return null;
 		}
 		const { hasUnsavedChanges } = this.props;
@@ -204,8 +233,12 @@ export class ThesisDetails extends React.PureComponent<Props> {
 		}
 	}
 
+	private shouldRenderResetButton() {
+		return this.props.mode === ThesisWorkMode.Editing && canModifyThesis(this.props.original);
+	}
+
 	private renderResetButton() {
-		if (!canModifyThesis(this.props.original)) {
+		if (!this.shouldRenderResetButton()) {
 			return null;
 		}
 		const { hasUnsavedChanges } = this.props;
@@ -216,8 +249,12 @@ export class ThesisDetails extends React.PureComponent<Props> {
 		>Wyczyść</ActionButton>;
 	}
 
+	private shouldRenderDeleteButton() {
+		return this.props.mode === ThesisWorkMode.Editing && canDeleteThesis(this.props.original);
+	}
+
 	private renderDeleteButton() {
-		if (this.props.mode === ThesisWorkMode.Adding || !canDeleteThesis(this.props.original)) {
+		if (!this.shouldRenderDeleteButton()) {
 			return null;
 		}
 		return <ActionButton
@@ -226,8 +263,12 @@ export class ThesisDetails extends React.PureComponent<Props> {
 		>Usuń</ActionButton>;
 	}
 
+	private shouldRenderSaveButton() {
+		return canModifyThesis(this.props.original);
+	}
+
 	private renderSaveButton() {
-		if (!canModifyThesis(this.props.original)) {
+		if (!this.shouldRenderSaveButton()) {
 			return null;
 		}
 		const { hasUnsavedChanges } = this.props;

@@ -260,6 +260,10 @@ class ThesesAppInternal extends React.Component<Props, State> {
 	private onDelete = async () => {
 		try {
 			await ThesisEditing.delete();
+			// Deleting does reload the list
+			if (this.tableInstance) {
+				this.tableInstance.onListReloaded();
+			}
 			(this.props as any).alert.success("Praca została usunięta");
 		} catch (err) {
 			errorWithActionName("usunąć", err);
@@ -272,7 +276,10 @@ class ThesesAppInternal extends React.Component<Props, State> {
 		}
 		return confirmationDialog({
 			title: "Uwaga",
-			message: "Zmiana tytułu spowoduje wykasowanie wszystkich głosów. Czy kontynuować?",
+			message: (
+				"Zmiana tytułu spowoduje wykasowanie wszystkich głosów " +
+				"i rozpoczęcie głosowania od nowa. Czy kontynuować?"
+			),
 			yesText: "Tak, zmień tytuł",
 			noText: "Nie, wróć",
 		});
