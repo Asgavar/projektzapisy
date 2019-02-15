@@ -65,7 +65,7 @@ export function canModifyThesis(thesis: Thesis) {
 // The functions below will only be used if the one above returns true,
 // so they don't need to repeat their checks
 
-const STATUSES_UNCHANGEABLE_BY_VOTE = [
+const UNVOTEABLE_STATUSES = [
 	ThesisStatus.Accepted,
 	ThesisStatus.InProgress,
 	ThesisStatus.Defended
@@ -77,7 +77,7 @@ const STATUSES_UNCHANGEABLE_BY_VOTE = [
  * @param thesis The thesis to vote for
  */
 export function canChangeThesisVote(thesis: Thesis) {
-	return Users.isUserAdmin() || !STATUSES_UNCHANGEABLE_BY_VOTE.includes(thesis.status);
+	return Users.isUserAdmin() || !UNVOTEABLE_STATUSES.includes(thesis.status);
 }
 
 /**
