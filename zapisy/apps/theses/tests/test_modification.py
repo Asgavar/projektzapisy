@@ -5,7 +5,7 @@ from django.urls import reverse
 
 from apps.users.models import Employee, BaseUser
 
-from ..models import ThesisStatus, ThesisVote, STATUSES_UNCHANGEABLE_BY_VOTE
+from ..models import ThesisStatus, ThesisVote, UNVOTEABLE_STATUSES
 from ..system_settings import get_num_required_votes
 from ..serializers import GenericDict
 from ..views import NOT_READY_STATUSES
@@ -260,7 +260,7 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         """Test that employees are not permitted to vote for "vote unchangeable" theses"""
         voter = self.get_random_board_member_not_admin()
         self.login_as(voter)
-        for thesis_status in STATUSES_UNCHANGEABLE_BY_VOTE:
+        for thesis_status in UNVOTEABLE_STATUSES:
             self.thesis.status = thesis_status.value
             self.thesis.save()
             response = self.cast_vote_as(voter, random_definite_vote())

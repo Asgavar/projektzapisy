@@ -9,7 +9,7 @@ from django.contrib.auth.models import Group
 from apps.users.models import Employee, Student, BaseUser
 from apps.users.tests.factories import EmployeeFactory, StudentFactory
 from ..models import (
-    Thesis, ThesisVote, ThesisStatus, STATUSES_UNCHANGEABLE_BY_VOTE, VoteToProcess,
+    Thesis, ThesisVote, ThesisStatus, UNVOTEABLE_STATUSES, VoteToProcess,
     ThesesSystemSettings
 )
 
@@ -166,7 +166,7 @@ class ThesesBaseTestCase(APITestCase):
             thesis.save()
         for graded in graded_theses:
             self.set_thesis_vote_locally(graded, board_member, random_definite_vote())
-        vote_changeable = list(set(ThesisStatus) - set(STATUSES_UNCHANGEABLE_BY_VOTE))
+        vote_changeable = list(set(ThesisStatus) - set(UNVOTEABLE_STATUSES))
         for ungraded in ungraded_theses:
             ungraded.status = random.choice(vote_changeable).value
             ungraded.save()
@@ -179,7 +179,7 @@ class ThesesBaseTestCase(APITestCase):
         # they shouldn't count anymore
         unchangeable_theses = random.sample(ungraded_theses, random.randrange(num_theses // 3))
         for unchangeable in unchangeable_theses:
-            unchangeable.status = random.choice(STATUSES_UNCHANGEABLE_BY_VOTE).value
+            unchangeable.status = random.choice(UNVOTEABLE_STATUSES).value
             unchangeable.save()
         # They shouldn't be counted as ungraded anymore
         ungraded_theses = list(set(ungraded_theses) - set(unchangeable_theses))
