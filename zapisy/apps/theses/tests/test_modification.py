@@ -5,14 +5,18 @@ from django.urls import reverse
 
 from apps.users.models import Employee, BaseUser
 
-from ..models import ThesisStatus, ThesisVote, UNVOTEABLE_STATUSES
+from ..models import (
+    ThesisStatus, ThesisVote, UNVOTEABLE_STATUSES,
+    MIN_REJECTION_REASON_LENGTH, MAX_REJECTION_REASON_LENGTH
+)
 from ..system_settings import get_num_required_votes
 from ..serializers import GenericDict
 from ..views import NOT_READY_STATUSES
 from .base import ThesesBaseTestCase
 from .utils import (
     random_vote, random_reserved_until,
-    accepting_vote, rejecting_vote, random_definite_vote
+    accepting_vote, rejecting_vote, random_definite_vote,
+    string_of_length,
 )
 
 # Students shouldn't be allowed to modify any thesis regardless of status,
@@ -202,10 +206,23 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
         response = self.cast_vote_as(emp, random_vote())
         self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
 
+    def _ensure_update_fails_with_400(self, **kwargs):
+        response = self.update_thesis_with_data(**kwargs)
+        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+
     def ensure_user_cannot_cast_invalid_vote(self, user: BaseUser):
         self.login_as(user)
-        response = self.update_thesis_with_data(votes={user.pk: 123})
-        self.assertEqual(response.status_code, status.HTTP_400_BAD_REQUEST)
+        self._ensure_update_fails_with_400(votes="blah")
+        self._ensure_update_fails_with_400(votes={user.pk: "blah"})
+        self._ensure_update_fails_with_400(votes={user.pk: {"value": 123}})
+        reason_too_short = string_of_length(MIN_REJECTION_REASON_LENGTH - 10)
+        reason_too_long = string_of_length(MAX_REJECTION_REASON_LENGTH + 10)
+        self._ensure_update_fails_with_400(
+            votes={user.pk: {"value": ThesisVote.REJECTED.value, "reason": reason_too_short}}
+        )
+        self._ensure_update_fails_with_400(
+            votes={user.pk: {"value": ThesisVote.REJECTED.value, "reason": reason_too_long}}
+        )
 
     def test_cannot_cast_invalid_vote(self):
         self.run_test_with_board_members(self.ensure_user_cannot_cast_invalid_vote)

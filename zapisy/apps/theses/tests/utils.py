@@ -2,6 +2,7 @@ import random
 import sys
 from typing import List, Any
 from datetime import date, timedelta
+from string import ascii_uppercase
 
 from faker import Faker
 
@@ -111,3 +112,7 @@ def make_student_with_name(name: str) -> Student:
 def exactly_one(l: List[Any]) -> bool:
     """Check that exactly one element in the list is truthy"""
     return sum(bool(e) for e in l) == 1
+
+
+def string_of_length(length: int) -> str:
+    return "".join(random.choice(ascii_uppercase) for i in range(length))
