@@ -43,7 +43,7 @@ class ThesesListingTestCase(ThesesBaseTestCase):
         self._test_user_can_list_theses(self.get_random_board_member())
         self._test_user_can_list_theses(self.get_admin())
         # Students cannot see theses that are not "ready"
-        ready = list(filter(lambda t: t.status not in NOT_READY_STATUSES, self.theses))
+        ready = list(filter(lambda t: ThesisStatus(t.status) not in NOT_READY_STATUSES, self.theses))
         self._test_user_can_list_theses(
             self.get_random_student(),
             min(len(ready), PAGE_SIZE)

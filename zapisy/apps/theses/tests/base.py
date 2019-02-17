@@ -1,5 +1,5 @@
 import random
-from typing import Callable
+from typing import Callable, List
 
 from rest_framework.test import APITestCase
 from rest_framework import status
@@ -82,21 +82,27 @@ class ThesesBaseTestCase(APITestCase):
         return random.choice(cls.board_members)
 
     @classmethod
-    def get_random_board_member_different_from(cls, member):
+    def get_random_board_member_other_than(cls, members: List[Employee]):
         """Return a random board member different from the specified one"""
         result = cls.get_random_board_member()
-        while result == member:
+        while members and result in members:
             result = cls.get_random_board_member()
         return result
 
     @classmethod
     def get_random_board_member_not_admin(cls):
         """Get a random board member, but not the admin"""
-        return cls.get_random_board_member_different_from(cls.get_admin())
+        return cls.get_random_board_member_other_than([cls.get_admin()])
 
     @classmethod
     def get_random_board_member_not_rejecter(cls):
-        return cls.get_random_board_member_different_from(cls.get_rejecter())
+        return cls.get_random_board_member_other_than([cls.get_rejecter()])
+
+    @classmethod
+    def get_random_board_member_not_admin_or_rejecter(cls):
+        return cls.get_random_board_member_other_than([
+            cls.get_rejecter(), cls.get_admin(),
+        ])
 
     @classmethod
     def get_rejecter(cls):
@@ -124,11 +130,15 @@ class ThesesBaseTestCase(APITestCase):
         )
 
     def get_board_members(self, num: int, to_skip: Employee=None):
+        def get_voter():
+            if to_skip:
+                return self.get_random_board_member_other_than([to_skip])
+            return self.get_random_board_member()
         voters = []
         while len(voters) < num:
-            voter = self.get_random_board_member_different_from(to_skip)
+            voter = get_voter()
             while voter in voters:
-                voter = self.get_random_board_member_different_from(to_skip)
+                voter = get_voter()
             voters.append(voter)
         return voters
 
@@ -206,5 +216,5 @@ class ThesesBaseTestCase(APITestCase):
         and the admin
         """
         admin = self.get_admin()
-        test_func(self.get_random_board_member_different_from(admin))
+        test_func(self.get_random_board_member_not_admin())
         test_func(admin)

@@ -50,7 +50,7 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
             self.thesis.save()
             response = self.update_thesis_with_data(reserved_until=random_reserved_until())
             self.assertIn(response.status_code, STUDENT_MODIFY_RESPONSES)
-            if thesis_status.value not in NOT_READY_STATUSES:
+            if thesis_status not in NOT_READY_STATUSES:
                 # if not ready, it won't be sent back
                 modified_thesis = self.get_modified_thesis()
                 self.assertEqual(modified_thesis["reserved_until"], str(self.thesis.reserved_until))
@@ -179,8 +179,8 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
 
     def test_board_members_cannot_vote_as_other(self):
         """Ensure board members cannot vote as anyone else"""
-        board_member = self.get_random_board_member_different_from(self.get_admin())
-        another_member = self.get_random_board_member_different_from(board_member)
+        board_member = self.get_random_board_member_not_admin()
+        another_member = self.get_random_board_member_other_than([board_member])
         self.login_as(board_member)
         response = self.cast_vote_as(another_member, random_vote())
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -188,7 +188,7 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
     def test_admin_can_vote_as_anyone(self):
         """Ensure the system admin can cast votes as any board member"""
         admin = self.get_admin()
-        another_member = self.get_random_board_member_different_from(admin)
+        another_member = self.get_random_board_member_not_admin()
         self.login_as(admin)
         response = self.cast_vote_as(another_member, random_vote())
         self.assertEqual(response.status_code, status.HTTP_200_OK)
@@ -324,7 +324,7 @@ class ThesesModificationTestCase(ThesesBaseTestCase):
 
     def test_board_member_cannot_reject(self):
         """Ensure that no one but the rejecter can reject a thesis"""
-        member = self.get_random_board_member_not_rejecter()
+        member = self.get_random_board_member_not_admin_or_rejecter()
         self.login_as(member)
         response = self.update_thesis_with_data(status=ThesisStatus.RETURNED_FOR_CORRECTIONS.value)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
