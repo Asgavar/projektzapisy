@@ -65,7 +65,7 @@ def select_for_voting(request):
     courses = CourseEntity.noremoved.filter(
         status__in=[CourseEntity.STATUS_IN_OFFER, CourseEntity.STATUS_TO_VOTE])
     courses_choices = [(x.pk, x.name) for x in courses]
- 
+
     if request.method == 'POST':
         form = SelectVotingForm(request.POST)
         form.fields['courses'].choices = courses_choices
@@ -74,12 +74,10 @@ def select_for_voting(request):
                 int(x) for x in form.cleaned_data['courses']
             ]
             for course in courses:
-                if (not course.is_in_voting()
-                        and course.id in selected_courses_ids):
+                if (not course.is_in_voting() and course.id in selected_courses_ids):
                     course.mark_for_voting()
                     course.save()
-                elif (course.is_in_voting()
-                        and course.id not in selected_courses_ids):
+                elif (course.is_in_voting() and course.id not in selected_courses_ids):
                     course.status = CourseEntity.STATUS_IN_OFFER
                     course.save()
         return redirect('/offer/manage/select_for_voting')
