@@ -262,8 +262,11 @@ def filter_theses_queryset_for_only_mine(qs: QuerySet, user: BaseUser):
 
 
 NOT_READY_STATUSES = (
-    ThesisStatus.BEING_EVALUATED.value,
-    ThesisStatus.RETURNED_FOR_CORRECTIONS.value
+    ThesisStatus.BEING_EVALUATED,
+    ThesisStatus.RETURNED_FOR_CORRECTIONS
+)
+NOT_READY_STATUS_VALUES = tuple(
+    status.value for status in NOT_READY_STATUSES
 )
 
 
@@ -273,7 +276,7 @@ def filter_theses_queryset_for_user(qs: QuerySet, user: BaseUser):
     """
     # Students should not see theses that are not "ready" yet
     if is_student(user):
-        return qs.exclude(status__in=NOT_READY_STATUSES)
+        return qs.exclude(status__in=NOT_READY_STATUS_VALUES)
     return qs
 
 
