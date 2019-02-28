@@ -69,6 +69,14 @@
                     <td> {{ course.votes_count }} <a href="{% url 'course-votes' course.slug %}">{% trans "lista" %}</a></td>
                 </tr>
             {% endif %}
+            {% for group_of_waiting_students in grouped_waiting_students %}
+                {% if group_of_waiting_students.students_amount %}
+                    <tr>
+                        <th scope="row">Liczba chętnych na {{ group_of_waiting_students.type_name }}</th>
+                        <td>{{ group_of_waiting_students.students_amount }}</td>
+                    </tr>
+                {% endif %}
+            {% endfor %}
         </tbody>
     </table>
 

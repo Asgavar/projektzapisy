@@ -232,7 +232,7 @@ def prototype_get_course(request, course_id):
     """Retrieves the annotated groups of a single course."""
     student = request.user.student
     course = Course.objects.get(pk=course_id)
-    groups = course.groups.all().select_related(
+    groups = course.groups.exclude(extra='hidden').select_related(
         'course', 'course__entity', 'teacher', 'course__semester', 'teacher__user'
     ).prefetch_related('term', 'term__classrooms')
     can_enqueue_dict = Record.can_enqueue_groups(student, groups)
@@ -255,25 +255,37 @@ def prototype_update_groups(request):
     The list of groups ids to update will be sent in JSON body of the request.
     """
     student = request.user.student
+    semester = Semester.objects.get_next()
     # Axios sends POST data in json rather than _Form-Encoded_.
     ids: List[int] = json.loads(request.body.decode('utf-8'))
     num_enrolled = Count('record', filter=Q(record__status=RecordStatus.ENROLLED))
     is_enrolled = Count(
         'record',
-        filter=(Q(record__status=RecordStatus.ENROLLED) & Q(record__student_id=student.pk)))
+        filter=(Q(record__status=RecordStatus.ENROLLED, record__student_id=student.pk)))
     is_enqueued = Count(
         'record',
-        filter=(Q(record__status=RecordStatus.QUEUED) & Q(record__student_id=student.pk)))
-    groups = Group.objects.filter(pk__in=ids).annotate(num_enrolled=num_enrolled).annotate(
+        filter=(Q(record__status=RecordStatus.QUEUED, record__student_id=student.pk)))
+
+    groups_from_ids = Group.objects.filter(pk__in=ids)
+    groups_enrolled_or_enqueued = Group.objects.filter(
+        course__semester=semester,
+        record__status__in=[RecordStatus.QUEUED, RecordStatus.ENROLLED],
+        record__student=student)
+    groups_all = groups_from_ids | groups_enrolled_or_enqueued
+    groups = groups_all.annotate(num_enrolled=num_enrolled).annotate(
         is_enrolled=is_enrolled).annotate(is_enqueued=is_enqueued).select_related(
             'course', 'course__entity', 'teacher', 'course__semester',
             'teacher__user').prefetch_related('term', 'term__classrooms')
+
     can_enqueue_dict = Record.can_enqueue_groups(student, groups)
     can_dequeue_dict = Record.can_dequeue_groups(student, groups)
+    hidden_groups = HiddenGroups.hidden_groups_for_student(student, groups)
+    hidden_groups_set = set(hidden_groups)
     for group in groups:
         group.can_enqueue = can_enqueue_dict.get(group.pk)
         group.can_dequeue = can_dequeue_dict.get(group.pk)
         group.is_enqueued = bool(group.is_enqueued)
         group.is_enrolled = bool(group.is_enrolled)
+        group.is_hidden = group.pk in hidden_groups_set
     group_dicts = build_group_list(groups)
     return JsonResponse(group_dicts, safe=False)

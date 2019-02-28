@@ -50,13 +50,13 @@ BREAK_DURATION = datetime.timedelta(minutes=15)
 def student_profile(request: HttpRequest, user_id: int) -> HttpResponse:
     """student profile"""
     try:
-        student = Student.objects.select_related('user').get(user_id=user_id)
+        student: Student = Student.objects.select_related('user', 'consent').get(user_id=user_id)
     except Student.DoesNotExist:
         raise Http404
 
     # We will not show the student profile if he decides to hide it.
-    if not BaseUser.is_employee(request.user) and not student.consent_granted:
-        return HttpResponseRedirect(request.META.get('HTTP_REFERER'))
+    if not BaseUser.is_employee(request.user) and not student.consent_granted():
+        return HttpResponseRedirect(reverse('students-list'))
 
     semester = Semester.objects.get_next()
 
@@ -66,8 +66,13 @@ def student_profile(request: HttpRequest, user_id: int) -> HttpResponse:
             'group__teacher', 'group__teacher__user', 'group__course',
             'group__course__entity').prefetch_related('group__term', 'group__term__classrooms')
     groups = [r.group for r in records]
-    group_dicts = build_group_list(groups)
 
+    # Highlight groups shared with the viewer in green.
+    viewer_groups = Record.common_groups(request.user, groups)
+    for g in groups:
+        g.is_enrolled = g.pk in viewer_groups
+
+    group_dicts = build_group_list(groups)
     data = {
         'student': student,
         'groups_json': json.dumps(group_dicts, cls=DjangoJSONEncoder),
@@ -76,7 +81,8 @@ def student_profile(request: HttpRequest, user_id: int) -> HttpResponse:
     if request.is_ajax():
         return render(request, 'users/student_profile_contents.html', data)
 
-    active_students = Student.objects.filter(status=0).select_related('user')
+    active_students = Student.get_list(
+        begin='All', restrict_list_consent=not BaseUser.is_employee(request.user))
     data.update({
         'students': active_students,
         'char': "All",
@@ -96,6 +102,12 @@ def employee_profile(request: HttpRequest, user_id: int) -> HttpResponse:
         course__semester_id=semester.pk, teacher=employee).select_related(
             'teacher', 'teacher__user', 'course', 'course__entity').prefetch_related(
                 'term', 'term__classrooms')
+    groups = list(groups)
+
+    # Highlight groups shared with the viewer in green.
+    viewer_groups = Record.common_groups(request.user, groups)
+    for g in groups:
+        g.is_enrolled = g.pk in viewer_groups
 
     group_dicts = build_group_list(groups)
 
