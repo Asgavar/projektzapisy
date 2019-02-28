@@ -58,10 +58,10 @@ $('.checkall').on('click', function(){
                     <td>
                     {% if user.student.consent_granted %}
                         Tak&emsp;
-                        <input type="submit" value="Wycofaj zgodę" name="no" class="btn secondary" />
+                        <button type="submit" value="Wycofaj zgodę" name="no" class="btn btn-secondary">Wycofaj zgodę</button>
                     {% else %}
                         Nie&emsp;
-                        <input type="submit" value="Udziel zgody" name="yes" class="btn secondary" />
+                        <button type="submit" value="Udziel zgody" name="yes" class="btn btn-secondary">Udziel zgody</button>
                     {% endif %}</td>
                 </tr>
             </form>

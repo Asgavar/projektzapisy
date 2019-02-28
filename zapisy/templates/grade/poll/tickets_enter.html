@@ -7,8 +7,9 @@
 {% block bread %}
   <li class="breadcrumb-item"><a href="/">Strona główna</a></li>
 	<li class="breadcrumb-item"><a href="{% url 'grade-main' %}">Ocena zajęć</a></li>
-	Weryfikacja biletów
+	<li class="breadcrumb-item active" aria-current="page">Weryfikacja biletów</li>
 {% endblock %}
+
 {% block all-content %}
 	{% if user.is_authenticated %}
         <div class="alert-message">

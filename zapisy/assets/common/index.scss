@@ -181,16 +181,28 @@ div.space2 {
   max-width: 380px;
 }
 
-.nav-tabs>li>a{
-  background-color: #005f92;
-  color: #FFFFFF;
-  margin-right: 1px;
-}
+#system_menu {
+  width: 100%;
+  ul#main-menu-list {
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    overflow-y: hidden;
+    -webkit-overflow-scrolling: touch;
+    li {
+      flex: 0 0 auto;
+      a {
+        background-color: #005f92;
+        color: #FFFFFF;
+        margin-right: 1px;
+      }
 
-.nav-tabs>li.active>a{
-  background-color: #FFFFFF;
-  color: #005f92;
-  margin-right: 1px;
+      &.active a {
+        background-color: #FFFFFF;
+        color: #005f92;
+        margin-right: 1px;
+      }
+    }
+  }
 }
 
 colgroup col.table-info-type  {
