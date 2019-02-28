@@ -14,12 +14,12 @@
 
 {% block system_menu %}
 <ul class="nav nav-tabs">
-    <li class="nav-item" {% block grade-info %}{% endblock %}>
+    <li class="nav-item {% block grade-info %}{% endblock %}">
         <a class="nav-link" href="{% url 'grade-main' %}">Zasady</a></li>
     {%if user.student and grade %}
-        <li class="nav-item"{% block connection-choice %}{% endblock %}>
-            <a class="nav-link" href="{% url 'grade-ticket-connections-choice' %}">Pobierz klucze</a>
-        </li>
+    <li class="nav-item {% block connection-choice %}{% endblock %}">
+        <a class="nav-link" href="{% url 'grade-ticket-connections-choice' %}">Pobierz klucze</a>
+    </li>
     {% endif %}
     {% if grade %}
         <li class="nav-item">

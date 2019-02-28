@@ -5,11 +5,11 @@
 
 
 {% block bread %}
-	<a href="/">Strona główna</a>  &raquo;
-	<a href="{% url 'grade-main' %}">Ocena zajęć</a>  &raquo;
+  <li class="breadcrumb-item"><a href="/">Strona główna</a></li>
+	<li class="breadcrumb-item"><a href="{% url 'grade-main' %}">Ocena zajęć</a></li>
 	Weryfikacja biletów
 {% endblock %}
-{% block content %}
+{% block all-content %}
 	{% if user.is_authenticated %}
         <div class="alert-message">
             <strong>Uwaga!</strong> Aby ankieta pozostała anonimowa należy się <a href="{% url 'grade-logout' %}">wylogować</a>.

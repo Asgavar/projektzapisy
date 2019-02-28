@@ -84,6 +84,10 @@ div.top .systemtopbar ul li.active a {
   background: rgba(255, 251, 251, 0.75); 
 }
 
+#main-content, #sidebar {
+  margin: 2em 0;
+}
+
 #btn-usos {
   padding: 10px 0;
   //margin-bottom:10px auto;
@@ -187,4 +191,8 @@ div.space2 {
   background-color: #FFFFFF;
   color: #005f92;
   margin-right: 1px;
+}
+
+colgroup col.table-info-type  {
+	background-color: #F9F9F9;
 }

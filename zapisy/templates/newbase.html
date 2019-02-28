@@ -17,12 +17,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>{% block main-subtitle %}{% endblock %} &ndash; {% block title %}System Zapisów{% endblock %}</title>
     <meta name="description" content="System obsługi cyklu dydaktycznego Instytut Informatyki Uniwersytetu Wrocławskiego">
-    <meta name="author" content="KSI i Studenci Instytutu Informatyki Uniwersytetu Wrocławskiego">
 
     <link rel="shortcut icon" href="{% static 'favicon.ico' %}">
-    <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
-    <link rel="apple-touch-icon" sizes="72x72" href="{% static 'images/apple-touch-icon-72x72.png' %}">
-    <link rel="apple-touch-icon" sizes="114x114" href="{% static 'images/apple-touch-icon-114x114.png' %}">
     <!-- Global site tag (gtag.js) - Google Analytics -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=UA-109984921-1"></script>
     <script>
@@ -36,7 +32,6 @@
         gtag('config', 'UA-109984921-1');
     </script>
 
-    <script type="text/javascript" src="{% static "vendor.js" %}"></script>
     {% render_bundle "main" %}
     {% render_bundle "polyfill" %}
     {% render_bundle "vendors" %}
@@ -44,9 +39,6 @@
     {% endblock %}
     {% block styles %}
     {% endblock %}
-    <script type="text/javascript">
-        const user_is_student = {% if request.user.student %}true{% else %} false{% endif %};
-    </script>
     {% block js %}{% endblock %}
     {% block rss %}{% endblock %}
     {% block head_extra %}{% endblock %}
@@ -75,7 +67,7 @@
         });
     </script>
     <script src="{% static "js/common/utils.js" %}"></script>
-    <script src="{% static "js/common/base.js" %}"></script>
+    
 </head>
 
 <body>
@@ -106,13 +98,13 @@
                         <a href="{% url 'events:classrooms' %}" class="nav-link">Sale</a>
                     </li>
                 </ul>
-                {% if user.is_authenticated %}
+            {% if user.is_authenticated %}
                 <div class="navbar-nav ml-auto">
-                <span class="navbar-text">
-                    <strong>
-                        {{ user.get_full_name }}
-                    </strong>
-                </span>
+                    <span class="navbar-text">
+                        <strong>
+                            {{ user.get_full_name }}
+                        </strong>
+                    </span>
                     <ul class="navbar-nav mr-auto">
                         <li class="nav-item">
                             <a href="{% url 'my-profile' %}" class="nav-link">Moje konto</a>
@@ -241,21 +233,23 @@
                     {% endblock %}
                 </div>
             </div>
-            <div id="main-content-container" class="sidebar-right inner-content-container">
-                <div class="container">
+            <div class="container sidebar-right" id="main-content-container">
+                {% block all-content %}
+                <div class="row">
                     {% block topContent %}
                     {% endblock %}
                     {% block center %}
+                    {% endblock %}
                 </div>
                 <div class="row">
-                    <div class="col">
+                    <div class="col col-lg-9">
                         {# WARNING ajaxCourseLoad.ts depends on this #}
                         <div id="main-content">
                             {% block content %}
                             {% endblock %}
                         </div>
                     </div>
-                    <nav id="sidebar">
+                    <nav class="col col-lg-3" id="sidebar">
                         {% block sidebar %}
                         {% endblock %}
                     </nav>

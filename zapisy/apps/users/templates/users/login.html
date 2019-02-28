@@ -17,7 +17,7 @@
 
 {% block main-subtitle %}Logowanie{% endblock %}
 
-{% block content %}
+{% block all-content %}
     {% if user.is_authenticated %}
         <p class="main-message">Jesteś już zalogowany. Możesz się <a href="{% url 'user-logout' %}">wylogować</a>.</p>
     {% else %}

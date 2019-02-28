@@ -8,11 +8,10 @@
 <li class="breadcrumb-item active" aria-current="page">Oceń zajęcia</li>
 {% endblock %}
 
-{% block content %}
+{% block all-content %}
 <div class="alert alert-danger" role="alert">
     <strong>Uwaga!</strong>
-        Aby ankieta pozostała anonimowa należy się <a href="{% url 'grade-logout' %}">
-        <button class="btn btn-danger btn-sm ml-1">wylogować</button>
-    </a>
+        Aby ankieta pozostała anonimowa należy się <a class="alert-link" href="{% url 'grade-logout' %}">
+        wylogować</a>.
 </div>
 {% endblock %}

@@ -6,10 +6,7 @@
     font-weight: bold;
     color: black;
 }
-colgroup col.table-info-type 
-{
-	background-color: #F9F9F9;
-}
+
 .info-table-header:not(:first-child)
 {
     margin-top: 40px;

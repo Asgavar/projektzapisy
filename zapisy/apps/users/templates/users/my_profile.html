@@ -14,7 +14,7 @@
 
 <script>
 $(function(){
-$('.checkall').live('click', function(){
+$('.checkall').on('click', function(){
     var cls = $(this).parent().parent().attr('class');
     if( $(this).attr('checked')){
         $('tr[class="'+ cls +'"]').find('input[type="checkbox"]').attr('checked', true);
@@ -34,7 +34,7 @@ $('.checkall').live('click', function(){
 
 {% block main-subtitle %}Moje konto{% endblock %}
 
-{% block content %}
+{% block all-content %}
 <div class="container">
     <p class="info-table-header">Moje dane</p>
         <table class="table table-condensed">
