@@ -3,9 +3,8 @@
 {% block results %}
     {% if results %}
         {% if completness %}
-            <div class="alert-message info">
-                    <a class="close" href="#">×</a>
-                    <p>{{ completness }}</p>
+            <div class="alert alert-warning">
+                    {{ completness }}
               </div>
         {% endif %}
         <div class="poll-header">
