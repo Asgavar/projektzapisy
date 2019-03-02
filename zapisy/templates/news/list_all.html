@@ -11,14 +11,6 @@
 <link href="/feeds/news/" rel="alternate" type="application/rss+xml" title="Aktualności RSS" />
 {% endblock %}
 
-{% block styles %}
-{% compressed_css 'news' %}
-{% endblock %}
-
-{% block js %}
-{% compressed_js 'news' %}
-{% endblock %}
-
 {% block bread %}
 <li class="breadcrumb-item"><a href="/">Strona główna</a></li>
 <li class="breadcrumb-item active" aria-current="page">Aktualności</li>
@@ -60,29 +52,23 @@
 </div>
 
 
-
-
 <div class="row">
     <div class="col">
-        <div id="news-content">
-            {% if items %}
-            <div class="od-news-list">
-                {% for news in items %}
-                <div id="od-news-{{news.id}}" class="od-news-item p-4">
-                    <div class="od-news-header">
+        {% if items %}
+            {% for news in items %}
+                <div id="od-news-{{news.id}}" class="jumbotron shadow-sm p-4">
+                    <div class="container m-2">
                         <h3>{{ news.title }}</h3>
-                        <span class="od-news-date">{{ news.date|date:"l, d.m.Y - G:i" }} &mdash; {{ news.author.get_full_name }}</span>
+                        <span>{{ news.date|date:"l, d.m.Y - G:i" }} &mdash; {{ news.author.get_full_name }}</span>
+                        <p class="p-2">
+                            {{ news.body|safe }}
+                        </p>
                     </div>
-                    <p class="od-news-body">
-                        {{ news.body|safe }}
-                    </p>
                 </div>
-                {% endfor %}
-            </div>
-            {% else %}
+            {% endfor %}
+        {% else %}
             <p>Nie ma ogłoszeń pasujących do zapytania.</p>
-            {% endif %}
-        </div>
+        {% endif %}
     </div>
 </div>
 
@@ -90,19 +76,22 @@
     <div class="col">
         <div class="pagination justify-content-center">
             <ul class="pagination">
-                <li class="page-item prev{% if not items.has_previous %} disabled{% endif %}"><a class="page-link"
-                        {% if items.has_previous %}href="?page={{ items.previous_page_number }}" {% endif %}>Poprzednia</a></li>
+                <li class="page-item prev {% if not items.has_previous %}disabled{% endif %}">
+                    <a class="page-link" {% if items.has_previous %}href="?page={{ items.previous_page_number }}"{% endif %}>Poprzednia</a>
+                </li>
                 {% for index in page_range %}
-                {% if index <= items.number|add:5 and index >= items.number|add:-5 %}
-                    <li class="page-item"><a class="page-link" href="?page={{ forloop.counter }}">{{forloop.counter }}</a></li>
+                    {% if index <= items.number|add:3 and index >= items.number|add:-3 %}
+                        <li class="page-item {% if forloop.counter == items.number %}active{% endif %}">
+                            <a class="page-link" href="?page={{ forloop.counter }}"> {{ forloop.counter }}</a>
+                        </li>
                     {% endif %}
-                    {% endfor %}
-
-                    <li class="page-item next{% if not items.has_next %} disabled{% endif %}"><a class="page-link"
-                            {% if items.has_next %}href="?page={{ items.next_page_number }}" {% endif %}>Następna</a></li>
+                {% endfor %}
+                <li class="page-item next {% if not items.has_next %}disabled{% endif %}">
+                    <a class="page-link" {%if items.has_next %}href="?page={{ items.next_page_number }}"{% endif %}>Następna</a>
+                </li>
             </ul>
         </div>
     </div>
-    </div>
+</div>
 
 {% endblock %}

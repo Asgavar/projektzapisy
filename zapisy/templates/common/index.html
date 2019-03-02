@@ -4,52 +4,44 @@
 
 {% block styles %}
 {% compressed_css 'mainpage' %}
-{% compressed_css 'news' %}
 {% endblock %}
 
 {% block main-subtitle %}Strona główna{% endblock %}
 
-
-{% block js %}
-{% compressed_js 'news' %}
-{% endblock %}
-
 {% block all-content %}
 
-    <div class="jumbotron jumbotron-fluid">
+    <div class="jumbotron jumbotron-fluid shadow-sm p-4">
         <div class="container container-fluid">
-            <div class="col">
-                <h4 class="display-4">Aktualności</h4>
-                <div class="od-news-list">
-                    {% for news in recent_news %}
-                    <div class="od-news-item p-3">
-                        <h3>{{ news.title }}</h3>
-                        <span class="od-news-date">{{ news.date|date:"l, d.m.Y - G:i" }}
-                            &mdash; {{ news.author.get_full_name }}</span>
-                        <p>{{ news.body|safe }}</p>
-                    </div>
-                    {% endfor %}
+            <h2 class="display-2">Aktualności</h2>
+            <div class="container">
+                {% for news in recent_news %}
+                <div class="od-news-item p-2">
+                    <h3>{{ news.title }}</h3>
+                    <span>{{ news.date|date:"l, d.m.Y - G:i" }}
+                        &mdash; {{ news.author.get_full_name }}</span>
+                    <p>{{ news.body|safe }}</p>
                 </div>
-            </div>
-            <div class="col offset-md-10">
-                <a class="btn btn-primary" href="{% url 'news-all' %}">Więcej aktualności</a>
+                {% endfor %}
+                <div class="row justify-content-end">
+                    <a class="float-right btn btn-primary" href="{% url 'news-all' %}">Więcej aktualności</a>
+                </div>
             </div>
         </div>
     </div>
     
-    <div class="row">
+    <div class="row align-items-end">
         <div class="col">
-            <h4 class="display-3">System Zapisów</h4>
+            <h1 class="display-1">System Zapisów</h1>
             <p class="lead">System zapisów na zajęcia w Instytucie Informatyki Uniwersytetu Wrocławskiego.</p>
             <a class="btn btn-secondary" href="{% url 'course-list' %}">Przejdź</a>
         </div>
         <div class="col">
-            <h4 class="display-3">Oferta Dydaktyczna</h4>
+            <h1 class="display-1">Oferta Dydaktyczna</h1>
             <p class="lead">System kształtowania oferty dydaktycznej w Instytucie Informatyki.</p>
             <a class="btn btn-secondary" href="{% url 'offer-main' %}">Przejdź</a>
         </div>
         <div class="col">
-            <h4 class="display-3">Ocena zajęć</h4>
+            <h1 class="display-1">Ocena zajęć</h1>
             <p class="lead">System oceny zajęć w Instytucie Informatyki Uniwersytetu Wrocławskiego.</p>
             <a class="btn btn-secondary" href="{% url 'grade-main' %}">Przejdź</a>
         </div>

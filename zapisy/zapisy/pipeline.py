@@ -70,17 +70,6 @@ PIPELINE_CSS = {
             'media': 'screen,projection',
         },
     },
-    'news': {
-        'source_filenames': (
-            'css/main.css',
-            'css/fereol.css',
-            'css/news.css',
-        ),
-        'output_filename': 'css/news.min.css',
-        'extra_context': {
-            'media': 'screen,projection',
-        },
-    },
     'login': {
         'source_filenames': (
             'css/main.css',
@@ -293,20 +282,6 @@ PIPELINE_JS = {
             'js/grade/poll/poll_answer.js'
         ),
         'output_filename': 'js/gradeuserpoll.min.js',
-    },
-    'news': {
-        'source_filenames': (
-            'js/jquery/jquery-1.5.2.js',
-            'js/jquery/jquery-ui-1.8.17.custom.js',
-            'js/jquery/jquery.cookies.2.2.0.min.js',
-            'js/jquery/baseExtensions.js',
-            'js/main.js',
-            'js/common/bootstrap-dropdown.js',
-            'js/components/messageBox.js',
-            'js/news.js',
-            'js/components/topBarFilter.js'
-        ),
-        'output_filename': 'js/news.min.js',
     },
     'courses': {
         'source_filenames': (
