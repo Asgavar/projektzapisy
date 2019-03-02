@@ -188,6 +188,7 @@ div.space2 {
     overflow-x: auto;
     overflow-y: hidden;
     -webkit-overflow-scrolling: touch;
+    border-bottom: 0;
     li {
       flex: 0 0 auto;
       a {

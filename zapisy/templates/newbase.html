@@ -234,11 +234,10 @@
                 </div>
             </div>
             <div class="container sidebar-right" id="main-content-container">
+                {# Use this block if you don't want a layout with right-hand sidebar #}
                 {% block all-content %}
                 <div class="row">
                     {% block topContent %}
-                    {% endblock %}
-                    {% block center %}
                     {% endblock %}
                 </div>
                 <div class="row">
