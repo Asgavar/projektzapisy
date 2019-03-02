@@ -1,10 +1,12 @@
 {% extends "grade/poll/poll_results.html" %}
 
+{% load crispy_forms_tags %}
+
 {% block results %}
     {% if form %}
         <div id="ans-title"><h1>Odpowiedź {{ page }}</h1></div>
         <br/><br/>
-        {{ form.as_divs }}
+        {{ form|crispy }}
         
         {% if connected %}
         <a class="connected-link">Powiązane odpowiedzi</a>
@@ -12,7 +14,7 @@
         <div class="connected-polls">
             <br/><br/>
             {% for cform in connected %}
-                {{ cform.as_divs }}
+                {{ cform|crispy }}
             {% endfor %}
         </div>
         {% endif %}
