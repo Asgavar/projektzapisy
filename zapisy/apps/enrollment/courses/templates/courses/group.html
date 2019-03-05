@@ -31,13 +31,15 @@
     <li class="breadcrumb-item">
 	    <a href="{% url 'course-page' group.course.slug %}">
             {{group.course.name}}
-            {{group.get_type_display}}: {{group.get_teacher_full_name}}
         </a>
+    </li>
+    <li class="breadcrumb-item active" aria-current="page">
+        {{group.get_type_display}}: {{group.get_teacher_full_name}}
     </li>
     
 	{% if user.is_staff %}
     {# Translators: chodzi o zmianę, nie o odsłonę #}
-        <a href="{% url 'admin:courses_group_change' group.pk %}">&nbsp;{% trans "Edycja" %}</a>
+        <a class="text-info mx-2" href="{% url 'admin:courses_group_change' group.pk %}">({% trans "edytuj grupę" %})</a>
     {% endif %}
 {% endblock %}
 
