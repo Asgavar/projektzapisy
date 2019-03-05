@@ -93,8 +93,8 @@
         </div>
     </form>
     
-    {% include "grade/poll/poll_results_sidebar_list.html" with polls=polls_by_course semester=semester summary="Ankiety &mdash; przedmioty" %}
-    {% include "grade/poll/poll_results_sidebar_list.html" with polls=polls_by_teacher semester=semester summary="Ankiety &mdash; osoby" %}
+    {% include "grade/poll/poll_results_sidebar_list.html" with polls=polls_by_course semester=semester pid=pid summary="Ankiety &mdash; przedmioty" only %}
+    {% include "grade/poll/poll_results_sidebar_list.html" with polls=polls_by_teacher semester=semester pid=pid summary="Ankiety &mdash; osoby" only %}
     
     
     

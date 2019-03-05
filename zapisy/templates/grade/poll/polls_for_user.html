@@ -35,10 +35,10 @@
             <h3>Twoje ankiety</h3>
         {% endif %}
         {% if polls %}
-            {% include "grade/poll/polls_sidebar_list.html" with polls=polls summary="Ankiety aktywne" %}
+            {% include "grade/poll/polls_sidebar_list.html" with polls=polls pid=pid summary="Ankiety aktywne" only %}
         {% endif %}
         {% if finished %}
-            {% include "grade/poll/polls_sidebar_list.html" with polls=finished summary="Ankiety zakończone" %}
+            {% include "grade/poll/polls_sidebar_list.html" with polls=finished pid=pid summary="Ankiety zakończone" only %}
         {% endif %}
     </div>
 {% endblock %}
