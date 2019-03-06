@@ -1,6 +1,10 @@
 @import "variables";
 @import "~bootstrap/scss/bootstrap";
 
+@page {
+  size: auto;
+}
+
 html {
   overflow-y: auto;
   overflow-x: hidden;

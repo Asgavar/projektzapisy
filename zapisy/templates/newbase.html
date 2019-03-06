@@ -71,7 +71,7 @@
 </head>
 
 <body>
-    <div class="container-fluid p-0">
+    <div class="container-fluid p-0 d-print-none">
         <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
             <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
                 aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
@@ -211,7 +211,7 @@
     <div>
         <div class="container content-container">
             {% if request.path != '/' %}
-            <div class="row">
+            <div class="row d-print-none">
                 <div class="col">
                     <nav aria-label="breadcrumb" role="navigation">
                         <ol class="breadcrumb">
@@ -236,7 +236,7 @@
             <div class="container sidebar-right" id="main-content-container">
                 {# Use this block if you don't want a layout with right-hand sidebar #}
                 {% block all-content %}
-                <div class="row">
+                <div class="row d-print-none">
                     {% block topContent %}
                     {% endblock %}
                 </div>
@@ -248,7 +248,7 @@
                             {% endblock %}
                         </div>
                     </div>
-                    <nav class="col col-lg-3 col-12" id="sidebar">
+                    <nav class="col col-lg-3 col-12 d-print-none" id="sidebar">
                         {% block sidebar %}
                         {% endblock %}
                     </nav>
@@ -256,7 +256,7 @@
                 {% endblock %}
             </div>
 
-            <div class="row">
+            <div class="row d-print-none">
                 <div class="col">
                     <footer class="sticky-footer">
                         <p>
