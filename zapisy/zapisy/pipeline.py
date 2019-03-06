@@ -81,32 +81,6 @@ PIPELINE_CSS = {
             'media': 'screen,projection',
         },
     },
-    'schedule': {
-        'source_filenames': (
-            'css/main.css',
-            'css/fereol.css',
-            'css/common/schedule.css',
-            'css/common/schedule-courses.css',
-            'css/enrollment/schedule.css'
-        ),
-        'output_filename': 'css/schedule.min.css',
-        'extra_context': {
-            'media': 'screen,projection',
-        },
-    },
-    'prototype': {
-        'source_filenames': (
-            'css/main.css',
-            'css/fereol.css',
-            'css/common/schedule.css',
-            'css/common/schedule-courses.css',
-            'css/enrollment/schedule-prototype.css'
-        ),
-        'output_filename': 'css/prototype.min.css',
-        'extra_context': {
-            'media': 'screen,projection',
-        },
-    },
     'mainpage': {
         'source_filenames': (
             'css/main.css',
@@ -258,30 +232,6 @@ PIPELINE_JS = {
             'js/grade/poll/poll_results.js',
         ),
         'output_filename': 'js/pollresult.min.js',
-    },
-    'pollbase': {
-        'source_filenames': (
-            'js/jquery/jquery-1.5.2.js',
-            'js/jquery/jquery-ui-1.8.17.custom.js',
-            'js/jquery/jquery.cookies.2.2.0.min.js',
-            'js/jquery/baseExtensions.js',
-            'js/main.js',
-            'js/common/bootstrap-dropdown.js',
-            'js/grade/grade.js',
-        ),
-        'output_filename': 'js/pollbase.min.js',
-    },
-    'gradeuserpoll': {
-        'source_filenames': (
-            'js/jquery/jquery-1.5.2.js',
-            'js/jquery/jquery-ui-1.8.17.custom.js',
-            'js/jquery/jquery.cookies.2.2.0.min.js',
-            'js/jquery/baseExtensions.js',
-            'js/main.js',
-            'js/common/bootstrap-dropdown.js',
-            'js/grade/poll/poll_answer.js'
-        ),
-        'output_filename': 'js/gradeuserpoll.min.js',
     },
     'courses': {
         'source_filenames': (

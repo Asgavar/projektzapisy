@@ -65,10 +65,10 @@
                                 {% endfor %}
                             {% elif ans_data.0 == 'open' %}
                                 {% if ans_data.3 != 0 %}
-                                    <div class="hidden-answers">
+                                    <div class="hidden-answers w-100">
                                         {% for ans in ans_data.2 %}
-                                        <blockquote class="blockquote">
-                                            <p {% if last_visit < ans.time %}class="text-info"{% endif %}>{{ ans.content }}</p>
+                                        <blockquote class="blockquote border-bottom p-3">
+                                            <pre {% if last_visit < ans.time %}class="text-info"{% endif %}>{{ ans.content }}</pre>
                                         </blockquote>
                                         {% endfor %}
                                     </div>
