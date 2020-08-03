@@ -34,3 +34,5 @@ postmarkup==1.2.2
 unidecode==1.0.22
 # PyYAML is used for fixtures.
 pyyaml==3.13
+
+pillow>=7.1.0 # not directly required, pinned by Snyk to avoid a vulnerability
