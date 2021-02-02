@@ -1,3 +1,4 @@
 slackclient==1.2.1
 dropbox==8.8.1
 django-environ==0.4.4
+django>=2.2.18 # not directly required, pinned by Snyk to avoid a vulnerability
