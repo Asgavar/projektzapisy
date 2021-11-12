@@ -1,4 +1,4 @@
-Django==2.0.8
+Django==2.2.24
 django-cas-ng==3.5.9
 django-el-pagination==3.2.4
 choicesenum==0.4
@@ -19,11 +19,11 @@ Fabric3==1.14.post1
 ipdb==0.11
 ipython==6.4.0
 psycopg2==2.7.4
-pycryptodome==3.6.1
+pycryptodome==3.6.6
 rollbar==0.13.17
 newrelic==2.68.0.50
 gunicorn==19.7.1
-lxml==4.2.1
+lxml==4.6.3
 python-dateutil==2.7.3
 vobject==0.9.5
 python-memcached==1.58
